@@ -17,6 +17,7 @@ public class Main {
                 new NoSameContinentConstraint(),
                 new GroupCMustBeAfrican()
         );
+        //tes
 
         WorldCupDrawSimulator simulator = new WorldCupDrawSimulator(domains, constraints);
 
