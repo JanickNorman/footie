@@ -29,7 +29,7 @@ public class Main {
         }
 
         // Print final assignments
-        System.out.println("\nFINAL DRAW:");
+        System.out.println("\nFINAL DRAW RESULT:");
         simulator.getAssignments().forEach((k,v) ->
                 System.out.println(k + " → " + v.getName() + " (" + v.getContinent() + ")"));
     }
