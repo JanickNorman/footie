@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>National Football Leagues</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 24px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+        th { background: #f4f4f4; text-align: left; }
+        tr:nth-child(even) { background: #fafafa; }
+    </style>
+</head>
+<body>
+<h1>National Football Leagues</h1>
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Country</th>
+        <th>Season</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="league : ${leagues}">
+        <td th:text="${league.id}">1</td>
+        <td th:text="${league.name}">Premier League</td>
+        <td th:text="${league.country}">England</td>
+        <td th:text="${league.season}">2025/26</td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
