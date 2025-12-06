@@ -15,8 +15,8 @@ public class WorldCupDrawSimulator {
 
     public boolean assignTeamSequentially(Team team) {
 
-        // Try groups A, B, C in order:
-        List<String> slots = Arrays.asList("A1", "B1", "C1");
+        // Try groups A, B, C, D in order:
+        List<String> slots = Arrays.asList("A1", "B1", "C1", "D1", "E1", "F1", "G1", "H1");
 
         for (String slot : slots) {
 
@@ -32,8 +32,9 @@ public class WorldCupDrawSimulator {
             domains.get(slot).clear();
             domains.get(slot).add(team);
 
-            // Run constraint propagation (AC-3)
-            boolean consistent = AC3.run(domains, constraints, assignments);
+//            // Run constraint propagation (AC-3)
+            boolean consistent = ForwardChecking.check(slot, team, domains, constraints, assignments);
+            // boolean consistent = AC3.run(domains, constraints, assignments);
 
             if (consistent) {
                 System.out.println("✔ Assigned " + team.getName() + " to " + slot);

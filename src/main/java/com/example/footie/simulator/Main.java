@@ -14,7 +14,7 @@ public class Main {
         Map<String, Set<Team>> domains = CSPUtils.initializeDomains(pots);
 
         List<Constraint> constraints = List.of(
-                new NoSameContinentConstraint(),
+                // new NoSameContinentConstraint(),
                 new GroupCMustBeAfrican()
         );
 
@@ -26,6 +26,7 @@ public class Main {
 
         for (Team t : pot1) {
             simulator.assignTeamSequentially(t);
+            
         }
 
         // Print final assignments

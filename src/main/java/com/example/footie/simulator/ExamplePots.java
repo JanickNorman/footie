@@ -12,7 +12,9 @@ public class ExamplePots {
                 new Team("Germany", "Europe"),
                 new Team("Nigeria", "Africa"),
                 new Team("Egypt", "Africa"),
-                new Team("Brazil", "South America")
+                new Team("Brazil", "South America"),
+                new Team("Argentina", "South America"),
+                new Team("Japan", "Asia")
         );
 
         Map<String, List<Team>> pots = new HashMap<>();
