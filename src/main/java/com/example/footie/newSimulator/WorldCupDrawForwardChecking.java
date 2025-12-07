@@ -8,17 +8,7 @@ import com.example.footie.newSimulator.constraint.ConstraintManager;
 
 public class WorldCupDrawForwardChecking {
     public static void main(String[] args) {
-        List<Team> teams = Arrays.asList(
-            TeamFactory.create("France"),
-            TeamFactory.create("Germany"),
-            TeamFactory.create("Brazil"),
-            TeamFactory.create("Japan"),
-            TeamFactory.create("Egypt"),
-            TeamFactory.create("Spain"),
-            TeamFactory.create("Argentina")
-        );
-
-
+        List<Team> teams = TeamFactory.createWorldCupPlaceholderTeams();
 
         List<GroupSlot> slots = buildWorldCupSlots();
 
@@ -29,10 +19,11 @@ public class WorldCupDrawForwardChecking {
         simulator.assignByGroupSequentially("France", 1);
         simulator.assignByGroupSequentially("Germany", 1);
         simulator.assignByGroupSequentially("Brazil", 1);
+        simulator.assignByGroupSequentially("Argentina", 1);
+        simulator.assignByGroupSequentially("NewZealand", 4);
         // simulator.assignTeamToGroup("B", teams.get(6));
-        System.out.println("state: " + simulator.getState());
         // simulator.shuffleAndAssignAll();
-        simulator.printAssignments();
+        simulator.prettyPrintGroupAssignments();
     }
 
     private static List<GroupSlot> buildWorldCupSlots() {

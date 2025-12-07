@@ -5,21 +5,22 @@ import java.util.Set;
 
 public class PlaceholderTeam implements Team {
     private final String name;
-    private final String continent;
+    private final Set<String> continents;
     private final String source; // e.g. "UEFA Playoff 1"
 
-    public PlaceholderTeam(String name, String continent, String source) {
+    public PlaceholderTeam(String name, Set<String> continents, String source) {
         this.name = name;
-        this.continent = continent;
+        this.continents = continents;
         this.source = source;
     }
 
     public String getSource() { return source; }
 
+    @Override
     public String getName() { return name; }
 
     @Override
-    public Set<String> getContinents() { return Set.of(continent); }
+    public Set<String> getContinents() { return continents; }
 
     @Override
     public boolean equals(Object o) {
@@ -31,5 +32,5 @@ public class PlaceholderTeam implements Team {
     }
 
     @Override
-    public int hashCode() { return Objects.hash(name, continent); }
+    public int hashCode() { return Objects.hash(name); }
 }
