@@ -19,13 +19,14 @@ public class Simulator {
     private final List<GroupSlot> drawOrder;
     private final AssignmentState state;
     private final ConstraintManager constraintManager;
-    private final List<Team> teams;
+    private final Map<String, Team> assignedTeams;
 
     public Simulator(List<GroupSlot> slots, ConstraintManager cm, List<Team> teams) {
         this.drawOrder = slots;
         this.state = new AssignmentState(slots, teams);
         this.constraintManager = cm;
-        this.teams = new ArrayList<>(teams);
+        this.assignedTeams = new HashMap<>(teams.stream()
+                                        .collect(Collectors.toMap(Team::getName, t -> t)));
     }
 
     public AssignmentState getState() {
@@ -172,7 +173,7 @@ public class Simulator {
      * requested by the user: try to place a team into the earliest possible slot.
      */
     public void assignTeamsFirst() {
-        for (Team team : teams) {
+        for (Team team : assignedTeams.values()) {
             boolean placed = false;
             System.out.println("Attempting to place team: " + team);
             for (GroupSlot slot : drawOrder) {
@@ -224,10 +225,10 @@ public class Simulator {
 
     public boolean assignByGroupSequentially(String teamName, int position) {
         // Find the team object
-        Team teamToAssign = teams.stream().filter(t -> t.getName().equals(teamName)).findFirst().orElseThrow();
+        Team teamToAssign = assignedTeams.get(teamName);
         
         int totalTeamsPerGroup = 4;
-        for (int pos = position; pos < totalTeamsPerGroup; pos++) {
+        for (int pos = position; pos <= totalTeamsPerGroup; pos++) {
             int startingPosition = (pos - 1) % totalTeamsPerGroup + 1;
 
             for (String g : state.getNextGroupsToAssign()) {
