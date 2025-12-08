@@ -20,9 +20,9 @@ public class WorldCupDrawForwardChecking {
         //give me idea to assignTeams sequentally
         simulator.assignByGroupSequentially("France", 1);
         simulator.assignByGroupSequentially("Germany", 2);
-        simulator.assignByGroupSequentially("Brazil", 3);
+        simulator.assignByGroupSequentially("Brazil", 4);
         simulator.assignByGroupSequentially("Argentina", 1);
-        simulator.assignByGroupSequentially("NewZealand", 4);
+        simulator.assignByGroupSequentially("NewZealand", 3);
         // simulator.assignByGroupSequentially("Uruguay", 4);
         // simulator.assignTeamToGroup("B", teams.get(6));
         // simulator.shuffleAndAssignAll();
