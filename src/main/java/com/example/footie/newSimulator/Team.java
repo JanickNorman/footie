@@ -12,4 +12,6 @@ public interface Team {
     String getName();
 
     Set<String> getContinents();
+
+    int pot();
 }

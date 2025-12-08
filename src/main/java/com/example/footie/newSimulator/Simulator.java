@@ -15,12 +15,17 @@ import com.example.footie.newSimulator.constraint.ConstraintManager;
 
 public class Simulator {
     private final List<GroupSlot> drawOrder;
+    private final Map<String, GroupSlot> slotsByKey;
     private final AssignmentState state;
     private final ConstraintManager constraintManager;
     private final Map<String, Team> assignedTeams;
 
     public Simulator(List<GroupSlot> slots, ConstraintManager cm, List<Team> teams) {
         this.drawOrder = slots;
+        this.slotsByKey = slots.stream()
+                                .collect(Collectors.toMap(
+                                    s -> s.getGroupName() + s.getPosition(),
+                                    s -> s));
         this.state = new AssignmentState(slots, teams);
         this.constraintManager = cm;
         this.assignedTeams = new HashMap<>(teams.stream()

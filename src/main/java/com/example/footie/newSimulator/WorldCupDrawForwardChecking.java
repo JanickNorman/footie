@@ -2,6 +2,7 @@ package com.example.footie.newSimulator;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.ArrayList;
 
 import com.example.footie.newSimulator.constraint.ConstraintManager;
@@ -10,9 +11,10 @@ import com.example.footie.newSimulator.constraint.NoSameContinentInGroup;
 public class WorldCupDrawForwardChecking {
     public static void main(String[] args) {
         // test();
-        List<Team> teams = TeamFactory.createWorldCupTeams();
+        List<Team> teams = TeamFactory.createWorldCupTeams(4);
 
         List<GroupSlot> slots = buildWorldCupSlots();
+        // teams = teams.stream().filter(s -> s.getContinents().size() == 0).toList();
 
         ConstraintManager cm = new ConstraintManager();
         Simulator simulator = new Simulator(slots, cm, teams);

@@ -7,14 +7,21 @@ public class PlaceholderTeam implements Team {
     private final String name;
     private final Set<String> continents;
     private final String source; // e.g. "UEFA Playoff 1"
+    private final int pot;
 
-    public PlaceholderTeam(String name, Set<String> continents, String source) {
+    public PlaceholderTeam(String name, Set<String> continents, String source, int pot) {
         this.name = name;
         this.continents = continents;
         this.source = source;
+        this.pot = pot;
     }
 
     public String getSource() { return source; }
+
+    @Override
+    public int pot() {
+        return pot;
+    }
 
     @Override
     public String getName() { return name; }

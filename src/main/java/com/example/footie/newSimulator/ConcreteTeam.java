@@ -6,10 +6,17 @@ import java.util.Set;
 public class ConcreteTeam implements Team {
     private final String name;
     private final String continent;
-
-    public ConcreteTeam(String name, String continent) {
+    private final int pot;
+    
+    public ConcreteTeam(String name, String continent, int pot) {
         this.name = name;
         this.continent = continent;
+        this.pot = pot;
+    }
+
+    @Override
+    public int pot() {
+        return pot;
     }
 
     @Override
@@ -19,6 +26,9 @@ public class ConcreteTeam implements Team {
 
     @Override
     public Set<String> getContinents() {
+        if (continent == null || continent.isEmpty()) {
+            return Set.of();
+        }
         return Set.of(continent);
     }
 
