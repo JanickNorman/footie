@@ -42,6 +42,11 @@ public class ConstraintManager {
             return false;
         }
 
+        if (state.isAssigned(slot)) {
+            reason.append("Assignment FAILED: " + slot + " is already assigned to " + state.getAssignments().get(slot));
+            return false;
+        }
+
         return true;
     }
 

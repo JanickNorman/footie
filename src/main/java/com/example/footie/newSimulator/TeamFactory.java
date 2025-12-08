@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.bouncycastle.jcajce.provider.symmetric.TLSKDF.TLS10;
+
 public final class TeamFactory {
     public static final Map<String, String> CONTINENT_MAP = new HashMap<>();
 
@@ -81,7 +83,7 @@ public final class TeamFactory {
         return new PlaceholderTeam(placeholderName, Set.of("Asia", "Africa"), "placeholder");
     }
 
-    public static List<Team> createWorldCupPlaceholderTeams() {
+    public static List<Team> createWorldCupTeams() {
         List<Team> teams = new ArrayList<>();
         CONTINENT_MAP.forEach((name, continent) -> {
             teams.add(new ConcreteTeam(name, continent));

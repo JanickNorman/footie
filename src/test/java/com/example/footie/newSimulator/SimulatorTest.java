@@ -1,12 +1,10 @@
 package com.example.footie.newSimulator;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import com.example.footie.newSimulator.constraint.ConstraintManager;
-import com.example.footie.newSimulator.constraint.NoSameContinentInGroup;
-
-import org.junit.jupiter.api.DisplayName;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,7 +12,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import com.example.footie.newSimulator.constraint.ConstraintManager;
+import com.example.footie.newSimulator.constraint.NoSameContinentInGroup;
 
 @DisplayName("Simulator Tests - Forward Checking & Backtracking")
 class SimulatorTest {
@@ -46,7 +49,54 @@ class SimulatorTest {
         );
 
         constraintManager = new ConstraintManager();
-        constraintManager.addConstraint(new NoSameContinentInGroup());
+        // constraintManager.addConstraint(new NoSameContinentInGroup());
+    }
+
+    private static List<GroupSlot> buildWorldCupSlots() {
+        List<GroupSlot> slots = new ArrayList<>();
+        for (char g = 'A'; g <= 'I'; g++) {
+            String group = String.valueOf(g);
+            for (int pos = 1; pos <= 4; pos++) {
+                slots.add(new GroupSlot(group, pos));
+            }
+        }
+        return slots;
+    }
+
+    @Test
+    @DisplayName("Should assign team sequentally to the next possible group in order")
+    public void testAssignFranceA1_GermanyB2_BrazilC3() {
+        List<GroupSlot> slots = buildWorldCupSlots();
+
+        // Use a small teams list containing the three target teams and some extras
+        List<Team> teams = new ArrayList<>();
+        teams.add(TeamFactory.create("France"));
+        teams.add(TeamFactory.create("Germany"));
+        teams.add(TeamFactory.create("Brazil"));
+        teams.add(TeamFactory.create("Argentina"));
+        teams.add(TeamFactory.create("NewZealand"));
+
+        ConstraintManager cm = new ConstraintManager();
+        // cm.addConstraint(new NoSameContinentInGroup());
+
+        Simulator simulator = new Simulator(slots, cm, teams);
+
+        // Perform sequential assignments
+        simulator.assignByGroupSequentially("France", 1);
+        simulator.assignByGroupSequentially("Germany", 2);
+        simulator.assignByGroupSequentially("Brazil", 3);
+        // simulator.assignByGroupSequentially("Tonga", 3);
+
+        // Find the slot instances from the original slots list
+        GroupSlot a1 = slots.stream().filter(s -> s.getGroupName().equals("A") && s.getPosition() == 1).findFirst().get();
+        GroupSlot b2 = slots.stream().filter(s -> s.getGroupName().equals("B") && s.getPosition() == 2).findFirst().get();
+        GroupSlot c3 = slots.stream().filter(s -> s.getGroupName().equals("C") && s.getPosition() == 3).findFirst().get();
+
+        AssignmentState state = simulator.getState();
+
+        assertEquals("France", state.getAssignments().get(a1).getName(), "France should be assigned to A1");
+        assertEquals("Germany", state.getAssignments().get(b2).getName(), "Germany should be assigned to B2");
+        assertEquals("Brazil", state.getAssignments().get(c3).getName(), "Brazil should be assigned to C3");
     }
 
     @Test
@@ -64,6 +114,7 @@ class SimulatorTest {
     @Test
     @DisplayName("Should reject assignment when constraint is violated")
     void testInvalidAssignment() {
+        constraintManager.addConstraint(new NoSameContinentInGroup());
         Simulator simulator = new Simulator(slots, constraintManager, teams);
         
         // First assign TeamA (Europe) to Group1
@@ -82,6 +133,7 @@ class SimulatorTest {
     @Test
     @DisplayName("Should perform forward checking and prune domains")
     void testForwardCheckingPrunesDomains() {
+        constraintManager.addConstraint(new NoSameContinentInGroup());
         Simulator simulator = new Simulator(slots, constraintManager, teams);
         
         // Assign TeamA (Europe) to first slot in Group1
@@ -105,11 +157,12 @@ class SimulatorTest {
     @Test
     @DisplayName("Should detect domain wipeout and backtrack")
     void testDomainWipeoutTriggersBacktrack() {
+        constraintManager.addConstraint(new NoSameContinentInGroup());
         // Create a scenario where assignment causes domain wipeout
         List<Team> limitedTeams = Arrays.asList(
-            TeamFactory.create("T1"),
-            TeamFactory.create("T2"),
-            TeamFactory.create("T3")
+            TeamFactory.create("Germany"),
+            TeamFactory.create("France"),
+            TeamFactory.create("Japan")
         );
 
         List<GroupSlot> threeSlots = Arrays.asList(
@@ -136,6 +189,7 @@ class SimulatorTest {
     @Test
     @DisplayName("Should restore domains after backtracking")
     void testDomainRestorationAfterBacktrack() {
+        constraintManager.addConstraint(new NoSameContinentInGroup());
         Simulator simulator = new Simulator(slots, constraintManager, teams);
         AssignmentState state = getState(simulator);
 
@@ -195,10 +249,12 @@ class SimulatorTest {
     @Test
     @DisplayName("Should handle empty domain gracefully")
     void testEmptyDomainHandling() {
+        constraintManager.addConstraint(new NoSameContinentInGroup());
         // Create impossible scenario: 3 slots in one group, only 2 continents
         List<Team> twoTeams = Arrays.asList(
-            TeamFactory.create("A"),
-            TeamFactory.create("B")
+            TeamFactory.create("Germany"),
+            TeamFactory.create("France"),
+            TeamFactory.create("Japan")
         );
 
         List<GroupSlot> twoSlots = Arrays.asList(

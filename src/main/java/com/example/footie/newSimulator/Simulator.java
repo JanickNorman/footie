@@ -5,10 +5,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.example.footie.newSimulator.constraint.ConstraintManager;
 
@@ -35,7 +38,6 @@ public class Simulator {
             System.out.println("Assignment FAILED: " + slot + " -> " + team + "; reason=" + (reason.length() > 0 ? reason.toString() : "unknown"));
             return false;
         }
-
         // Save original domains for backtracking
         Map<GroupSlot, Set<Team>> oldDomains = deepCopyDomains();
  
@@ -221,16 +223,27 @@ public class Simulator {
     }
 
     public boolean assignByGroupSequentially(String teamName, int position) {
-        for (GroupSlot slot : drawOrder) {
-            if (slot.getPosition() == position && !state.isAssigned(slot)) {
-                for (Team t : teams) {
-                    if (t.getName().equals(teamName)) {
-                        assignTeamToSlot(slot, t);
-                        return true;
-                    }
-                }
+        // Find the team object
+        Team teamToAssign = teams.stream().filter(t -> t.getName().equals(teamName)).findFirst().orElseThrow();
+        
+        int totalTeamsPerGroup = 4;
+        for (int pos = position; pos < totalTeamsPerGroup; pos++) {
+            int startingPosition = (pos - 1) % totalTeamsPerGroup + 1;
+
+            for (String g : state.getNextGroupsToAssign()) {
+                GroupSlot slot = state.getUnassignedSlots()
+                                .stream()
+                                .filter(s -> s.getGroupName().equals(g) && s.getPosition() == startingPosition)
+                                .findFirst()
+                                .orElse(null);
+
+                if (assignTeamToSlot(slot, teamToAssign)) return true;
+                    // if assignment failed, try next group
+                break;
             }
+
         }
+
         return false;
     }
 }

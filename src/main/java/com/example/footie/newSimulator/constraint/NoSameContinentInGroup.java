@@ -11,15 +11,16 @@ public class NoSameContinentInGroup implements Constraint {
 
     @Override
     public boolean isAssignmentAllowed(AssignmentState state, GroupSlot slot, Team team) {
-        for (Map.Entry<GroupSlot, Team> entry : state.getAssignments().entrySet()) {
-            GroupSlot assignedSlot = entry.getKey();
-            Team assignedTeam = entry.getValue();
-            if (assignedSlot.getGroupName().equals(slot.getGroupName())) {
-                for (String continent : team.getContinents()) {
-                    if (assignedTeam.getContinents().contains(continent)) {
-                        return false;
-                    }
-                }
+        // For the target group, ensure no already-assigned team shares any continent
+        for (Map.Entry<GroupSlot, Team> e : state.getAssignments().entrySet()) {
+            GroupSlot otherSlot = e.getKey();
+            Team assigned = e.getValue();
+            if (assigned == null) continue;
+            if (!otherSlot.getGroupName().equals(slot.getGroupName())) continue;
+
+            // if any continent overlaps, assignment is not allowed
+            for (String c : assigned.getContinents()) {
+                if (team.getContinents().contains(c)) return false;
             }
         }
         return true;

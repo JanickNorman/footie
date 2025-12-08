@@ -59,6 +59,33 @@ public class AssignmentState {
         return unassigned;
     }
 
+    public List<String> getNextGroupsToAssign() {
+        // Count assigned teams per group
+        Map<String, Integer> counts = new HashMap<>();
+        for (GroupSlot slot : assignments.keySet()) {
+            String g = slot.getGroupName();
+            counts.putIfAbsent(g, 0);
+            if (assignments.get(slot) != null) {
+                counts.put(g, counts.get(g) + 1);
+            }
+        }
+
+        // Find minimum assigned count
+        int min = Integer.MAX_VALUE;
+        for (int c : counts.values()) {
+            if (c < min) min = c;
+        }
+        if (min == Integer.MAX_VALUE) min = 0;
+
+        // Collect groups that have the minimal count and sort alphabetically
+        List<String> result = new ArrayList<>();
+        for (Map.Entry<String, Integer> e : counts.entrySet()) {
+            if (e.getValue() == min) result.add(e.getKey());
+        }
+        Collections.sort(result);
+        return result;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

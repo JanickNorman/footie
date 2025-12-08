@@ -5,10 +5,12 @@ import java.util.List;
 import java.util.ArrayList;
 
 import com.example.footie.newSimulator.constraint.ConstraintManager;
+import com.example.footie.newSimulator.constraint.NoSameContinentInGroup;
 
 public class WorldCupDrawForwardChecking {
     public static void main(String[] args) {
-        List<Team> teams = TeamFactory.createWorldCupPlaceholderTeams();
+        // test();
+        List<Team> teams = TeamFactory.createWorldCupTeams();
 
         List<GroupSlot> slots = buildWorldCupSlots();
 
@@ -17,13 +19,40 @@ public class WorldCupDrawForwardChecking {
 
         //give me idea to assignTeams sequentally
         simulator.assignByGroupSequentially("France", 1);
-        simulator.assignByGroupSequentially("Germany", 1);
-        simulator.assignByGroupSequentially("Brazil", 1);
+        simulator.assignByGroupSequentially("Germany", 2);
+        simulator.assignByGroupSequentially("Brazil", 3);
         simulator.assignByGroupSequentially("Argentina", 1);
         simulator.assignByGroupSequentially("NewZealand", 4);
+        // simulator.assignByGroupSequentially("Uruguay", 4);
         // simulator.assignTeamToGroup("B", teams.get(6));
         // simulator.shuffleAndAssignAll();
         simulator.prettyPrintGroupAssignments();
+    }
+
+    private static void test() {
+        ConstraintManager constraintManager = new ConstraintManager();
+        constraintManager.addConstraint(new NoSameContinentInGroup());
+        // Create impossible scenario: 3 slots in one group, only 2 continents
+        List<Team> twoTeams = Arrays.asList(
+            TeamFactory.create("Germany"),
+            TeamFactory.create("France"),
+            TeamFactory.create("Japan")
+        );
+
+        List<GroupSlot> twoSlots = Arrays.asList(
+            new GroupSlot("G", 1),
+            new GroupSlot("G", 2)
+        );
+
+        Simulator simulator = new Simulator(twoSlots, constraintManager, twoTeams);
+
+        // Assign first team
+        boolean first = simulator.assignTeamToSlot(twoSlots.get(0), twoTeams.get(0));
+        System.out.println("First assignment (should be true): " + first);
+
+        // Attempt to assign second team (should fail due to continent constraint)
+        boolean second = simulator.assignTeamToSlot(twoSlots.get(1), twoTeams.get(1));
+        System.out.println("Second assignment (should be false): " + second);
     }
 
     private static List<GroupSlot> buildWorldCupSlots() {
