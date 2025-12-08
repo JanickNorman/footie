@@ -23,28 +23,39 @@ public class Simulator {
     public Simulator(List<GroupSlot> slots, ConstraintManager cm, List<Team> teams) {
         this.drawOrder = slots;
         this.slotsByKey = slots.stream()
-                                .collect(Collectors.toMap(
-                                    s -> s.getGroupName() + s.getPosition(),
-                                    s -> s));
+                .collect(Collectors.toMap(
+                        s -> s.getGroupName() + s.getPosition(),
+                        s -> s));
         this.state = new AssignmentState(slots, teams);
         this.constraintManager = cm;
         this.assignedTeams = new HashMap<>(teams.stream()
-                                        .collect(Collectors.toMap(Team::getName, t -> t)));
+                .collect(Collectors.toMap(Team::getName, t -> t)));
     }
 
     public AssignmentState getState() {
         return state;
     }
 
+    public boolean assignTeamToSlot(String slotKey, String teamName) {
+        GroupSlot slot = slotsByKey.get(slotKey);
+        Team team = assignedTeams.get(teamName);
+        if (slot == null || team == null) {
+            System.out.println("Invalid slot or team: " + slotKey + ", " + teamName);
+            return false;
+        }
+        return assignTeamToSlot(slot, team);
+    }
+
     public boolean assignTeamToSlot(GroupSlot slot, Team team) {
         StringBuilder reason = new StringBuilder();
         if (!constraintManager.isAssignmentValid(state, slot, team, reason)) {
-            System.out.println("Assignment FAILED: " + slot + " -> " + team + "; reason=" + (reason.length() > 0 ? reason.toString() : "unknown"));
+            System.out.println("Assignment FAILED: " + slot + " -> " + team + "; reason="
+                    + (reason.length() > 0 ? reason.toString() : "unknown"));
             return false;
         }
         // Save original domains for backtracking
         Map<GroupSlot, Set<Team>> oldDomains = deepCopyDomains();
- 
+
         state.assign(slot, team);
         constraintManager.forwardCheck(state, slot, team);
         System.out.println("Try assigning: " + slot + " -> " + team + "; running forward-check");
@@ -53,7 +64,8 @@ public class Simulator {
         for (GroupSlot s : state.getUnassignedSlots()) {
             if (state.getDomains().get(s).isEmpty()) {
                 // Report which slot hit an empty domain
-                System.out.println("Assignment caused dead end: domain emptied for slot " + s + " after assigning " + team + " to " + slot);
+                System.out.println("Assignment caused dead end: domain emptied for slot " + s + " after assigning "
+                        + team + " to " + slot);
                 // Restore domains and unassign
                 for (GroupSlot restoreSlot : oldDomains.keySet()) {
                     state.getDomains().put(restoreSlot, oldDomains.get(restoreSlot));
@@ -102,9 +114,7 @@ public class Simulator {
     public void printAssignments() {
         System.out.println("Assignments:");
         state.getAssignments()
-        .forEach((slot, team) -> 
-            System.out.println(slot + " -> " + (team != null ? team : "-"))
-        );
+                .forEach((slot, team) -> System.out.println(slot + " -> " + (team != null ? team : "-")));
     }
 
     public void prettyPrintGroupAssignments() {
@@ -116,7 +126,8 @@ public class Simulator {
             groups.putIfAbsent(g, new HashMap<>());
             Team team = state.getAssignments().get(slot);
             groups.get(g).put(slot.getPosition(), team != null ? team.getName() : "-");
-            if (slot.getPosition() > maxPosition) maxPosition = slot.getPosition();
+            if (slot.getPosition() > maxPosition)
+                maxPosition = slot.getPosition();
         }
 
         // Sort groups by name
@@ -162,7 +173,8 @@ public class Simulator {
             for (String g : groupNames) {
                 int w = colWidth.get(g);
                 String cell = groups.get(g).getOrDefault(pos, "-");
-                if (cell.length() > w - 2) cell = cell.substring(0, w - 5) + "...";
+                if (cell.length() > w - 2)
+                    cell = cell.substring(0, w - 5) + "...";
                 row.append(String.format(" %" + (-w) + "s|", cell));
             }
             System.out.println(row.toString());
@@ -170,9 +182,12 @@ public class Simulator {
     }
 
     /**
-     * Assign teams by iterating teams first, then picking an available slot for each team.
-     * For each team we try slots in the configured draw order where the team is allowed
-     * (present in the slot's current domain). This implements the "team-first" strategy
+     * Assign teams by iterating teams first, then picking an available slot for
+     * each team.
+     * For each team we try slots in the configured draw order where the team is
+     * allowed
+     * (present in the slot's current domain). This implements the "team-first"
+     * strategy
      * requested by the user: try to place a team into the earliest possible slot.
      */
     public void assignTeamsFirst() {
@@ -180,14 +195,17 @@ public class Simulator {
             boolean placed = false;
             System.out.println("Attempting to place team: " + team);
             for (GroupSlot slot : drawOrder) {
-                if (state.isAssigned(slot)) continue;
+                if (state.isAssigned(slot))
+                    continue;
                 Set<Team> domain = state.getDomains().get(slot);
-                if (domain == null) continue;
+                if (domain == null)
+                    continue;
                 if (!domain.contains(team)) {
                     // Not allowed by domain/constraints — print small note and continue
                     StringBuilder reason = new StringBuilder();
                     if (!constraintManager.isAssignmentValid(state, slot, team, reason)) {
-                        System.out.println("  Cannot place " + team + " into " + slot + " -> constraint: " + (reason.length() > 0 ? reason.toString() : "unknown"));
+                        System.out.println("  Cannot place " + team + " into " + slot + " -> constraint: "
+                                + (reason.length() > 0 ? reason.toString() : "unknown"));
                     } else {
                         System.out.println("  Not in domain for " + slot + " (may have been pruned)");
                     }
@@ -198,7 +216,7 @@ public class Simulator {
                 System.out.println("  Trying slot " + slot + " for team " + team);
                 // instead assigning to slot, just assign it to group
                 if (assignTeamToGroup(slot.getGroupName(), team)) {
-                    placed = true;  
+                    placed = true;
                     break;
                 } else {
                     System.out.println("  Failed to place " + team + " into " + slot + ", trying next slot");
@@ -214,7 +232,8 @@ public class Simulator {
         // iterate by group name first, then by position
         drawOrder.sort((a, b) -> {
             int groupComp = a.getGroupName().compareTo(b.getGroupName());
-            if (groupComp != 0) return groupComp;
+            if (groupComp != 0)
+                return groupComp;
             return Integer.compare(a.getPosition(), b.getPosition());
         });
 
@@ -226,24 +245,23 @@ public class Simulator {
         return false;
     }
 
-    public boolean assignByGroupSequentially(String teamName, int position) {
+    public boolean tryPlaceTeam(String teamName, int position) {
         // Find the team object
         Team teamToAssign = assignedTeams.get(teamName);
-        
+
         int totalTeamsPerGroup = 4;
         for (int pos = position; pos <= totalTeamsPerGroup; pos++) {
             int startingPosition = (pos - 1) % totalTeamsPerGroup + 1;
 
             for (String g : state.getNextGroupsToAssign()) {
                 GroupSlot slot = state.getUnassignedSlots()
-                                .stream()
-                                .filter(s -> s.getGroupName().equals(g) && s.getPosition() == startingPosition)
-                                .findFirst()
-                                .orElse(null);
+                        .stream()
+                        .filter(s -> s.getGroupName().equals(g) && s.getPosition() == startingPosition)
+                        .findFirst()
+                        .orElse(null);
 
-                if (assignTeamToSlot(slot, teamToAssign)) return true;
-                    // if assignment failed, try next group
-                break;
+                if (assignTeamToSlot(slot, teamToAssign))
+                    return true;
             }
 
         }
@@ -251,4 +269,3 @@ public class Simulator {
         return false;
     }
 }
-
