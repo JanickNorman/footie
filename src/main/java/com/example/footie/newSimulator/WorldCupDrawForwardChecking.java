@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import com.example.footie.newSimulator.constraint.ConstraintManager;
 import com.example.footie.newSimulator.constraint.NoSameContinentInGroup;
 import com.example.footie.newSimulator.constraint.PairedGroupConstraint;
-import com.example.footie.newSimulator.constraint.TriggerAnyTeamInGroupsConstraint;
 
 public class WorldCupDrawForwardChecking {
     public static void main(String[] args) {
@@ -33,8 +32,8 @@ public class WorldCupDrawForwardChecking {
         simulator.tryPlaceTeam("France", 1);
         simulator.tryPlaceTeam("Germany", 1);
         simulator.tryPlaceTeam("Brazil", 1);
-        simulator.tryPlaceTeam("Argentina", 1);
-        simulator.tryPlaceTeam("Spain", 1);
+        simulator.tryPlaceTeam("Argentina", 1); // Group G
+        simulator.tryPlaceTeam("Spain", 1); // must go directly to J
         simulator.tryPlaceTeam("Belgium", 1);
         simulator.tryPlaceTeam("Croatia", 1);
         simulator.tryPlaceTeam("England", 1);
