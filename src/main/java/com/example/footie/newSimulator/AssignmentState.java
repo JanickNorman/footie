@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
+import java.util.stream.Collectors;
 
 public class AssignmentState {
     private final Map<GroupSlot, Team> assignments = new HashMap<>();
@@ -44,8 +44,13 @@ public class AssignmentState {
         return assignments.get(slot);
     }
 
-    public Map<GroupSlot, Team> getAssignments() { return assignments; }
-    public Map<GroupSlot, Set<Team>> getDomains() { return domains; }
+    public Map<GroupSlot, Team> getAssignments() {
+        return assignments;
+    }
+
+    public Map<GroupSlot, Set<Team>> getDomains() {
+        return domains;
+    }
 
     public Set<Team> getDomain(GroupSlot slot) {
         return domains.get(slot);
@@ -54,36 +59,28 @@ public class AssignmentState {
     public List<GroupSlot> getUnassignedSlots() {
         List<GroupSlot> unassigned = new ArrayList<>();
         for (Map.Entry<GroupSlot, Team> entry : assignments.entrySet()) {
-            if (entry.getValue() == null) unassigned.add(entry.getKey());
+            if (entry.getValue() == null)
+                unassigned.add(entry.getKey());
         }
         return unassigned;
     }
 
     public List<String> getNextGroupsToAssign() {
-        // Count assigned teams per group
-        Map<String, Integer> counts = new HashMap<>();
-        for (GroupSlot slot : assignments.keySet()) {
-            String g = slot.getGroupName();
-            counts.putIfAbsent(g, 0);
-            if (assignments.get(slot) != null) {
-                counts.put(g, counts.get(g) + 1);
-            }
-        }
+        // Group slots by group name and count how many assignments each group already
+        // has.
+        Map<String, Integer> counts = assignments.keySet().stream()
+                .collect(Collectors.groupingBy(GroupSlot::getGroupName,
+                        Collectors.summingInt(s -> assignments.get(s) != null ? 1 : 0)));
 
-        // Find minimum assigned count
-        int min = Integer.MAX_VALUE;
-        for (int c : counts.values()) {
-            if (c < min) min = c;
-        }
-        if (min == Integer.MAX_VALUE) min = 0;
+        // Find minimum assigned count (default to 0 when no groups present)
+        int min = counts.values().stream().min(Integer::compare).orElse(0);
 
-        // Collect groups that have the minimal count and sort alphabetically
-        List<String> result = new ArrayList<>();
-        for (Map.Entry<String, Integer> e : counts.entrySet()) {
-            if (e.getValue() == min) result.add(e.getKey());
-        }
-        Collections.sort(result);
-        return result;
+        // Return alphabetically sorted group names that have the minimal count
+        return counts.entrySet().stream()
+                .filter(e -> e.getValue() == min)
+                .map(Map.Entry::getKey)
+                .sorted()
+                .collect(Collectors.toList());
     }
 
     @Override
