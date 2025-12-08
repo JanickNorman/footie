@@ -17,14 +17,38 @@ public class WorldCupDrawForwardChecking {
         // teams = teams.stream().filter(s -> s.getContinents().size() == 0).toList();
 
         ConstraintManager cm = new ConstraintManager();
+        cm.addConstraint(new NoSameContinentInGroup());
         Simulator simulator = new Simulator(slots, cm, teams);
 
-        //give me idea to assignTeams sequentally
-        simulator.assignByGroupSequentially("France", 1);
-        simulator.assignByGroupSequentially("Germany", 2);
-        simulator.assignByGroupSequentially("Brazil", 4);
-        simulator.assignByGroupSequentially("Argentina", 1);
-        simulator.assignByGroupSequentially("NewZealand", 3);
+        // give me idea to assignTeams sequentally
+        simulator.assignTeamToSlot("A1", "Mexico");
+        simulator.assignTeamToSlot("B1", "Canada");
+        simulator.assignTeamToSlot("D1", "USA");
+
+        simulator.tryPlaceTeam("France", 1);
+        simulator.tryPlaceTeam("Germany", 2);
+        simulator.tryPlaceTeam("Brazil", 4);
+        simulator.tryPlaceTeam("Argentina", 1);
+        simulator.tryPlaceTeam("Belgium", 1);
+        simulator.tryPlaceTeam("Croatia", 1);
+        simulator.tryPlaceTeam("England", 2);
+        simulator.tryPlaceTeam("Morocco", 2);
+        simulator.tryPlaceTeam("Japan", 3);
+        simulator.tryPlaceTeam("Senegal", 3);
+        simulator.tryPlaceTeam("Portugal", 2);
+        simulator.tryPlaceTeam("Norway", 2);
+        simulator.tryPlaceTeam("Curacao", 3);
+        simulator.tryPlaceTeam("Ecuador", 4);
+        simulator.tryPlaceTeam("Switzerland", 3);
+        simulator.tryPlaceTeam("Tunisia", 4);
+        simulator.tryPlaceTeam("Uruguay", 4);
+        simulator.tryPlaceTeam("Ghana", 3);
+        simulator.tryPlaceTeam("SouthKorea", 3);
+        // simulator.tryPlaceTeam("CotedIvoire", 2);
+        simulator.tryPlaceTeam("Haiti", 4);
+
+        // simulator.tryPlaceTeam("Place", 2);
+
         // simulator.assignByGroupSequentially("Uruguay", 4);
         // simulator.assignTeamToGroup("B", teams.get(6));
         // simulator.shuffleAndAssignAll();
@@ -36,15 +60,13 @@ public class WorldCupDrawForwardChecking {
         constraintManager.addConstraint(new NoSameContinentInGroup());
         // Create impossible scenario: 3 slots in one group, only 2 continents
         List<Team> twoTeams = Arrays.asList(
-            TeamFactory.create("Germany"),
-            TeamFactory.create("France"),
-            TeamFactory.create("Japan")
-        );
+                TeamFactory.create("Germany"),
+                TeamFactory.create("France"),
+                TeamFactory.create("Japan"));
 
         List<GroupSlot> twoSlots = Arrays.asList(
-            new GroupSlot("G", 1),
-            new GroupSlot("G", 2)
-        );
+                new GroupSlot("G", 1),
+                new GroupSlot("G", 2));
 
         Simulator simulator = new Simulator(twoSlots, constraintManager, twoTeams);
 
@@ -60,7 +82,7 @@ public class WorldCupDrawForwardChecking {
     private static List<GroupSlot> buildWorldCupSlots() {
         List<GroupSlot> slots = new ArrayList<>();
         // Groups A..I, positions 1..4
-        for (char g = 'A'; g <= 'I'; g++) {
+        for (char g = 'A'; g <= 'L'; g++) {
             String group = String.valueOf(g);
             for (int pos = 1; pos <= 4; pos++) {
                 slots.add(new GroupSlot(group, pos));
