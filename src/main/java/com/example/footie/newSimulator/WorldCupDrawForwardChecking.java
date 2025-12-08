@@ -7,6 +7,8 @@ import java.util.ArrayList;
 
 import com.example.footie.newSimulator.constraint.ConstraintManager;
 import com.example.footie.newSimulator.constraint.NoSameContinentInGroup;
+import com.example.footie.newSimulator.constraint.PairedGroupConstraint;
+import com.example.footie.newSimulator.constraint.TriggerAnyTeamInGroupsConstraint;
 
 public class WorldCupDrawForwardChecking {
     public static void main(String[] args) {
@@ -18,6 +20,9 @@ public class WorldCupDrawForwardChecking {
 
         ConstraintManager cm = new ConstraintManager();
         cm.addConstraint(new NoSameContinentInGroup());
+        cm.addConstraint(new PairedGroupConstraint("Spain", Set.of("E", "I", "F", "H", "D", "G"), "Argentina",
+                Set.of("C", "A", "L", "J", "B", "K"), true));
+
         Simulator simulator = new Simulator(slots, cm, teams);
 
         // give me idea to assignTeams sequentally
@@ -26,14 +31,14 @@ public class WorldCupDrawForwardChecking {
         simulator.assignTeamToSlot("D1", "USA");
 
         simulator.tryPlaceTeam("France", 1);
-        simulator.tryPlaceTeam("Germany", 2);
-        simulator.tryPlaceTeam("Brazil", 4);
+        simulator.tryPlaceTeam("Germany", 1);
+        simulator.tryPlaceTeam("Brazil", 1);
         simulator.tryPlaceTeam("Argentina", 1);
+        simulator.tryPlaceTeam("Spain", 1);
         simulator.tryPlaceTeam("Belgium", 1);
         simulator.tryPlaceTeam("Croatia", 1);
-        simulator.tryPlaceTeam("England", 2);
-        simulator.tryPlaceTeam("Morocco", 2);
-        simulator.tryPlaceTeam("Japan", 3);
+        simulator.tryPlaceTeam("England", 1);
+        simulator.tryPlaceTeam("Japan", 1);
         simulator.tryPlaceTeam("Senegal", 3);
         simulator.tryPlaceTeam("Portugal", 2);
         simulator.tryPlaceTeam("Norway", 2);
