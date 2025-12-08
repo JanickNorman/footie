@@ -30,23 +30,21 @@ class SimulatorTest {
     void setUp() {
         // Create teams from different continents
         teams = Arrays.asList(
-            TeamFactory.create("France"),
-            TeamFactory.create("Germany"),
-            TeamFactory.create("Japan"),
-            TeamFactory.create("Nigeria"),
-            TeamFactory.create("Brazil"),
-            TeamFactory.create("USA")
-        );
+                TeamFactory.create("France"),
+                TeamFactory.create("Germany"),
+                TeamFactory.create("Japan"),
+                TeamFactory.create("Nigeria"),
+                TeamFactory.create("Brazil"),
+                TeamFactory.create("USA"));
 
         // Create slots for 2 groups with 3 slots each
         slots = Arrays.asList(
-            new GroupSlot("Group1", 1),
-            new GroupSlot("Group1", 2),
-            new GroupSlot("Group1", 3),
-            new GroupSlot("Group2", 1),
-            new GroupSlot("Group2", 2),
-            new GroupSlot("Group2", 3)
-        );
+                new GroupSlot("Group1", 1),
+                new GroupSlot("Group1", 2),
+                new GroupSlot("Group1", 3),
+                new GroupSlot("Group2", 1),
+                new GroupSlot("Group2", 2),
+                new GroupSlot("Group2", 3));
 
         constraintManager = new ConstraintManager();
         // constraintManager.addConstraint(new NoSameContinentInGroup());
@@ -82,15 +80,18 @@ class SimulatorTest {
         Simulator simulator = new Simulator(slots, cm, teams);
 
         // Perform sequential assignments
-        simulator.assignByGroupSequentially("France", 1);
-        simulator.assignByGroupSequentially("Germany", 2);
-        simulator.assignByGroupSequentially("Brazil", 3);
+        simulator.tryPlaceTeam("France", 1);
+        simulator.tryPlaceTeam("Germany", 2);
+        simulator.tryPlaceTeam("Brazil", 3);
         // simulator.assignByGroupSequentially("Tonga", 3);
 
         // Find the slot instances from the original slots list
-        GroupSlot a1 = slots.stream().filter(s -> s.getGroupName().equals("A") && s.getPosition() == 1).findFirst().get();
-        GroupSlot b2 = slots.stream().filter(s -> s.getGroupName().equals("B") && s.getPosition() == 2).findFirst().get();
-        GroupSlot c3 = slots.stream().filter(s -> s.getGroupName().equals("C") && s.getPosition() == 3).findFirst().get();
+        GroupSlot a1 = slots.stream().filter(s -> s.getGroupName().equals("A") && s.getPosition() == 1).findFirst()
+                .get();
+        GroupSlot b2 = slots.stream().filter(s -> s.getGroupName().equals("B") && s.getPosition() == 2).findFirst()
+                .get();
+        GroupSlot c3 = slots.stream().filter(s -> s.getGroupName().equals("C") && s.getPosition() == 3).findFirst()
+                .get();
 
         AssignmentState state = simulator.getState();
 
@@ -116,7 +117,7 @@ class SimulatorTest {
     void testInvalidAssignment() {
         constraintManager.addConstraint(new NoSameContinentInGroup());
         Simulator simulator = new Simulator(slots, constraintManager, teams);
-        
+
         // First assign TeamA (Europe) to Group1
         GroupSlot slot1 = slots.get(0);
         Team teamA = teams.get(0); // Europe
@@ -135,7 +136,7 @@ class SimulatorTest {
     void testForwardCheckingPrunesDomains() {
         constraintManager.addConstraint(new NoSameContinentInGroup());
         Simulator simulator = new Simulator(slots, constraintManager, teams);
-        
+
         // Assign TeamA (Europe) to first slot in Group1
         GroupSlot slot1 = slots.get(0);
         Team teamA = teams.get(0); // Europe
@@ -148,7 +149,7 @@ class SimulatorTest {
 
         // TeamB (Europe) should be removed from slot2's domain
         assertFalse(domain2.contains(teams.get(1)), "European team should be pruned from Group1 domains");
-        
+
         // Non-European teams should still be available
         assertTrue(domain2.contains(teams.get(2)), "Asian team should remain in domain"); // TeamC Asia
         assertTrue(domain2.contains(teams.get(3)), "African team should remain in domain"); // TeamD Africa
@@ -160,16 +161,14 @@ class SimulatorTest {
         constraintManager.addConstraint(new NoSameContinentInGroup());
         // Create a scenario where assignment causes domain wipeout
         List<Team> limitedTeams = Arrays.asList(
-            TeamFactory.create("Germany"),
-            TeamFactory.create("France"),
-            TeamFactory.create("Japan")
-        );
+                TeamFactory.create("Germany"),
+                TeamFactory.create("France"),
+                TeamFactory.create("Japan"));
 
         List<GroupSlot> threeSlots = Arrays.asList(
-            new GroupSlot("GroupA", 1),
-            new GroupSlot("GroupA", 2),
-            new GroupSlot("GroupA", 3)
-        );
+                new GroupSlot("GroupA", 1),
+                new GroupSlot("GroupA", 2),
+                new GroupSlot("GroupA", 3));
 
         Simulator simulator = new Simulator(threeSlots, constraintManager, limitedTeams);
 
@@ -178,9 +177,10 @@ class SimulatorTest {
         assertTrue(firstAssign, "First assignment should succeed");
 
         // Try to assign T2 (Europe) to second slot - should fail due to domain wipeout
-        // because the third slot would have no valid options (both Europe teams used, only Asia remains)
+        // because the third slot would have no valid options (both Europe teams used,
+        // only Asia remains)
         boolean secondAssign = simulator.assignTeamToSlot(threeSlots.get(1), limitedTeams.get(1));
-        
+
         // This should fail because it would leave slot 3 with only T3 (Asia),
         // but after pruning Europe teams, there's no valid solution path
         assertFalse(secondAssign, "Assignment should fail when it causes domain wipeout");
@@ -201,14 +201,14 @@ class SimulatorTest {
 
         // Try an assignment that will fail
         simulator.assignTeamToSlot(slot1, teamA);
-        
+
         // Now try to assign another Europe team to same group (will fail and backtrack)
         GroupSlot slot2 = slots.get(1);
         Team teamB = teams.get(1); // Europe
         boolean result = simulator.assignTeamToSlot(slot2, teamB);
 
         assertFalse(result, "Second Europe team assignment should fail");
-        
+
         // After backtracking, the first assignment should still be there
         assertNotNull(state.getAssigned(slot1), "First assignment should persist");
         assertEquals(teamA, state.getAssigned(slot1), "First assignment should be unchanged");
@@ -240,8 +240,9 @@ class SimulatorTest {
 
         // Count successful assignments
         long assignedCount = assignments.values().stream().filter(t -> t != null).count();
-        
-        // With 6 teams and 6 slots, and the constraint that no two teams from same continent in same group,
+
+        // With 6 teams and 6 slots, and the constraint that no two teams from same
+        // continent in same group,
         // we should be able to assign most or all slots
         assertTrue(assignedCount >= 4, "Should successfully assign at least 4 teams out of 6");
     }
@@ -252,15 +253,13 @@ class SimulatorTest {
         constraintManager.addConstraint(new NoSameContinentInGroup());
         // Create impossible scenario: 3 slots in one group, only 2 continents
         List<Team> twoTeams = Arrays.asList(
-            TeamFactory.create("Germany"),
-            TeamFactory.create("France"),
-            TeamFactory.create("Japan")
-        );
+                TeamFactory.create("Germany"),
+                TeamFactory.create("France"),
+                TeamFactory.create("Japan"));
 
         List<GroupSlot> twoSlots = Arrays.asList(
-            new GroupSlot("G", 1),
-            new GroupSlot("G", 2)
-        );
+                new GroupSlot("G", 1),
+                new GroupSlot("G", 2));
 
         Simulator simulator = new Simulator(twoSlots, constraintManager, twoTeams);
 
@@ -297,16 +296,14 @@ class SimulatorTest {
     void testAllDifferentContinents() {
         // Scenario where all teams are from different continents
         List<Team> diverseTeams = Arrays.asList(
-            TeamFactory.create("T1"),
-            TeamFactory.create("T2"),
-            TeamFactory.create("T3")
-        );
+                TeamFactory.create("T1"),
+                TeamFactory.create("T2"),
+                TeamFactory.create("T3"));
 
         List<GroupSlot> threeSlots = Arrays.asList(
-            new GroupSlot("G", 1),
-            new GroupSlot("G", 2),
-            new GroupSlot("G", 3)
-        );
+                new GroupSlot("G", 1),
+                new GroupSlot("G", 2),
+                new GroupSlot("G", 3));
 
         Simulator simulator = new Simulator(threeSlots, constraintManager, diverseTeams);
 
@@ -344,7 +341,8 @@ class SimulatorTest {
         }
     }
 
-    // Helper method to access private state (using reflection or package-private access)
+    // Helper method to access private state (using reflection or package-private
+    // access)
     private AssignmentState getState(Simulator simulator) {
         try {
             var field = Simulator.class.getDeclaredField("state");

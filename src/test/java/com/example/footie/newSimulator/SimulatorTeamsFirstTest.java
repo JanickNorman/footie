@@ -18,60 +18,56 @@ public class SimulatorTeamsFirstTest {
     @Test
     public void testAssignByGroupSequentially_assignByGroupOrder() {
         List<Team> teams = Arrays.asList(
-            TeamFactory.create("France"),
-            TeamFactory.create("Germany"),
-            TeamFactory.create("Brazil"),
-            TeamFactory.create("Japan"),
-            TeamFactory.create("Egypt"),
-            TeamFactory.create("Spain"),
-            TeamFactory.create("Argentina")
-        );
+                TeamFactory.create("France"),
+                TeamFactory.create("Germany"),
+                TeamFactory.create("Brazil"),
+                TeamFactory.create("Japan"),
+                TeamFactory.create("Egypt"),
+                TeamFactory.create("Spain"),
+                TeamFactory.create("Argentina"));
 
         List<GroupSlot> slots = Arrays.asList(
-            new GroupSlot("A", 1),
-            new GroupSlot("A", 2),
-            new GroupSlot("B", 1),
-            new GroupSlot("B", 2),
-            new GroupSlot("C", 1),
-            new GroupSlot("C", 2),
-            new GroupSlot("D", 1)
-        );
+                new GroupSlot("A", 1),
+                new GroupSlot("A", 2),
+                new GroupSlot("B", 1),
+                new GroupSlot("B", 2),
+                new GroupSlot("C", 1),
+                new GroupSlot("C", 2),
+                new GroupSlot("D", 1));
 
         ConstraintManager cm = new ConstraintManager();
         // cm.addConstraint(new NoSameContinentInGroup());
 
         Simulator simulator = new Simulator(slots, cm, teams);
-        simulator.assignByGroupSequentially("France", 1);
-        simulator.assignByGroupSequentially("Germany", 1);
+        simulator.tryPlaceTeam("France", 1);
+        simulator.tryPlaceTeam("Germany", 1);
 
         // France should be assigned to Group A slot 1 && Germany to Group B slot 1
         assertEquals("France", simulator.getState().getAssignments().get(slots.get(0)).getName());
         assertEquals("Germany", simulator.getState().getAssignments().get(slots.get(2)).getName());
-        simulator.printAssignments();        
+        simulator.printAssignments();
     }
 
     @Test
     @DisplayName("Assignment should have alldifferent constraint by default")
     public void testAssignByGroupSequentially_alldifferentConstraint() {
         List<Team> teams = Arrays.asList(
-            TeamFactory.create("France"),
-            TeamFactory.create("Germany"),
-            TeamFactory.create("Brazil"),
-            TeamFactory.create("Japan"),
-            TeamFactory.create("Egypt"),
-            TeamFactory.create("Spain"),
-            TeamFactory.create("Argentina")
-        );
+                TeamFactory.create("France"),
+                TeamFactory.create("Germany"),
+                TeamFactory.create("Brazil"),
+                TeamFactory.create("Japan"),
+                TeamFactory.create("Egypt"),
+                TeamFactory.create("Spain"),
+                TeamFactory.create("Argentina"));
 
         List<GroupSlot> slots = Arrays.asList(
-            new GroupSlot("A", 1),
-            new GroupSlot("A", 2),
-            new GroupSlot("B", 1),
-            new GroupSlot("B", 2),
-            new GroupSlot("C", 1),
-            new GroupSlot("C", 2),
-            new GroupSlot("D", 1)
-        );
+                new GroupSlot("A", 1),
+                new GroupSlot("A", 2),
+                new GroupSlot("B", 1),
+                new GroupSlot("B", 2),
+                new GroupSlot("C", 1),
+                new GroupSlot("C", 2),
+                new GroupSlot("D", 1));
 
         ConstraintManager cm = new ConstraintManager();
         // cm.addConstraint(new NoSameContinentInGroup());

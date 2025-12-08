@@ -34,7 +34,6 @@ public final class TeamFactory {
         CONTINENT_MAP.put("Denmark", "Europe");
         CONTINENT_MAP.put("Norway", "Europe");
 
-
         CONTINENT_MAP.put("Brazil", "SouthAmerica");
         CONTINENT_MAP.put("Argentina", "SouthAmerica");
         CONTINENT_MAP.put("Chile", "SouthAmerica");
@@ -83,12 +82,14 @@ public final class TeamFactory {
         CONTINENT_MAP.put("NewZealand", "Oceania");
     }
 
-    private TeamFactory() {}
+    private TeamFactory() {
+    }
 
     public static Team create(String name) {
         String continent = CONTINENT_MAP.getOrDefault(name, "Unknown");
         return new ConcreteTeam(name, continent, 1);
     }
+
     public static Team createPlaceholder(String placeholderName, int pot) {
         // default continent for placeholders is Unknown unless mapped
         if (placeholderName.contains("Euro Playoff")) {
@@ -96,7 +97,8 @@ public final class TeamFactory {
         }
 
         if (placeholderName.contains("FIFA Playoff 1")) {
-            return new PlaceholderTeam(placeholderName, Set.of("SouthAmerica", "Asia", "NorthAmerica"), "placeholder", pot);
+            return new PlaceholderTeam(placeholderName, Set.of("SouthAmerica", "Asia", "NorthAmerica"), "placeholder",
+                    pot);
         }
 
         return new PlaceholderTeam(placeholderName, Set.of("Africa", "NorthAmerica", "Oceania"), "placeholder", pot);
@@ -106,31 +108,31 @@ public final class TeamFactory {
         Map<String, Team> teams = new HashMap<>();
 
         String[][] worldCup2026TeamsByPot = {
-            {
-                "Canada", "Mexico", "USA",
-                "Spain", "Argentina", "France",
-                "England", "Brazil", "Portugal",
-                "Netherlands", "Belgium", "Germany"
-            },
-            {
-                "Croatia", "Morocco", "Colombia",
-                "Uruguay", "Switzerland", "Japan",
-                "Senegal", "Iran", "SouthKorea",
-                "Ecuador", "Austria", "Australia"
-            },
-            {
-                "Norway", "Panama", "Egypt",
-                "Algeria", "Scotland", "Paraguay",
-                "Tunisia", "CotedIvoire", "Uzbekistan",
-                "Qatar", "SaudiArabia", "SouthAfrica"
-            },
-            {
-                "Jordan", "CapeVerde", "Ghana",
-                "Curacao", "Haiti", "NewZealand",
-                "European Play-Off A", "European Play-Off B",
-                "European Play-Off C", "European Play-Off D",
-                "FIFA Play-Off 1", "FIFA Play-Off 2"
-            }
+                {
+                        "Canada", "Mexico", "USA",
+                        "Spain", "Argentina", "France",
+                        "England", "Brazil", "Portugal",
+                        "Netherlands", "Belgium", "Germany"
+                },
+                {
+                        "Croatia", "Morocco", "Colombia",
+                        "Uruguay", "Switzerland", "Japan",
+                        "Senegal", "Iran", "SouthKorea",
+                        "Ecuador", "Austria", "Australia"
+                },
+                {
+                        "Norway", "Panama", "Egypt",
+                        "Algeria", "Scotland", "Paraguay",
+                        "Tunisia", "CotedIvoire", "Uzbekistan",
+                        "Qatar", "SaudiArabia", "SouthAfrica"
+                },
+                {
+                        "Jordan", "CapeVerde", "Ghana",
+                        "Curacao", "Haiti", "NewZealand",
+                        "European Play-Off A", "European Play-Off B",
+                        "European Play-Off C", "European Play-Off D",
+                        "FIFA Play-Off 1", "FIFA Play-Off 2"
+                }
         };
 
         for (int pot = 1; pot <= worldCup2026TeamsByPot.length; pot++) {
@@ -138,17 +140,17 @@ public final class TeamFactory {
                 if (teamName.startsWith("European Play-Off")) {
                     teams.put(teamName, new PlaceholderTeam(teamName, Set.of("Europe"), "placeholder", pot));
                 } else if (teamName.equals("FIFA Play-Off 1")) {
-                    teams.put(teamName, new PlaceholderTeam(teamName, Set.of("SouthAmerica", "Asia", "NorthAmerica"), "placeholder", pot));
+                    teams.put(teamName, new PlaceholderTeam(teamName, Set.of("SouthAmerica", "Asia", "NorthAmerica"),
+                            "placeholder", pot));
                 } else if (teamName.equals("FIFA Play-Off 2")) {
-                    teams.put(teamName, new PlaceholderTeam(teamName, Set.of("Africa", "NorthAmerica", "Oceania"), "placeholder", pot));
-                } else { 
+                    teams.put(teamName, new PlaceholderTeam(teamName, Set.of("Africa", "NorthAmerica", "Oceania"),
+                            "placeholder", pot));
+                } else {
                     teams.put(teamName, new ConcreteTeam(teamName, CONTINENT_MAP.get(teamName), pot));
                 }
             }
         }
 
-        
-        
         return new ArrayList<>(teams.values());
     }
 }
