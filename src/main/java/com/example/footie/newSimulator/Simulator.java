@@ -111,6 +111,85 @@ public class Simulator {
         }
     }
 
+    /**
+     * Solve remaining assignments using recursive backtracking with forward checking.
+     * Returns true if a complete assignment was found.
+     */
+    public boolean solveWithBacktracking() {
+        return backtrack();
+    }
+
+    private boolean backtrack() {
+        // if no unassigned slots remain, solution found
+        List<GroupSlot> unassigned = state.getUnassignedSlots();
+        if (unassigned.isEmpty()) return true;
+
+        // choose next slot(s) to try using state's heuristic
+        List<GroupSlot> slotsToTry = state.nextSlotsToTry();
+        if (slotsToTry.isEmpty()) return false;
+
+        GroupSlot slot = slotsToTry.get(0);
+
+        // iterate over candidates in domain (make a copy to avoid concurrent modification)
+        List<Team> candidates = new ArrayList<>(state.getDomains().get(slot));
+
+        for (Team candidate : candidates) {
+            StringBuilder reason = new StringBuilder();
+            if (!constraintManager.isAssignmentValid(state, slot, candidate, reason)) {
+                continue; // skip invalid candidate
+            }
+
+            Map<GroupSlot, Set<Team>> snapshot = assignWithSnapshot(slot, candidate);
+            if (snapshot == null) {
+                // immediate inconsistency, try next candidate
+                continue;
+            }
+
+            // recurse
+            if (backtrack()) return true;
+
+            // backtrack: restore state
+            restoreFromSnapshot(slot, snapshot);
+        }
+
+        // no candidate led to a solution
+        return false;
+    }
+
+    /**
+     * Assign a team to a slot, perform forward checking and return a snapshot of domains
+     * before the assignment. Returns null if the assignment immediately causes a domain wipeout.
+     */
+    private Map<GroupSlot, Set<Team>> assignWithSnapshot(GroupSlot slot, Team team) {
+        Map<GroupSlot, Set<Team>> oldDomains = deepCopyDomains();
+
+        state.assign(slot, team);
+        constraintManager.forwardCheck(state, slot, team);
+
+        // detect domain wipeout
+        for (GroupSlot s : state.getUnassignedSlots()) {
+            if (state.getDomains().get(s).isEmpty()) {
+                // restore and unassign
+                for (GroupSlot restoreSlot : oldDomains.keySet()) {
+                    state.getDomains().put(restoreSlot, oldDomains.get(restoreSlot));
+                }
+                List<Team> originalDomainForSlot = new ArrayList<>(oldDomains.get(slot));
+                state.unassign(slot, originalDomainForSlot);
+                return null;
+            }
+        }
+
+        return oldDomains;
+    }
+
+    private void restoreFromSnapshot(GroupSlot slot, Map<GroupSlot, Set<Team>> snapshot) {
+        for (GroupSlot restoreSlot : snapshot.keySet()) {
+            state.getDomains().put(restoreSlot, snapshot.get(restoreSlot));
+        }
+        List<Team> originalDomainForSlot = new ArrayList<>(snapshot.get(slot));
+        state.unassign(slot, originalDomainForSlot);
+    }
+
     public void printAssignments() {
         System.out.println("Assignments:");
         state.getAssignments()
