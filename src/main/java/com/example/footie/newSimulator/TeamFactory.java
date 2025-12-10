@@ -1,15 +1,10 @@
 package com.example.footie.newSimulator;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import tools.jackson.core.json.JsonReadContext;
 
 public final class TeamFactory {
     public static final Map<String, String> CONTINENT_MAP = new HashMap<>();
@@ -129,20 +124,20 @@ public final class TeamFactory {
                 {
                         "Jordan", "CapeVerde", "Ghana",
                         "Curacao", "Haiti", "NewZealand",
-                        "European Play-Off A", "European Play-Off B",
-                        "European Play-Off C", "European Play-Off D",
-                        "FIFA Play-Off 1", "FIFA Play-Off 2"
+                        "Euro A", "Euro B",
+                        "Euro C", "Euro D",
+                        "FIFA 1", "FIFA 2"
                 }
         };
 
         for (int pot = 1; pot <= worldCup2026TeamsByPot.length; pot++) {
             for (String teamName : worldCup2026TeamsByPot[pot - 1]) {
-                if (teamName.startsWith("European Play-Off")) {
+                if (teamName.startsWith("Euro")) {
                     teams.put(teamName, new PlaceholderTeam(teamName, Set.of("Europe"), "placeholder", pot));
-                } else if (teamName.equals("FIFA Play-Off 1")) {
+                } else if (teamName.equals("FIFA 1")) {
                     teams.put(teamName, new PlaceholderTeam(teamName, Set.of("SouthAmerica", "Asia", "NorthAmerica"),
                             "placeholder", pot));
-                } else if (teamName.equals("FIFA Play-Off 2")) {
+                } else if (teamName.equals("FIFA 2")) {
                     teams.put(teamName, new PlaceholderTeam(teamName, Set.of("Africa", "NorthAmerica", "Oceania"),
                             "placeholder", pot));
                 } else {
