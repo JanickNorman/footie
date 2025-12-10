@@ -182,6 +182,60 @@ public class Simulator {
     }
 
     /**
+     * Print groups vertically: one row per group, columns are positions.
+     * Example header: "Group | 1 | 2 | 3 | 4"
+     */
+    public void prettyPrintGroupAssignmentsVertical() {
+        // Build a map: groupName -> map(position -> teamName)
+        Map<String, Map<Integer, String>> groups = new HashMap<>();
+        int maxPosition = 0;
+        for (GroupSlot slot : drawOrder) {
+            String g = slot.getGroupName();
+            groups.putIfAbsent(g, new HashMap<>());
+            Team team = state.getAssignments().get(slot);
+            groups.get(g).put(slot.getPosition(), team != null ? team.getName() : "-");
+            if (slot.getPosition() > maxPosition) maxPosition = slot.getPosition();
+        }
+
+        // Sort groups by name
+        List<String> groupNames = new ArrayList<>(groups.keySet());
+        Collections.sort(groupNames);
+
+        // Compute widths
+        int groupLabelWidth = Math.max(5, groupNames.stream().mapToInt(String::length).max().orElse(5));
+        int cellWidth = 15; // width per position column
+
+        // Header
+        StringBuilder header = new StringBuilder();
+        header.append(String.format("%-" + (groupLabelWidth + 2) + "s", "Group"));
+        for (int p = 1; p <= maxPosition; p++) {
+            header.append(String.format(" %" + (-cellWidth) + "s", String.valueOf(p)));
+        }
+        System.out.println(header.toString());
+
+        // Separator
+        StringBuilder sep = new StringBuilder();
+        sep.append("".repeat(Math.max(0, groupLabelWidth + 2))).append("-");
+        for (int p = 1; p <= maxPosition; p++) {
+            sep.append("".repeat(1)).append("".repeat(Math.max(0, cellWidth))).append("-");
+        }
+        System.out.println(sep.toString());
+
+        // Rows
+        for (String g : groupNames) {
+            StringBuilder row = new StringBuilder();
+            row.append(String.format("%-" + (groupLabelWidth + 2) + "s", "Group " + g));
+            Map<Integer, String> col = groups.get(g);
+            for (int p = 1; p <= maxPosition; p++) {
+                String cell = col.getOrDefault(p, "-");
+                if (cell.length() > cellWidth - 3) cell = cell.substring(0, cellWidth - 6) + "...";
+                row.append(String.format(" %" + (-cellWidth) + "s", cell));
+            }
+            System.out.println(row.toString());
+        }
+    }
+
+    /**
      * Assign teams by iterating teams first, then picking an available slot for
      * each team.
      * For each team we try slots in the configured draw order where the team is
