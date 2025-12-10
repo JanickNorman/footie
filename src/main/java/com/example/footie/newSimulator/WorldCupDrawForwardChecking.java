@@ -1,13 +1,13 @@
 package com.example.footie.newSimulator;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.ArrayList;
 
-import com.example.footie.newSimulator.constraint.AtMostTwoEuropeTeamsPerGroup;
 import com.example.footie.newSimulator.constraint.ConstraintManager;
-import com.example.footie.newSimulator.constraint.NoSameContinentInGroupForNonEurope;
+import com.example.footie.newSimulator.constraint.NoSameContinentInGroup;
 import com.example.footie.newSimulator.constraint.PairedGroupConstraint;
 
 public class WorldCupDrawForwardChecking {
@@ -17,10 +17,9 @@ public class WorldCupDrawForwardChecking {
 
         List<GroupSlot> slots = buildWorldCupSlots();
         // teams = teams.stream().filter(s -> s.getContinents().size() == 0).toList();
+
         ConstraintManager cm = new ConstraintManager();
-        // cm.addConstraint(new NoSameContinentInGroupExceptEurope());
-        cm.addConstraint(new NoSameContinentInGroupForNonEurope());
-        cm.addConstraint(new AtMostTwoEuropeTeamsPerGroup());
+        cm.addConstraint(new NoSameContinentInGroup());
         cm.addConstraint(new PairedGroupConstraint("Spain", Set.of("E", "I", "F", "H", "D", "G"), "Argentina",
                 Set.of("C", "A", "L", "J", "B", "K"), true));
 
@@ -31,10 +30,9 @@ public class WorldCupDrawForwardChecking {
         simulator.assignTeamToSlot("B1", "Canada");
         simulator.assignTeamToSlot("D1", "USA");
 
-
         // Collections.shuffle(teams);
         teams.sort(Comparator.comparing(Team::pot));
-        teams.forEach(t -> simulator.tryPlaceTeam(t.getName()));
+        teams.forEach(t -> simulator.tryPlaceTeamWithBacktracking(t.getName()));
 
         // simulator.tryPlaceTeam("France", 1);
         // simulator.tryPlaceTeam("Germany", 1);
@@ -61,10 +59,10 @@ public class WorldCupDrawForwardChecking {
         // // simulator.tryPlaceTeam("CotedIvoire", 2);
         // simulator.tryPlaceTeam("Haiti", 4);
 
-        // System.out.println("Remaining groups with most slots: " + simulator.getNextGroupsToAssign());                
+        // System.out.println("Remaining groups with most slots: " +
+        // simulator.getNextGroupsToAssign());
         simulator.prettyPrintGroupAssignmentsVertical();
     }
-
 
     private static List<GroupSlot> buildWorldCupSlots() {
         List<GroupSlot> slots = new ArrayList<>();

@@ -112,7 +112,8 @@ public class Simulator {
     }
 
     /**
-     * Solve remaining assignments using recursive backtracking with forward checking.
+     * Solve remaining assignments using recursive backtracking with forward
+     * checking.
      * Returns true if a complete assignment was found.
      */
     public boolean solveWithBacktracking() {
@@ -122,31 +123,39 @@ public class Simulator {
     private boolean backtrack() {
         // if no unassigned slots remain, solution found
         List<GroupSlot> unassigned = state.getUnassignedSlots();
-        if (unassigned.isEmpty()) return true;
+        if (unassigned.isEmpty())
+            return true;
 
         // choose next slot(s) to try using state's heuristic
         List<GroupSlot> slotsToTry = state.nextSlotsToTry();
-        if (slotsToTry.isEmpty()) return false;
+        if (slotsToTry.isEmpty())
+            return false;
 
         GroupSlot slot = slotsToTry.get(0);
 
-        // iterate over candidates in domain (make a copy to avoid concurrent modification)
+        // iterate over candidates in domain (make a copy to avoid concurrent
+        // modification)
         List<Team> candidates = new ArrayList<>(state.getDomains().get(slot));
 
         for (Team candidate : candidates) {
             StringBuilder reason = new StringBuilder();
             if (!constraintManager.isAssignmentValid(state, slot, candidate, reason)) {
+                System.out.println("Skipping invalid candidate: " + candidate + " for slot " + slot + "; reason="
+                        + (reason.length() > 0 ? reason.toString() : "unknown"));
                 continue; // skip invalid candidate
             }
 
             Map<GroupSlot, Set<Team>> snapshot = assignWithSnapshot(slot, candidate);
             if (snapshot == null) {
+                System.out.println("Backtrack: assignment of " + candidate + " to " + slot
+                        + " caused immediate inconsistency");
                 // immediate inconsistency, try next candidate
                 continue;
             }
 
             // recurse
-            if (backtrack()) return true;
+            if (backtrack())
+                return true;
 
             // backtrack: restore state
             restoreFromSnapshot(slot, snapshot);
@@ -157,8 +166,10 @@ public class Simulator {
     }
 
     /**
-     * Assign a team to a slot, perform forward checking and return a snapshot of domains
-     * before the assignment. Returns null if the assignment immediately causes a domain wipeout.
+     * Assign a team to a slot, perform forward checking and return a snapshot of
+     * domains
+     * before the assignment. Returns null if the assignment immediately causes a
+     * domain wipeout.
      */
     private Map<GroupSlot, Set<Team>> assignWithSnapshot(GroupSlot slot, Team team) {
         Map<GroupSlot, Set<Team>> oldDomains = deepCopyDomains();
@@ -273,7 +284,8 @@ public class Simulator {
             groups.putIfAbsent(g, new HashMap<>());
             Team team = state.getAssignments().get(slot);
             groups.get(g).put(slot.getPosition(), team != null ? team.getName() : "-");
-            if (slot.getPosition() > maxPosition) maxPosition = slot.getPosition();
+            if (slot.getPosition() > maxPosition)
+                maxPosition = slot.getPosition();
         }
 
         // Sort groups by name
@@ -307,7 +319,8 @@ public class Simulator {
             Map<Integer, String> col = groups.get(g);
             for (int p = 1; p <= maxPosition; p++) {
                 String cell = col.getOrDefault(p, "-");
-                if (cell.length() > cellWidth - 3) cell = cell.substring(0, cellWidth - 6) + "...";
+                if (cell.length() > cellWidth - 3)
+                    cell = cell.substring(0, cellWidth - 6) + "...";
                 row.append(String.format(" %" + (-cellWidth) + "s", cell));
             }
             System.out.println(row.toString());
@@ -412,6 +425,27 @@ public class Simulator {
                 return true;
         }
 
+        return false;
+    }
+
+    public boolean tryPlaceTeamWithBacktracking(String teamName) {
+        // Find the team object
+        Team teamToAssign = assignedTeams.get(teamName);
+
+        List<GroupSlot> nextSlots = this.state.nextSlotsToTry();
+        for (GroupSlot slot : nextSlots) {
+            Map<GroupSlot, Set<Team>> snapshot = assignWithSnapshot(slot, teamToAssign);
+            if (snapshot == null) {
+                continue; // immediate inconsistency
+            }
+
+            // recurse
+            if (backtrack())
+                return true;
+
+            // backtrack: restore state
+            restoreFromSnapshot(slot, snapshot);
+        }
 
         return false;
     }
