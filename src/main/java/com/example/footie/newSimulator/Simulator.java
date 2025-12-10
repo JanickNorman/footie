@@ -421,19 +421,6 @@ public class Simulator {
 
         List<GroupSlot> nextSlots = this.state.nextSlotsToTry();
         for (GroupSlot slot : nextSlots) {
-            if (assignTeamToSlot(slot, teamToAssign))
-                return true;
-        }
-
-        return false;
-    }
-
-    public boolean tryPlaceTeamWithBacktracking(String teamName) {
-        // Find the team object
-        Team teamToAssign = assignedTeams.get(teamName);
-
-        List<GroupSlot> nextSlots = this.state.nextSlotsToTry();
-        for (GroupSlot slot : nextSlots) {
             Map<GroupSlot, Set<Team>> snapshot = assignWithSnapshot(slot, teamToAssign);
             if (snapshot == null) {
                 continue; // immediate inconsistency
