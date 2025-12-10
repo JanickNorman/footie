@@ -268,4 +268,19 @@ public class Simulator {
 
         return false;
     }
+
+    public boolean tryPlaceTeam(String teamName) {
+        // Find the team object
+        Team teamToAssign = assignedTeams.get(teamName);
+
+        List<GroupSlot> nextSlots = this.state.nextSlotsToTry();
+        for (GroupSlot slot : nextSlots) {
+            if (assignTeamToSlot(slot, teamToAssign))
+                return true;
+        }
+
+
+        return false;
+    }
+
 }
