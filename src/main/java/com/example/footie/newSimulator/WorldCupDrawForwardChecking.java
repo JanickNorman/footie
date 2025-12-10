@@ -1,14 +1,18 @@
 package com.example.footie.newSimulator;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.ArrayList;
 
+import com.example.footie.newSimulator.constraint.AtMostTwoEuropeTeamsPerGroup;
 import com.example.footie.newSimulator.constraint.ConstraintManager;
 import com.example.footie.newSimulator.constraint.NoSameContinentInGroup;
+import com.example.footie.newSimulator.constraint.NoSameContinentInGroupForNonEurope;
 import com.example.footie.newSimulator.constraint.PairedGroupConstraint;
+import com.example.footie.newSimulator.constraint.SamePotCantBeInTheSameGroup;
 
 public class WorldCupDrawForwardChecking {
     public static void main(String[] args) {
@@ -19,7 +23,9 @@ public class WorldCupDrawForwardChecking {
         // teams = teams.stream().filter(s -> s.getContinents().size() == 0).toList();
 
         ConstraintManager cm = new ConstraintManager();
-        cm.addConstraint(new NoSameContinentInGroup());
+        cm.addConstraint(new SamePotCantBeInTheSameGroup());
+        cm.addConstraint(new AtMostTwoEuropeTeamsPerGroup());
+        cm.addConstraint(new NoSameContinentInGroupForNonEurope());
         cm.addConstraint(new PairedGroupConstraint("Spain", Set.of("E", "I", "F", "H", "D", "G"), "Argentina",
                 Set.of("C", "A", "L", "J", "B", "K"), true));
 
@@ -32,7 +38,7 @@ public class WorldCupDrawForwardChecking {
 
         // Collections.shuffle(teams);
         teams.sort(Comparator.comparing(Team::pot));
-        teams.forEach(t -> simulator.tryPlaceTeamWithBacktracking(t.getName()));
+        teams.forEach(t -> simulator.tryPlaceTeam(t.getName()));
 
         // simulator.tryPlaceTeam("France", 1);
         // simulator.tryPlaceTeam("Germany", 1);
