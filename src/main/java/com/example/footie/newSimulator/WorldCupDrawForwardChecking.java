@@ -33,7 +33,7 @@ public class WorldCupDrawForwardChecking {
 
 
         // Collections.shuffle(teams);
-        teams.sort(Comparator.comparing(t -> t.pot()));
+        teams.sort(Comparator.comparing(Team::pot));
         teams.forEach(t -> simulator.tryPlaceTeam(t.getName()));
 
         // simulator.tryPlaceTeam("France", 1);
