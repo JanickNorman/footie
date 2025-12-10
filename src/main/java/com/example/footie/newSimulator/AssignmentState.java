@@ -7,11 +7,14 @@ package com.example.footie.newSimulator;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 public class AssignmentState {
@@ -81,6 +84,28 @@ public class AssignmentState {
                 .map(Map.Entry::getKey)
                 .sorted()
                 .collect(Collectors.toList());
+    }
+
+    public List<GroupSlot> nextSlotsToTry() {
+                // use TreeMap next
+        SortedMap<String, List<GroupSlot>> nextGroups = new TreeMap<>();
+        for (GroupSlot slot : this.getUnassignedSlots()) {
+            nextGroups.putIfAbsent(slot.getGroupName(), new ArrayList<>());
+            nextGroups.get(slot.getGroupName()).add(slot);
+        }
+
+        // find minimal group size and collect groups with that size using streams
+        int maxSize = nextGroups.values().stream().mapToInt(List::size).max().orElse(Integer.MAX_VALUE);
+        List<GroupSlot> slotsToTry = nextGroups.entrySet().stream()
+            .filter(e -> e.getValue().size() == maxSize)
+            // i want to flatMap the list of GroupSlot to a single list
+            .flatMap(e -> e.getValue().stream())
+            .collect(Collectors.toList());
+
+        // slotsToTry.sort(Comparator.comparing((GroupSlot s) -> (int) s.getGroupName().charAt(0) + (s.getPosition() % maxSize) * 10));
+        slotsToTry.sort(Comparator.comparing((GroupSlot s) -> s.getGroupName()).thenComparing(s -> s.getPosition()));
+
+        return slotsToTry;
     }
 
     @Override
