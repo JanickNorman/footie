@@ -147,8 +147,6 @@ public class Simulator {
 
             Map<GroupSlot, Set<Team>> snapshot = assignWithSnapshot(slot, candidate);
             if (snapshot == null) {
-                System.out.println("Backtrack: assignment of " + candidate + " to " + slot
-                        + " caused immediate inconsistency");
                 // immediate inconsistency, try next candidate
                 continue;
             }
@@ -427,13 +425,113 @@ public class Simulator {
             }
 
             // recurse
-            if (backtrack())
+            if (backtrack()) {
+                restoreFromSnapshot(slot, snapshot);
+                // assignTeamToSlot(slot, teamToAssign);
                 return true;
+            }
 
             // backtrack: restore state
             restoreFromSnapshot(slot, snapshot);
         }
 
+        return false;
+    }
+
+    /**
+     * Place only the specified team into the first viable slot (does NOT fill
+     * remaining slots, but verifies a complete solution exists via backtracking).
+     * Runs AC-3 and then backtracking to ensure all possibilities are checked.
+     */
+    public boolean placeOnlyTeam(String teamName) {
+        Team teamToAssign = assignedTeams.get(teamName);
+        if (teamToAssign == null) return false;
+
+        List<GroupSlot> candidates = this.state.nextSlotsToTry().stream()
+                .filter(s -> !state.isAssigned(s) && state.getDomains().getOrDefault(s, Set.of()).contains(teamToAssign))
+                .collect(Collectors.toList());
+
+        for (GroupSlot slot : candidates) {
+            // snapshot domains and assignments before trying this placement
+            Map<GroupSlot, Set<Team>> snapshot = deepCopyDomains();
+            Map<GroupSlot, Team> assignmentSnapshot = new HashMap<>(state.getAssignments());
+            
+            // assign and run forward-check
+            state.assign(slot, teamToAssign);
+            constraintManager.forwardCheck(state, slot, teamToAssign);
+            
+            // check for immediate domain wipeout
+            boolean immediateWipeout = false;
+            for (GroupSlot s : state.getUnassignedSlots()) {
+                if (state.getDomains().get(s).isEmpty()) {
+                    immediateWipeout = true;
+                    break;
+                }
+            }
+            
+            if (immediateWipeout) {
+                // restore and try next candidate
+                for (GroupSlot restoreSlot : snapshot.keySet()) {
+                    state.getDomains().put(restoreSlot, snapshot.get(restoreSlot));
+                }
+                List<Team> originalDomainForSlot = new ArrayList<>(snapshot.get(slot));
+                state.unassign(slot, originalDomainForSlot);
+                System.out.println("Placement of " + teamToAssign + " into " + slot + " caused immediate domain wipeout; trying next");
+                continue;
+            }
+            
+            // enforce full arc-consistency (AC-3)
+            boolean ac3ok = constraintManager.enforceArcConsistency(state);
+            if (!ac3ok) {
+                // AC-3 found inconsistency, restore and try next candidate
+                for (GroupSlot restoreSlot : snapshot.keySet()) {
+                    state.getDomains().put(restoreSlot, snapshot.get(restoreSlot));
+                }
+                List<Team> originalDomainForSlot = new ArrayList<>(snapshot.get(slot));
+                state.unassign(slot, originalDomainForSlot);
+                System.out.println("Placement of " + teamToAssign + " into " + slot + " caused AC-3 domain wipeout; trying next");
+                continue;
+            }
+
+            // AC-3 passed. Now verify that a complete solution exists by running backtracking.
+            // Take another snapshot of domains after AC-3 (domains may have been pruned)
+            Map<GroupSlot, Set<Team>> snapshotAfterAC3 = deepCopyDomains();
+            
+            boolean solutionExists = backtrack();
+            
+            if (solutionExists) {
+                // Solution found! Restore to the state right after placing this team
+                // (keep the team assigned, restore domains to post-AC3 state, undo the backtracking assignments)
+                for (GroupSlot s : snapshotAfterAC3.keySet()) {
+                    state.getDomains().put(s, new HashSet<>(snapshotAfterAC3.get(s)));
+                }
+                // restore assignments to just the current team placed (undo backtracking)
+                for (GroupSlot s : state.getAssignments().keySet()) {
+                    if (s.equals(slot)) {
+                        state.getAssignments().put(s, teamToAssign);
+                    } else if (assignmentSnapshot.get(s) != null) {
+                        state.getAssignments().put(s, assignmentSnapshot.get(s));
+                    } else {
+                        state.getAssignments().put(s, null);
+                    }
+                }
+                
+                System.out.println("✅ Placed " + teamToAssign + " into " + slot + " (verified solution exists)");
+                return true;
+            } else {
+                // No solution exists with this placement, restore full snapshot and try next
+                for (GroupSlot restoreSlot : snapshot.keySet()) {
+                    state.getDomains().put(restoreSlot, snapshot.get(restoreSlot));
+                }
+                for (GroupSlot s : assignmentSnapshot.keySet()) {
+                    state.getAssignments().put(s, assignmentSnapshot.get(s));
+                }
+                System.out.println("Placement of " + teamToAssign + " into " + slot + " has no complete solution; trying next");
+                continue;
+            }
+        }
+
+        System.out.println("❌ Could not place " + teamToAssign + " into any viable slot");
         return false;
     }
 

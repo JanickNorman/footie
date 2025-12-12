@@ -1,7 +1,13 @@
 package com.example.footie.newSimulator.constraint;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.example.footie.newSimulator.AssignmentState;
 import com.example.footie.newSimulator.GroupSlot;
@@ -61,5 +67,114 @@ public class ConstraintManager {
                 state.getDomains().get(s).removeIf(t -> t.getName().equals(team.getName()));
             }
         }
+    }
+
+    /**
+     * Enforce arc-consistency (AC-3) across all unassigned variables.
+     * Returns true if no domain was emptied, false if some domain became empty.
+     */
+    public boolean enforceArcConsistency(AssignmentState state) {
+        List<GroupSlot> unassigned = state.getUnassignedSlots();
+        Deque<GroupSlot[]> queue = new ArrayDeque<>();
+
+        for (GroupSlot xi : unassigned) {
+            for (GroupSlot xj : unassigned) {
+                if (!xi.equals(xj)) queue.add(new GroupSlot[] { xi, xj });
+            }
+        }
+
+        while (!queue.isEmpty()) {
+            GroupSlot[] pair = queue.removeFirst();
+            GroupSlot xi = pair[0];
+            GroupSlot xj = pair[1];
+            if (revise(state, xi, xj)) {
+                if (state.getDomains().get(xi).isEmpty()) return false;
+                for (GroupSlot xk : unassigned) {
+                    if (!xk.equals(xi) && !xk.equals(xj)) {
+                        queue.add(new GroupSlot[] { xk, xi });
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Revise xi's domain with respect to xj. Return true if xi's domain changed.
+     */
+    private boolean revise(AssignmentState state, GroupSlot xi, GroupSlot xj) {
+        boolean revised = false;
+        Set<Team> domainXi = new HashSet<>(state.getDomain(xi));
+
+        for (Team vx : new HashSet<>(domainXi)) {
+            boolean hasSupport = false;
+            List<Team> originalXiDomain = new ArrayList<>(state.getDomain(xi));
+
+            // temporarily assign xi = vx and check if some value in xj's domain
+            // is consistent with that assignment
+            state.assign(xi, vx);
+            for (Team vy : new HashSet<>(state.getDomain(xj))) {
+                if (isAssignmentValid(state, xj, vy)) {
+                    hasSupport = true;
+                    break;
+                }
+            }
+            state.unassign(xi, originalXiDomain);
+
+            if (!hasSupport) {
+                state.getDomains().get(xi).removeIf(t -> t.getName().equals(vx.getName()));
+                revised = true;
+            }
+        }
+
+        return revised;
+    }
+
+    /**
+     * Singleton Arc Consistency (SAC): for every unassigned variable xi and for
+     * every value v in its domain, temporarily assign xi=v and run AC-3. If
+     * a domain wipeout occurs, remove v from xi's domain. Returns false if a
+     * domain becomes empty during pruning.
+     *
+     * This is stronger (and much more expensive) than plain AC-3.
+     */
+    public boolean enforceSingletonArcConsistency(AssignmentState state) {
+        boolean changed = false;
+
+        List<GroupSlot> unassigned = state.getUnassignedSlots();
+
+        for (GroupSlot xi : new ArrayList<>(unassigned)) {
+            Set<Team> domainCopy = new HashSet<>(state.getDomain(xi));
+
+            for (Team v : new HashSet<>(domainCopy)) {
+                // snapshot domains
+                Map<GroupSlot, Set<Team>> snapshot = new HashMap<>();
+                for (GroupSlot s : state.getUnassignedSlots()) {
+                    snapshot.put(s, new HashSet<>(state.getDomains().get(s)));
+                }
+
+                // temporarily assign and propagate
+                List<Team> originalDomainForXi = new ArrayList<>(snapshot.get(xi));
+                state.assign(xi, v);
+                forwardCheck(state, xi, v);
+                boolean ok = enforceArcConsistency(state);
+
+                // restore snapshot (do not keep pruning from the test)
+                for (GroupSlot s : snapshot.keySet()) {
+                    state.getDomains().put(s, new HashSet<>(snapshot.get(s)));
+                }
+                state.unassign(xi, originalDomainForXi);
+
+                if (!ok) {
+                    // prune v permanently
+                    state.getDomains().get(xi).removeIf(t -> t.getName().equals(v.getName()));
+                    changed = true;
+                    if (state.getDomains().get(xi).isEmpty()) return false;
+                }
+            }
+        }
+
+        return true;
     }
 }

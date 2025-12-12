@@ -40,4 +40,9 @@ public class PlaceholderTeam implements Team {
 
     @Override
     public int hashCode() { return Objects.hash(name); }
+
+    @Override
+    public String toString() {
+        return getName();
+    }
 }

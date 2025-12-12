@@ -102,8 +102,8 @@ public class AssignmentState {
             .flatMap(e -> e.getValue().stream())
             .collect(Collectors.toList());
 
-        // slotsToTry.sort(Comparator.comparing((GroupSlot s) -> (int) s.getGroupName().charAt(0) + (s.getPosition() % maxSize) * 10));
-        slotsToTry.sort(Comparator.comparing((GroupSlot s) -> s.getGroupName()).thenComparing(s -> s.getPosition()));
+        slotsToTry.sort(Comparator.comparing((GroupSlot s) -> (int) s.getGroupName().charAt(0) + (s.getPosition() % maxSize) * 10));
+        // slotsToTry.sort(Comparator.comparing((GroupSlot s) -> s.getGroupName()).thenComparing(s -> s.getPosition()));
 
         return slotsToTry;
     }
