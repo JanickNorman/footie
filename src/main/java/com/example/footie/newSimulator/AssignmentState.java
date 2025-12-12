@@ -8,7 +8,6 @@ package com.example.footie.newSimulator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -18,8 +17,8 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 public class AssignmentState {
-    private final Map<GroupSlot, Team> assignments = new HashMap<>();
-    private final Map<GroupSlot, Set<Team>> domains = new HashMap<>();
+    private final SortedMap<GroupSlot, Team> assignments = new TreeMap<>();
+    private final SortedMap<GroupSlot, Set<Team>> domains = new TreeMap<>();
 
     public AssignmentState(List<GroupSlot> slots, List<Team> teams) {
         for (GroupSlot slot : slots) {
@@ -47,7 +46,7 @@ public class AssignmentState {
         return assignments.get(slot);
     }
 
-    public Map<GroupSlot, Team> getAssignments() {
+    public SortedMap<GroupSlot, Team> getAssignments() {
         return assignments;
     }
 

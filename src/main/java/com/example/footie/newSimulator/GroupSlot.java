@@ -1,7 +1,7 @@
 package com.example.footie.newSimulator;
 
 
-public class GroupSlot {
+public class GroupSlot implements Comparable<GroupSlot> {
     private final String groupName;
     private final int position;
 
@@ -24,5 +24,12 @@ public class GroupSlot {
 
     @Override
     public String toString() { return groupName + position; }
+
+    @Override
+    public int compareTo(GroupSlot other) {
+        int groupComp = toString().compareTo(other.toString());
+        if (groupComp != 0) return groupComp;
+        return Integer.compare(this.position, other.position);
+    }
 }
 
