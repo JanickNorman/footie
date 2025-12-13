@@ -1,17 +1,16 @@
 package com.example.footie.newSimulator;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,7 +26,7 @@ class SimulatorTest {
     private ConstraintManager constraintManager;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         // Create teams from different continents
         teams = Arrays.asList(
                 TeamFactory.create("France"),
@@ -64,10 +63,10 @@ class SimulatorTest {
     @Test
     @DisplayName("Should assign team sequentally to the next possible group in order")
     public void testAssignFranceA1_GermanyB2_BrazilC3() {
-        List<GroupSlot> slots = buildWorldCupSlots();
+        slots = buildWorldCupSlots();
 
         // Use a small teams list containing the three target teams and some extras
-        List<Team> teams = new ArrayList<>();
+        teams = new ArrayList<>();
         teams.add(TeamFactory.create("France"));
         teams.add(TeamFactory.create("Germany"));
         teams.add(TeamFactory.create("Brazil"));
@@ -345,7 +344,7 @@ class SimulatorTest {
             var field = Simulator.class.getDeclaredField("state");
             field.setAccessible(true);
             return (AssignmentState) field.get(simulator);
-        } catch (Exception e) {
+        } catch (IllegalAccessException | IllegalArgumentException | NoSuchFieldException e) {
             throw new RuntimeException("Failed to access state field", e);
         }
     }

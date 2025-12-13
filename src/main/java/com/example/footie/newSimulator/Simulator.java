@@ -533,7 +533,6 @@ public class Simulator {
                 }
                 System.out.println(
                         "Placement of " + teamToAssign + " into " + slot + " has no complete solution; trying next");
-                continue;
             }
         }
 
