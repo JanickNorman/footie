@@ -1,8 +1,6 @@
 package com.example.footie.newSimulator;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -12,8 +10,8 @@ import com.example.footie.newSimulator.constraint.NoSameContinentInGroupForNonEu
 import com.example.footie.newSimulator.constraint.PairedGroupConstraint;
 import com.example.footie.newSimulator.constraint.SamePotCantBeInTheSameGroup;
 
-public class WorldCupDrawForwardChecking {
-    void main(String[] args) {
+public class WorldCupDrawSimulation {
+    public static void main(String[] args) {
         // test();
         List<Team> teams = TeamFactory.createWorldCupTeams(4);
 
@@ -33,14 +31,17 @@ public class WorldCupDrawForwardChecking {
         simulator.assignTeamToSlot("A1", "Mexico");
         simulator.assignTeamToSlot("B1", "Canada");
         simulator.assignTeamToSlot("D1", "USA");
+        simulator.assignTeamToSlot("E1", "Argentina");
+        System.out.println(simulator.state.getDomains().get("F1"));
+        simulator.assignTeamToSlot("F1", "Spain");
+        // simulator.solveWithBacktracking();
 
-        Collections.shuffle(teams);
-        teams.sort(Comparator.comparing(Team::pot));
-        teams.forEach(t -> simulator.placeOnlyTeam(t.getName()));
+        // Collections.shuffle(teams);
+        // teams.sort(Comparator.comparing(Team::pot));
+        // teams.forEach(t -> simulator.placeOnlyTeam(t.getName()));
         // simulator.placeOnlyTeam("Brazil");
         // simulator.placeOnlyTeam("Spain");
         // simulator.placeOnlyTeam("Argentina");
-
 
         // simulator.tryPlaceTeam("France", 1);
         // simulator.tryPlaceTeam("Germany", 1);
