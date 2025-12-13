@@ -33,6 +33,7 @@ public class ConstraintManager {
      * the provided StringBuilder with a short reason when the assignment is
      * rejected (the simple constraint class name).
      */
+    @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
     public boolean isAssignmentValid(AssignmentState state, GroupSlot slot, Team team, StringBuilder reason) {
         for (Constraint c : constraints) {
             if (!c.isAssignmentAllowed(state, slot, team)) {
