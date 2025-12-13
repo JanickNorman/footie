@@ -17,15 +17,29 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 public class AssignmentState {
+    private final List<GroupSlot> slots;
+    private final Map<String, Team> allTeams;
+
     private final SortedMap<GroupSlot, Team> assignments = new TreeMap<>();
     private final SortedMap<GroupSlot, Set<Team>> domains = new TreeMap<>();
 
     public AssignmentState(List<GroupSlot> slots, List<Team> teams) {
+        this.slots = new ArrayList<>(slots);
+        this.allTeams = teams.stream().collect(Collectors.toMap(Team::getName, t -> t));
+
         for (GroupSlot slot : slots) {
             assignments.put(slot, null);
             domains.put(slot, new HashSet<>(teams));
         }
     }
+
+    public AssignmentState copyForSearch() {
+        return new AssignmentState(getSlots(), getAllTeams().values().stream().collect(Collectors.toList()));
+    }
+
+    public List<GroupSlot> getSlots() { return Collections.unmodifiableList(slots); }
+    
+    public Map<String, Team> getAllTeams() { return Collections.unmodifiableMap(allTeams); }
 
     public void assign(GroupSlot slot, Team team) {
         assignments.put(slot, team);
@@ -52,6 +66,13 @@ public class AssignmentState {
 
     public Map<GroupSlot, Set<Team>> getDomains() {
         return domains;
+    }
+
+    public Set<Team> getDomain(String slotString) {
+        String group = slotString.substring(0, 1);
+        int position = Integer.parseInt(slotString.substring(1));
+        GroupSlot targetSlot = new GroupSlot(group, position);
+        return domains.get(targetSlot);
     }
 
     public Set<Team> getDomain(GroupSlot slot) {
