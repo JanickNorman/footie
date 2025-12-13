@@ -68,16 +68,32 @@ public class PairedGroupConstraint implements Constraint {
     public void forwardCheck(AssignmentState state, GroupSlot slot, Team team) {
         // If teamA was placed into groupsA, prune teamB to groupsB; and vice-versa when
         // symmetric
-        if (team.getName().equals(teamA)) {
+        if (team.getName().equals(this.teamA)) {
             if (groupsA.contains(slot.getGroupName())) {
                 // allow teamB only in groupsB
                 pruneTeamToGroups(state, teamB, groupsB);
+                System.out.println("Pruning teamB to groupsB: " + this.teamB + " -> " + this.groupsB);
             }
         }
 
-        if (team.getName().equals(teamB)) {
+        if (team.getName().equals(this.teamB)) {
             if (groupsB.contains(slot.getGroupName())) {
                 pruneTeamToGroups(state, teamA, groupsA);
+                System.out.println("Pruning teamA to groupsA: " + this.teamA + " -> " + this.groupsA);
+            }
+        }
+
+        // If symmetric, and the assigned team is in a group NOT in its allowed set,
+        // then prune the partner team to groups NOT in its allowed set
+        if (symmetric) {
+            if (team.getName().equals(this.teamA) && !groupsA.contains(slot.getGroupName())) {
+                // agent log
+                pruneTeamToGroupsExcluding(state, teamB, groupsB);
+                System.out.println("Symmetric pruning teamB excluding groupsB: " + this.teamB + " -> !" + this.groupsB);
+            } else if (team.getName().equals(this.teamB) && !groupsB.contains(slot.getGroupName())) {
+                // agent log
+                pruneTeamToGroupsExcluding(state, teamA, groupsA);
+                System.out.println("Symmetric pruning teamA excluding groupsA: " + this.teamA + " -> !" + this.groupsA);
             }
         }
     }
@@ -104,6 +120,16 @@ public class PairedGroupConstraint implements Constraint {
         for (GroupSlot s : state.getUnassignedSlots()) {
             state.getDomains().get(s)
                     .removeIf(t -> t.getName().equals(teamName) && !allowedGroups.contains(s.getGroupName()));
+            try { java.nio.file.Files.write(java.nio.file.Paths.get("d:\\User\\Projects\\12FootballJava\\footie\\.cursor\\debug.log"), ( "{\"id\":\"" + java.util.UUID.randomUUID().toString() + "\",\"timestamp\":" + System.currentTimeMillis() + ",\"location\":\"PairedGroupConstraint.java:129\",\"message\":\"Pruning check for slot (pruneTeamToGroups)\",\"data\":{\"slot\":\"" + s.getGroupName() + "\",\"teamName\":\"" + teamName + "\",\"allowedGroups\":" + allowedGroups + ",\"domainSize\":" + state.getDomains().get(s).size() + "},\"sessionId\":\"debug-session\",\"runId\":\"run2\",\"hypothesisId\":\"H4\",\"logLevel\":\"INFO\"}\n").getBytes(java.nio.charset.StandardCharsets.UTF_8), java.nio.file.StandardOpenOption.APPEND, java.nio.file.StandardOpenOption.CREATE); } catch (java.io.IOException e) { System.err.println("Failed to write to log file: " + e.getMessage()); }
+            // #endregion
+        }
+    }
+
+    private void pruneTeamToGroupsExcluding(AssignmentState state, String teamName, Set<String> excludedGroups) {
+        for (GroupSlot s : state.getUnassignedSlots()) {
+            state.getDomains().get(s)
+                    .removeIf(t -> t.getName().equals(teamName) && excludedGroups.contains(s.getGroupName()));
+            try { java.nio.file.Files.write(java.nio.file.Paths.get("d:\\User\\Projects\\12FootballJava\\footie\\.cursor\\debug.log"), ( "{\"id\":\"" + java.util.UUID.randomUUID().toString() + "\",\"timestamp\":" + System.currentTimeMillis() + ",\"location\":\"PairedGroupConstraint.java:138\",\"message\":\"Pruning check for slot (pruneTeamToGroupsExcluding)\",\"data\":{\"slot\":\"" + s.getGroupName() + "\",\"teamName\":\"" + teamName + "\",\"excludedGroups\":" + excludedGroups + ",\"domainSize\":" + state.getDomains().get(s).size() + "},\"sessionId\":\"debug-session\",\"runId\":\"run2\",\"hypothesisId\":\"H4\",\"logLevel\":\"INFO\"}\n").getBytes(java.nio.charset.StandardCharsets.UTF_8), java.nio.file.StandardOpenOption.APPEND, java.nio.file.StandardOpenOption.CREATE); } catch (java.io.IOException e) { System.err.println("Failed to write to log file: " + e.getMessage()); }
         }
     }
 }
