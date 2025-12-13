@@ -68,14 +68,14 @@ public class AssignmentState {
         return domains;
     }
 
-    public Set<Team> getDomain(String slotString) {
+    public Set<Team> getDomains(String slotString) {
         String group = slotString.substring(0, 1);
         int position = Integer.parseInt(slotString.substring(1));
         GroupSlot targetSlot = new GroupSlot(group, position);
         return domains.get(targetSlot);
     }
 
-    public Set<Team> getDomain(GroupSlot slot) {
+    public Set<Team> getDomains(GroupSlot slot) {
         return domains.get(slot);
     }
 

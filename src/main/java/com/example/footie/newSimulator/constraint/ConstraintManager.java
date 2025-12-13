@@ -40,7 +40,7 @@ public class ConstraintManager {
         }        
 
         // default constraint: team must be in slot's domain
-        if (!state.getDomain(slot).contains(team)) {
+        if (!state.getDomains(slot).contains(team)) {
             if (reason != null) {
                 if (reason.length() > 0) reason.append("; ");
                 reason.append("Team not in slot domain");
@@ -105,16 +105,16 @@ public class ConstraintManager {
      */
     private boolean revise(AssignmentState state, GroupSlot xi, GroupSlot xj) {
         boolean revised = false;
-        Set<Team> domainXi = new HashSet<>(state.getDomain(xi));
+        Set<Team> domainXi = new HashSet<>(state.getDomains(xi));
 
         for (Team vx : new HashSet<>(domainXi)) {
             boolean hasSupport = false;
-            List<Team> originalXiDomain = new ArrayList<>(state.getDomain(xi));
+            List<Team> originalXiDomain = new ArrayList<>(state.getDomains(xi));
 
             // temporarily assign xi = vx and check if some value in xj's domain
             // is consistent with that assignment
             state.assign(xi, vx);
-            for (Team vy : new HashSet<>(state.getDomain(xj))) {
+            for (Team vy : new HashSet<>(state.getDomains(xj))) {
                 if (isAssignmentValid(state, xj, vy)) {
                     hasSupport = true;
                     break;
@@ -145,7 +145,7 @@ public class ConstraintManager {
         List<GroupSlot> unassigned = state.getUnassignedSlots();
 
         for (GroupSlot xi : new ArrayList<>(unassigned)) {
-            Set<Team> domainCopy = new HashSet<>(state.getDomain(xi));
+            Set<Team> domainCopy = new HashSet<>(state.getDomains(xi));
 
             for (Team v : new HashSet<>(domainCopy)) {
                 // snapshot domains
