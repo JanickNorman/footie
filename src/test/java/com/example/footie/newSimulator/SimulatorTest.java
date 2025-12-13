@@ -196,9 +196,6 @@ class SimulatorTest {
         GroupSlot slot1 = slots.get(0);
         Team teamA = teams.get(0); // Europe
 
-        // Record original domain sizes
-        int originalDomainSize = state.getDomains().get(slots.get(1)).size();
-
         // Try an assignment that will fail
         simulator.assignTeamToSlot(slot1, teamA);
 
