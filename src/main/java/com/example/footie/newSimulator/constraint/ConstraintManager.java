@@ -13,15 +13,17 @@ import com.example.footie.newSimulator.AssignmentState;
 import com.example.footie.newSimulator.GroupSlot;
 import com.example.footie.newSimulator.Team;
 
-
 public class ConstraintManager {
     private final List<Constraint> constraints = new ArrayList<>();
 
-    public void addConstraint(Constraint c) { constraints.add(c); }
+    public void addConstraint(Constraint c) {
+        constraints.add(c);
+    }
 
     public boolean isAssignmentValid(AssignmentState state, GroupSlot slot, Team team) {
         for (Constraint c : constraints) {
-            if (!c.isAssignmentAllowed(state, slot, team)) return false;
+            if (!c.isAssignmentAllowed(state, slot, team))
+                return false;
         }
         return true;
     }
@@ -34,15 +36,17 @@ public class ConstraintManager {
     public boolean isAssignmentValid(AssignmentState state, GroupSlot slot, Team team, StringBuilder reason) {
         for (Constraint c : constraints) {
             if (!c.isAssignmentAllowed(state, slot, team)) {
-                if (reason != null) reason.append(c.getClass().getSimpleName());
+                if (reason != null)
+                    reason.append(c.getClass().getSimpleName());
                 return false;
             }
-        }        
+        }
 
         // default constraint: team must be in slot's domain
         if (!state.getDomains(slot).contains(team)) {
             if (reason != null) {
-                if (reason.length() > 0) reason.append("; ");
+                if (reason.length() > 0)
+                    reason.append("; ");
                 reason.append("Team not in slot domain");
             }
             return false;
@@ -79,7 +83,8 @@ public class ConstraintManager {
 
         for (GroupSlot xi : unassigned) {
             for (GroupSlot xj : unassigned) {
-                if (!xi.equals(xj)) queue.add(new GroupSlot[] { xi, xj });
+                if (!xi.equals(xj))
+                    queue.add(new GroupSlot[] { xi, xj });
             }
         }
 
@@ -88,7 +93,8 @@ public class ConstraintManager {
             GroupSlot xi = pair[0];
             GroupSlot xj = pair[1];
             if (revise(state, xi, xj)) {
-                if (state.getDomains().get(xi).isEmpty()) return false;
+                if (state.getDomains().get(xi).isEmpty())
+                    return false;
                 for (GroupSlot xk : unassigned) {
                     if (!xk.equals(xi) && !xk.equals(xj)) {
                         queue.add(new GroupSlot[] { xk, xi });
@@ -140,8 +146,6 @@ public class ConstraintManager {
      * This is stronger (and much more expensive) than plain AC-3.
      */
     public boolean enforceSingletonArcConsistency(AssignmentState state) {
-        boolean changed = false;
-
         List<GroupSlot> unassigned = state.getUnassignedSlots();
 
         for (GroupSlot xi : new ArrayList<>(unassigned)) {
@@ -169,8 +173,8 @@ public class ConstraintManager {
                 if (!ok) {
                     // prune v permanently
                     state.getDomains().get(xi).removeIf(t -> t.getName().equals(v.getName()));
-                    changed = true;
-                    if (state.getDomains().get(xi).isEmpty()) return false;
+                    if (state.getDomains().get(xi).isEmpty())
+                        return false;
                 }
             }
         }

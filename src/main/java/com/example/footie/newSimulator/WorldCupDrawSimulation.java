@@ -32,7 +32,7 @@ public class WorldCupDrawSimulation {
         simulator.assignTeamToSlot("B1", "Canada");
         simulator.assignTeamToSlot("D1", "USA");
         simulator.assignTeamToSlot("E1", "Argentina");
-        System.out.println(simulator.state.getDomains().get("F1"));
+        System.out.println(simulator.state.getDomains("F1"));
         simulator.assignTeamToSlot("F1", "Spain");
         // simulator.solveWithBacktracking();
 

@@ -1,10 +1,8 @@
 package com.example.footie.controller;
 
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.reactive.result.view.Rendering;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/leagues")
@@ -40,7 +38,6 @@ public class LeagueController {
         return Mono.empty();
     }
 
-
     // Inner class for League model (move to separate file later)
     public static class League {
         private Long id;
@@ -49,7 +46,8 @@ public class LeagueController {
         private String season;
 
         // Constructors
-        public League() {}
+        public League() {
+        }
 
         public League(Long id, String name, String country, String season) {
             this.id = id;

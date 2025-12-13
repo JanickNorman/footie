@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -16,7 +15,7 @@ import com.example.footie.newSimulator.constraint.ConstraintManager;
 public class Simulator {
     private final List<GroupSlot> drawOrder;
     private final Map<String, GroupSlot> slotsByKey;
-    private final AssignmentState state;
+    final AssignmentState state;
     private final ConstraintManager constraintManager;
     private final Map<String, Team> assignedTeams;
 
@@ -94,7 +93,6 @@ public class Simulator {
     }
 
     public void shuffleAndAssignAll() {
-        Random rand = new Random();
         for (GroupSlot slot : drawOrder) {
             List<Team> candidates = new ArrayList<>(state.getDomains().get(slot));
             Collections.shuffle(candidates);
@@ -117,17 +115,17 @@ public class Simulator {
      * Returns true if a complete assignment was found.
      */
     public boolean solveWithBacktracking() {
-        return backtrack();
+        return backtrack(this.state);
     }
 
-    private boolean backtrack() {
+    private boolean backtrack(AssignmentState stateCopy) {
         // if no unassigned slots remain, solution found
-        List<GroupSlot> unassigned = state.getUnassignedSlots();
+        List<GroupSlot> unassigned = stateCopy.getUnassignedSlots();
         if (unassigned.isEmpty())
             return true;
 
         // choose next slot(s) to try using state's heuristic
-        List<GroupSlot> slotsToTry = state.nextSlotsToTry();
+        List<GroupSlot> slotsToTry = stateCopy.nextSlotsToTry();
         if (slotsToTry.isEmpty())
             return false;
 
@@ -135,24 +133,24 @@ public class Simulator {
 
         // iterate over candidates in domain (make a copy to avoid concurrent
         // modification)
-        List<Team> candidates = new ArrayList<>(state.getDomains().get(slot));
-
+        List<Team> candidates = new ArrayList<>(stateCopy.getDomains().get(slot));
+        Collections.shuffle(candidates); // randomize order to get different solutions on different runs
         for (Team candidate : candidates) {
             StringBuilder reason = new StringBuilder();
-            if (!constraintManager.isAssignmentValid(state, slot, candidate, reason)) {
+            if (!constraintManager.isAssignmentValid(stateCopy, slot, candidate, reason)) {
                 System.out.println("Skipping invalid candidate: " + candidate + " for slot " + slot + "; reason="
                         + (reason.length() > 0 ? reason.toString() : "unknown"));
                 continue; // skip invalid candidate
             }
 
-            Map<GroupSlot, Set<Team>> snapshot = assignWithSnapshot(slot, candidate);
+            Map<GroupSlot, Set<Team>> snapshot = assignWithSnapshot(stateCopy, slot, candidate);
             if (snapshot == null) {
                 // immediate inconsistency, try next candidate
                 continue;
             }
 
             // recurse
-            if (backtrack())
+            if (backtrack(stateCopy))
                 return true;
 
             // backtrack: restore state
@@ -169,21 +167,21 @@ public class Simulator {
      * before the assignment. Returns null if the assignment immediately causes a
      * domain wipeout.
      */
-    private Map<GroupSlot, Set<Team>> assignWithSnapshot(GroupSlot slot, Team team) {
+    private Map<GroupSlot, Set<Team>> assignWithSnapshot(AssignmentState stateCopy, GroupSlot slot, Team team) {
         Map<GroupSlot, Set<Team>> oldDomains = deepCopyDomains();
 
-        state.assign(slot, team);
-        constraintManager.forwardCheck(state, slot, team);
+        stateCopy.assign(slot, team);
+        constraintManager.forwardCheck(stateCopy, slot, team);
 
         // detect domain wipeout
-        for (GroupSlot s : state.getUnassignedSlots()) {
-            if (state.getDomains().get(s).isEmpty()) {
+        for (GroupSlot s : stateCopy.getUnassignedSlots()) {
+            if (stateCopy.getDomains().get(s).isEmpty()) {
                 // restore and unassign
                 for (GroupSlot restoreSlot : oldDomains.keySet()) {
-                    state.getDomains().put(restoreSlot, oldDomains.get(restoreSlot));
+                    stateCopy.getDomains().put(restoreSlot, oldDomains.get(restoreSlot));
                 }
                 List<Team> originalDomainForSlot = new ArrayList<>(oldDomains.get(slot));
-                state.unassign(slot, originalDomainForSlot);
+                stateCopy.unassign(slot, originalDomainForSlot);
                 return null;
             }
         }
@@ -419,13 +417,13 @@ public class Simulator {
 
         List<GroupSlot> nextSlots = this.state.nextSlotsToTry();
         for (GroupSlot slot : nextSlots) {
-            Map<GroupSlot, Set<Team>> snapshot = assignWithSnapshot(slot, teamToAssign);
+            Map<GroupSlot, Set<Team>> snapshot = assignWithSnapshot(this.state, slot, teamToAssign);
             if (snapshot == null) {
                 continue; // immediate inconsistency
             }
 
             // recurse
-            if (backtrack()) {
+            if (backtrack(state)) {
                 restoreFromSnapshot(slot, snapshot);
                 // assignTeamToSlot(slot, teamToAssign);
                 return true;
@@ -445,21 +443,23 @@ public class Simulator {
      */
     public boolean placeOnlyTeam(String teamName) {
         Team teamToAssign = assignedTeams.get(teamName);
-        if (teamToAssign == null) return false;
+        if (teamToAssign == null)
+            return false;
 
         List<GroupSlot> candidates = this.state.nextSlotsToTry().stream()
-                .filter(s -> !state.isAssigned(s) && state.getDomains().getOrDefault(s, Set.of()).contains(teamToAssign))
+                .filter(s -> !state.isAssigned(s)
+                        && state.getDomains().getOrDefault(s, Set.of()).contains(teamToAssign))
                 .collect(Collectors.toList());
 
         for (GroupSlot slot : candidates) {
             // snapshot domains and assignments before trying this placement
             Map<GroupSlot, Set<Team>> snapshot = deepCopyDomains();
             Map<GroupSlot, Team> assignmentSnapshot = new HashMap<>(state.getAssignments());
-            
+
             // assign and run forward-check
             state.assign(slot, teamToAssign);
             constraintManager.forwardCheck(state, slot, teamToAssign);
-            
+
             // check for immediate domain wipeout
             boolean immediateWipeout = false;
             for (GroupSlot s : state.getUnassignedSlots()) {
@@ -468,7 +468,7 @@ public class Simulator {
                     break;
                 }
             }
-            
+
             if (immediateWipeout) {
                 // restore and try next candidate
                 for (GroupSlot restoreSlot : snapshot.keySet()) {
@@ -476,10 +476,11 @@ public class Simulator {
                 }
                 List<Team> originalDomainForSlot = new ArrayList<>(snapshot.get(slot));
                 state.unassign(slot, originalDomainForSlot);
-                System.out.println("Placement of " + teamToAssign + " into " + slot + " caused immediate domain wipeout; trying next");
+                System.out.println("Placement of " + teamToAssign + " into " + slot
+                        + " caused immediate domain wipeout; trying next");
                 continue;
             }
-            
+
             // enforce full arc-consistency (AC-3)
             boolean ac3ok = constraintManager.enforceArcConsistency(state);
             if (!ac3ok) {
@@ -489,19 +490,23 @@ public class Simulator {
                 }
                 List<Team> originalDomainForSlot = new ArrayList<>(snapshot.get(slot));
                 state.unassign(slot, originalDomainForSlot);
-                System.out.println("Placement of " + teamToAssign + " into " + slot + " caused AC-3 domain wipeout; trying next");
+                System.out.println(
+                        "Placement of " + teamToAssign + " into " + slot + " caused AC-3 domain wipeout; trying next");
                 continue;
             }
 
-            // AC-3 passed. Now verify that a complete solution exists by running backtracking.
+            // AC-3 passed. Now verify that a complete solution exists by running
+            // backtracking.
             // Take another snapshot of domains after AC-3 (domains may have been pruned)
             Map<GroupSlot, Set<Team>> snapshotAfterAC3 = deepCopyDomains();
-            
-            boolean solutionExists = backtrack();
-            
+
+            var deepCopyState = this.state;
+            boolean solutionExists = backtrack(deepCopyState);
+
             if (solutionExists) {
                 // Solution found! Restore to the state right after placing this team
-                // (keep the team assigned, restore domains to post-AC3 state, undo the backtracking assignments)
+                // (keep the team assigned, restore domains to post-AC3 state, undo the
+                // backtracking assignments)
                 for (GroupSlot s : snapshotAfterAC3.keySet()) {
                     state.getDomains().put(s, new HashSet<>(snapshotAfterAC3.get(s)));
                 }
@@ -515,7 +520,7 @@ public class Simulator {
                         state.getAssignments().put(s, null);
                     }
                 }
-                
+
                 System.out.println("✅ Placed " + teamToAssign + " into " + slot + " (verified solution exists)");
                 return true;
             } else {
@@ -526,7 +531,8 @@ public class Simulator {
                 for (GroupSlot s : assignmentSnapshot.keySet()) {
                     state.getAssignments().put(s, assignmentSnapshot.get(s));
                 }
-                System.out.println("Placement of " + teamToAssign + " into " + slot + " has no complete solution; trying next");
+                System.out.println(
+                        "Placement of " + teamToAssign + " into " + slot + " has no complete solution; trying next");
                 continue;
             }
         }
