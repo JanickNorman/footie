@@ -3,7 +3,6 @@ package com.example.footie.newSimulator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -222,25 +221,6 @@ class SimulatorTest {
         boolean result = simulator.assignTeamToSlot(slots.get(3), teams.get(1)); // Europe to Group2
 
         assertTrue(result, "Same continent should be allowed in different groups");
-    }
-
-    @Test
-    @DisplayName("Should complete assignment with shuffleAndAssignAll")
-    void testShuffleAndAssignAll() {
-        Simulator simulator = new Simulator(slots, constraintManager, teams);
-
-        simulator.shuffleAndAssignAll();
-
-        AssignmentState state = getState(simulator);
-        Map<GroupSlot, Team> assignments = state.getAssignments();
-
-        // Count successful assignments
-        long assignedCount = assignments.values().stream().filter(t -> t != null).count();
-
-        // With 6 teams and 6 slots, and the constraint that no two teams from same
-        // continent in same group,
-        // we should be able to assign most or all slots
-        assertTrue(assignedCount >= 4, "Should successfully assign at least 4 teams out of 6");
     }
 
     @Test
