@@ -119,17 +119,16 @@ public class AssignmentState {
         }
 
         // find minimal group size and collect groups with that size using streams
-        int maxSize = nextGroups.values().stream().mapToInt(List::size).max().orElse(Integer.MAX_VALUE);
+        int maxSize = nextGroups.values().stream().mapToInt(List::size).max().orElse(0);
         List<GroupSlot> slotsToTry = nextGroups.entrySet().stream()
                 .filter(e -> e.getValue().size() == maxSize)
                 // i want to flatMap the list of GroupSlot to a single list
                 .flatMap(e -> e.getValue().stream())
                 .collect(Collectors.toList());
 
-        slotsToTry.sort(Comparator
-                .comparing((GroupSlot s) -> (int) s.getGroupName().charAt(0) + (s.getPosition() % maxSize) * 10));
-        // slotsToTry.sort(Comparator.comparing((GroupSlot s) ->
-        // s.getGroupName()).thenComparing(s -> s.getPosition()));
+        // slotsToTry.sort(Comparator
+                // .comparing((GroupSlot s) -> (int) s.getGroupName().charAt(0) + ((s.getPosition() - 1) % maxSize) * 10));
+        slotsToTry.sort(Comparator.comparing((GroupSlot s) -> s.getPosition()).thenComparing(s -> s.getGroupName()));
 
         return slotsToTry;
     }
