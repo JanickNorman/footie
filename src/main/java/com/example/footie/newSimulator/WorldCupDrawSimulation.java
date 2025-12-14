@@ -1,7 +1,6 @@
 package com.example.footie.newSimulator;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -32,33 +31,46 @@ public class WorldCupDrawSimulation {
         simulator.assignTeamToSlot("A1", "Mexico");
         simulator.assignTeamToSlot("B1", "Canada");
         simulator.assignTeamToSlot("D1", "USA");
-        simulator.placeOnlyTeam("Brazil");
-        simulator.placeOnlyTeam("Argentina");
-        simulator.placeOnlyTeam("Spain");
-        simulator.placeOnlyTeam("Portugal");
-        simulator.placeOnlyTeam("Netherlands");
-        simulator.placeOnlyTeam("France");
-        simulator.placeOnlyTeam("Germany");
-        simulator.placeOnlyTeam("Brazil");
-        simulator.placeOnlyTeam("Belgium");
-        simulator.placeOnlyTeam("England");
-        
-        Collections.shuffle(teams);
-        teams.stream().filter(t -> t.pot() == 2).forEach(t -> {
-            simulator.placeOnlyTeam(t.getName());
-        });
-        teams.stream().filter(t -> t.pot() == 3).forEach(t -> {
-            if (t.getContinents().contains("Europe")) {
-                simulator.placeOnlyTeam(t.getName());
-                return;
-            }
-            simulator.placeOnlyTeam(t.getName());
-        });
-        teams.stream().filter(t -> t.pot() == 4).forEach(t -> {
-            simulator.placeOnlyTeam(t.getName());
-        });
+        simulator.placeTeam("Brazil");
+        simulator.placeTeam("Germany");
+        simulator.placeTeam("Netherlands");
+        simulator.placeTeam("Belgium");
+        simulator.placeTeam("Spain");
+        simulator.placeTeam("Argentina");
+        simulator.placeTeam("France");
+        simulator.placeTeam("Portugal");
+        simulator.placeTeam("England");
 
+        simulator.placeTeam("SouthKorea");
+        simulator.placeTeam("Switzerland");
+        simulator.placeTeam("Morocco");
+        simulator.placeTeam("Australia");
+        simulator.placeTeam("Ecuador");
+        simulator.placeTeam("Japan");
+        simulator.placeTeam("Iran");
+        simulator.placeTeam("Uruguay");
+        simulator.placeTeam("Senegal");
+        simulator.placeTeam("Austria");
+        simulator.placeTeam("Colombia");
+        simulator.placeTeam("Croatia");
+
+        simulator.placeTeam("SouthAfrica");
+        simulator.placeTeam("Qatar");
+        simulator.placeTeam("Paraguay");
+        simulator.placeTeam("CotedIvoire");
+        simulator.placeTeam("Tunisia");
+        simulator.placeTeam("Egypt");
+        simulator.placeTeam("Scotland");
+        simulator.placeTeam("SaudiArabia");
+        simulator.placeTeam("Algeria");
+
+
+
+    
+        simulator.makePlacements();
+    
         simulator.prettyPrintGroupAssignmentsVertical();
+        simulator.prettyPrintUnassignedDomains();
     }
 
     private static List<GroupSlot> buildWorldCupSlots() {
