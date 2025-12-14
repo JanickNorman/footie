@@ -41,31 +41,36 @@ public class WorldCupDrawSimulation {
         simulator.placeOnlyTeam("Portugal");
         simulator.placeOnlyTeam("England");
 
-        simulator.placeOnlyTeam("SouthKorea");
-        simulator.placeOnlyTeam("Switzerland");
-        simulator.placeOnlyTeam("Morocco");
-        simulator.placeOnlyTeam("Australia");
-        simulator.placeOnlyTeam("Ecuador");
-        simulator.placeOnlyTeam("Japan");
-        simulator.placeOnlyTeam("Iran");
-        simulator.placeOnlyTeam("Uruguay");
-        simulator.placeOnlyTeam("Senegal");
-        simulator.placeOnlyTeam("Austria");
-        simulator.placeOnlyTeam("Colombia");
-        simulator.placeOnlyTeam("Croatia");
+        // simulator.placeOnlyTeam("SouthKorea");
+        // simulator.placeOnlyTeam("Switzerland");
+        // simulator.placeOnlyTeam("Morocco");
+        // simulator.placeOnlyTeam("Australia");
+        // simulator.placeOnlyTeam("Ecuador");
+        // simulator.placeOnlyTeam("Japan");
+        // simulator.placeOnlyTeam("Iran");
+        // simulator.placeOnlyTeam("Uruguay");
+        // simulator.placeOnlyTeam("Senegal");
+        // simulator.placeOnlyTeam("Austria");
+        // simulator.placeOnlyTeam("Colombia");
+        // simulator.placeOnlyTeam("Croatia");
 
-        simulator.placeOnlyTeam("SouthAfrica");
-        simulator.placeOnlyTeam("Qatar");
-        simulator.placeOnlyTeam("Paraguay");
-        simulator.placeOnlyTeam("CotedIvoire");
-        simulator.placeOnlyTeam("Tunisia");
-        simulator.placeOnlyTeam("Egypt");
-        simulator.placeOnlyTeam("Scotland");
-        simulator.placeOnlyTeam("SaudiArabia");
-        simulator.placeOnlyTeam("Algeria");
-        simulator.placeOnlyTeam("Uzbekistan");
-        simulator.placeOnlyTeam("Panama");
-        simulator.placeOnlyTeam("Norway");
+        // simulator.placeOnlyTeam("SouthAfrica");
+        // simulator.placeOnlyTeam("Qatar");
+        // simulator.placeOnlyTeam("Paraguay");
+        // simulator.placeOnlyTeam("CotedIvoire");
+        // simulator.placeOnlyTeam("Tunisia");
+        // simulator.placeOnlyTeam("Egypt");
+        // simulator.placeOnlyTeam("Scotland");
+        // simulator.placeOnlyTeam("SaudiArabia");
+        // simulator.placeOnlyTeam("Algeria");
+        // simulator.placeOnlyTeam("Uzbekistan");
+        // simulator.placeOnlyTeam("Panama");
+        // simulator.placeOnlyTeam("Norway");
+        teams.stream().filter(t -> t.pot() == 2).forEach(t -> simulator.placeTeam(t.getName()));
+        teams.stream().filter(t -> t.pot() == 3).forEach(t -> simulator.placeTeam(t.getName()));
+        teams.stream().filter(t -> t.pot() == 4).forEach(t -> simulator.placeTeam(t.getName()));
+        simulator.makePlacements();
+
 
         
 

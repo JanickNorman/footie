@@ -6,9 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.PriorityQueue;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.stream.Collectors;
 
 import com.example.footie.newSimulator.constraint.ConstraintManager;
@@ -69,27 +67,9 @@ public class BacktrackingSolver {
     }
 
     private List<GroupSlot> candidateSlots(AssignmentState state, Team team) {
-        state.getUnassignedSlots().stream().collect(Collectors.groupingBy(s -> s.getGroupName()));
-        SortedMap<String, PriorityQueue<GroupSlot>> slotsByGroup = (SortedMap<String, PriorityQueue<GroupSlot>>) state.getUnassignedSlots().stream()
-            .collect(Collectors.groupingBy(GroupSlot::getGroupName, 
-                Collectors.toCollection(() -> new PriorityQueue<>(Comparator.comparingInt(GroupSlot::getPosition)))));
-
-        List<GroupSlot> result = new ArrayList<>();
-        int maxPosition = slotsByGroup.values().stream()
-            .mapToInt(q -> q.size())
-            .max().orElse(0);
+        List<GroupSlot> results = state.nextSlots();
         
-        for (int pos = 0; pos < maxPosition; pos++) {
-            for (PriorityQueue<GroupSlot> pq : slotsByGroup.values()) {
-                GroupSlot s = pq.peek();
-                if (s != null && s.getPosition() == pos) {
-                    result.add(s);
-                    pq.poll();
-                }
-            }
-        }
-
-        return result.stream()
+        return results.stream()
                 .filter(s -> state.getDomains().getOrDefault(s, Set.of()).contains(team))
                 .collect(Collectors.toList());
     }
