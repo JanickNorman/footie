@@ -23,6 +23,11 @@ public class GroupSlot implements Comparable<GroupSlot> {
     }
 
     @Override
+    public int hashCode() {
+        return java.util.Objects.hash(groupName, position);
+    }
+
+    @Override
     public String toString() { return groupName + position; }
 
     @Override

@@ -163,6 +163,19 @@ public class BacktrackingSolver {
         // summarize domain changes after forward-check (only show diffs)
         summarizeDomainChanges(oldDomains, stateCopy, 0);
 
+        // detect unassigned teams that have no candidate unassigned slot
+        List<String> missingTeams = stateCopy.findUnassignedTeamsWithNoUnassignedCandidateSlot();
+        if (!missingTeams.isEmpty()) {
+            // restore domains and unassign on the provided stateCopy
+            for (GroupSlot restoreSlot : oldDomains.keySet()) {
+                stateCopy.getDomains().put(restoreSlot, oldDomains.get(restoreSlot));
+            }
+            Set<Team> slotDomain = oldDomains.get(slot);
+            List<Team> originalDomainForSlot = slotDomain != null ? new ArrayList<>(slotDomain) : new ArrayList<>();
+            stateCopy.unassign(slot, originalDomainForSlot);
+            return null;
+        }
+
         // detect domain wipeout
         for (GroupSlot s : stateCopy.getUnassignedSlots()) {
             Set<Team> dom = stateCopy.getDomains().get(s);

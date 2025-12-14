@@ -36,7 +36,7 @@ public class SamePotCantBeInTheSameGroup implements Constraint {
                 .forEach(s -> {
                     Set<Team> domain = state.getDomains(s);
                     if (domain != null) {
-                        domain.removeIf(t -> t != null && t.pot() == team.pot());
+                        state.removeIfFromDomain(s, t -> t != null && t.pot() == team.pot());
                     }
                 });
     }   

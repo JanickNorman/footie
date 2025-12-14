@@ -48,7 +48,7 @@ public class AtMostTwoEuropeTeamsPerGroup implements Constraint {
             if (!s.getGroupName().equals(slot.getGroupName())) continue;
             // If group already has 2 Europeans, remove European candidates
             if (europeCount >= 2) {
-                state.getDomains().get(s).removeIf(candidate -> candidate.getContinents().stream()
+                state.removeIfFromDomain(s, candidate -> candidate.getContinents().stream()
                         .anyMatch(c -> "Europe".equalsIgnoreCase(c)));
             }
         }

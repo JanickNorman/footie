@@ -55,7 +55,8 @@ public class TriggerAnyTeamInGroupsConstraint implements Constraint {
 
         for (GroupSlot s : state.getUnassignedSlots()) {
             state.getDomains().get(s)
-                    .removeIf(t -> requiredTeams.contains(t.getName()) && !requiredGroups.contains(s.getGroupName()));
+                    ;
+                    state.removeIfFromDomain(s, t -> requiredTeams.contains(t.getName()) && !requiredGroups.contains(s.getGroupName()));
         }
     }
 

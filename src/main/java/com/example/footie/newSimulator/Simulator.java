@@ -96,9 +96,7 @@ public class Simulator {
                 System.out.println("Assignment caused dead end: domain emptied for slot " + s + " after assigning "
                         + team + " to " + slot);
                 // Restore domains and unassign
-                for (GroupSlot restoreSlot : oldDomains.keySet()) {
-                    state.getDomains().put(restoreSlot, oldDomains.get(restoreSlot));
-                }
+                    state.restoreDomains(oldDomains);
                 // Restore the slot's original domain from oldDomains rather than
                 // overwriting it with the singleton we just tried.
                 Set<Team> slotDomain = oldDomains.get(slot);
@@ -225,9 +223,7 @@ public class Simulator {
             Set<Team> dom = stateCopy.getDomains().get(s);
             if (dom == null || dom.isEmpty()) {
                 // restore and unassign on the provided stateCopy
-                for (GroupSlot restoreSlot : oldDomains.keySet()) {
-                    stateCopy.getDomains().put(restoreSlot, oldDomains.get(restoreSlot));
-                }
+                    stateCopy.restoreDomains(oldDomains);
                 Set<Team> slotDomain = oldDomains.get(slot);
                 List<Team> originalDomainForSlot = slotDomain != null ? new ArrayList<>(slotDomain) : new ArrayList<>();
                 stateCopy.unassign(slot, originalDomainForSlot);
@@ -240,9 +236,7 @@ public class Simulator {
 
     // restore domains/assignment into the provided AssignmentState
     private void restoreFromSnapshot(AssignmentState target, GroupSlot slot, Map<GroupSlot, Set<Team>> snapshot) {
-        for (GroupSlot restoreSlot : snapshot.keySet()) {
-            target.getDomains().put(restoreSlot, snapshot.get(restoreSlot));
-        }
+            target.restoreDomains(snapshot);
         Set<Team> slotDomain = snapshot.get(slot);
         List<Team> originalDomainForSlot = slotDomain != null ? new ArrayList<>(slotDomain) : new ArrayList<>();
         target.unassign(slot, originalDomainForSlot);
@@ -268,9 +262,7 @@ public class Simulator {
     }
 
     private void restoreDomains(Map<GroupSlot, Set<Team>> snapshot) {
-        for (GroupSlot restoreSlot : snapshot.keySet()) {
-            state.getDomains().put(restoreSlot, snapshot.get(restoreSlot));
-        }
+            state.restoreDomains(snapshot);
     }
 
     private void restoreAssignments(Map<GroupSlot, Team> assignmentSnapshot) {
@@ -440,9 +432,7 @@ public class Simulator {
                 restoreAssignments(assignmentSnapshot);
                 state.getAssignments().put(slot, teamToAssign);
                 // apply post-AC3 domains defensively
-                for (GroupSlot s : snapshotAfterAC3.keySet()) {
-                    state.getDomains().put(s, new HashSet<>(snapshotAfterAC3.get(s)));
-                }
+                state.restoreDomains(snapshotAfterAC3);
                 System.out.println("✅ Placed " + teamToAssign + " into " + slot + " (AC-3 accepted)");
                 return true;
             }
@@ -454,9 +444,7 @@ public class Simulator {
 
             if (solutionExists) {
                 // Restore domains to post-AC3 pruning (use defensive copy)
-                for (GroupSlot s : snapshotAfterAC3.keySet()) {
-                    state.getDomains().put(s, new HashSet<>(snapshotAfterAC3.get(s)));
-                }
+                state.restoreDomains(snapshotAfterAC3);
                 // restore prior assignments, then ensure this slot remains assigned
                 restoreAssignments(assignmentSnapshot);
                 state.getAssignments().put(slot, teamToAssign);

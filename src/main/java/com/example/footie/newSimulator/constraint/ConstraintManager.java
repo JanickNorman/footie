@@ -69,7 +69,7 @@ public class ConstraintManager {
         // from the domains of all other unassigned slots.
         for (GroupSlot s : state.getUnassignedSlots()) {
             if (!s.equals(slot)) {
-                state.getDomains().get(s).removeIf(t -> t.getName().equals(team.getName()));
+                state.removeTeamFromDomain(s, team.getName());
             }
         }
     }
@@ -104,8 +104,8 @@ public class ConstraintManager {
             }
         }
         // final sanity check: ensure no unplaceable teams remain
-
-        return true;
+        List<String> missing = state.findUnassignedTeamsWithNoUnassignedCandidateSlot();
+        return missing.isEmpty();
     }
 
     /**
@@ -131,7 +131,7 @@ public class ConstraintManager {
             state.unassign(xi, originalXiDomain);
 
             if (!hasSupport) {
-                state.getDomains().get(xi).removeIf(t -> t.getName().equals(vx.getName()));
+                state.removeTeamFromDomain(xi, vx.getName());
                 revised = true;
             }
         }
@@ -174,7 +174,7 @@ public class ConstraintManager {
 
                 if (!ok) {
                     // prune v permanently
-                    state.getDomains().get(xi).removeIf(t -> t.getName().equals(v.getName()));
+                    state.removeTeamFromDomain(xi, v.getName());
                     if (state.getDomains().get(xi).isEmpty())
                         return false;
                 }
@@ -182,6 +182,7 @@ public class ConstraintManager {
         }
 
         // final sanity check
-        return true;
+        List<String> missing = state.findUnassignedTeamsWithNoUnassignedCandidateSlot();
+        return missing.isEmpty();
     }
 }

@@ -119,14 +119,16 @@ public class PairedGroupConstraint implements Constraint {
     private void pruneTeamToGroups(AssignmentState state, String teamName, Set<String> allowedGroups) {
         for (GroupSlot s : state.getUnassignedSlots()) {
             state.getDomains().get(s)
-                    .removeIf(t -> t.getName().equals(teamName) && !allowedGroups.contains(s.getGroupName()));
+                    ;
+                    state.removeIfFromDomain(s, t -> t.getName().equals(teamName) && !allowedGroups.contains(s.getGroupName()));
         }
     }
 
     private void pruneTeamToGroupsExcluding(AssignmentState state, String teamName, Set<String> excludedGroups) {
         for (GroupSlot s : state.getUnassignedSlots()) {
             state.getDomains().get(s)
-                    .removeIf(t -> t.getName().equals(teamName) && excludedGroups.contains(s.getGroupName()));
+                    ;
+                    state.removeIfFromDomain(s, t -> t.getName().equals(teamName) && excludedGroups.contains(s.getGroupName()));
         }
     }
 }

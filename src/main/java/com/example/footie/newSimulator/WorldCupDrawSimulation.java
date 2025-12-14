@@ -31,46 +31,46 @@ public class WorldCupDrawSimulation {
         simulator.assignTeamToSlot("A1", "Mexico");
         simulator.assignTeamToSlot("B1", "Canada");
         simulator.assignTeamToSlot("D1", "USA");
-        simulator.placeTeam("Brazil");
-        simulator.placeTeam("Germany");
-        simulator.placeTeam("Netherlands");
-        simulator.placeTeam("Belgium");
-        simulator.placeTeam("Spain");
-        simulator.placeTeam("Argentina");
-        simulator.placeTeam("France");
-        simulator.placeTeam("Portugal");
-        simulator.placeTeam("England");
+        simulator.placeOnlyTeam("Brazil");
+        simulator.placeOnlyTeam("Germany");
+        simulator.placeOnlyTeam("Netherlands");
+        simulator.placeOnlyTeam("Belgium");
+        simulator.placeOnlyTeam("Spain");
+        simulator.placeOnlyTeam("Argentina");
+        simulator.placeOnlyTeam("France");
+        simulator.placeOnlyTeam("Portugal");
+        simulator.placeOnlyTeam("England");
 
-        simulator.placeTeam("SouthKorea");
-        simulator.placeTeam("Switzerland");
-        simulator.placeTeam("Morocco");
-        simulator.placeTeam("Australia");
-        simulator.placeTeam("Ecuador");
-        simulator.placeTeam("Japan");
-        simulator.placeTeam("Iran");
-        simulator.placeTeam("Uruguay");
-        simulator.placeTeam("Senegal");
-        simulator.placeTeam("Austria");
-        simulator.placeTeam("Colombia");
-        simulator.placeTeam("Croatia");
+        simulator.placeOnlyTeam("SouthKorea");
+        simulator.placeOnlyTeam("Switzerland");
+        simulator.placeOnlyTeam("Morocco");
+        simulator.placeOnlyTeam("Australia");
+        simulator.placeOnlyTeam("Ecuador");
+        simulator.placeOnlyTeam("Japan");
+        simulator.placeOnlyTeam("Iran");
+        simulator.placeOnlyTeam("Uruguay");
+        simulator.placeOnlyTeam("Senegal");
+        simulator.placeOnlyTeam("Austria");
+        simulator.placeOnlyTeam("Colombia");
+        simulator.placeOnlyTeam("Croatia");
 
-        simulator.placeTeam("SouthAfrica");
-        simulator.placeTeam("Qatar");
-        simulator.placeTeam("Paraguay");
-        simulator.placeTeam("CotedIvoire");
-        simulator.placeTeam("Tunisia");
-        simulator.placeTeam("Egypt");
-        simulator.placeTeam("Scotland");
-        simulator.placeTeam("SaudiArabia");
-        simulator.placeTeam("Algeria");
-        simulator.placeTeam("Uzbekistan");
-        simulator.placeTeam("Panama");
-        simulator.placeTeam("Norway");
-
+        simulator.placeOnlyTeam("SouthAfrica");
+        simulator.placeOnlyTeam("Qatar");
+        simulator.placeOnlyTeam("Paraguay");
+        simulator.placeOnlyTeam("CotedIvoire");
+        simulator.placeOnlyTeam("Tunisia");
+        simulator.placeOnlyTeam("Egypt");
+        simulator.placeOnlyTeam("Scotland");
+        simulator.placeOnlyTeam("SaudiArabia");
+        simulator.placeOnlyTeam("Algeria");
+        simulator.placeOnlyTeam("Uzbekistan");
+        simulator.placeOnlyTeam("Panama");
+        simulator.placeOnlyTeam("Norway");
 
 
     
-        simulator.makePlacements();
+        // simulator.makePlacements();
+        System.out.println(simulator.getState().findUnassignedTeamsWithNoUnassignedCandidateSlot());
     
         simulator.prettyPrintGroupAssignmentsVertical();
         simulator.prettyPrintUnassignedDomains();

@@ -8,12 +8,14 @@ package com.example.footie.newSimulator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class AssignmentState {
@@ -22,6 +24,11 @@ public class AssignmentState {
     private final SortedMap<GroupSlot, Team> assignments = new TreeMap<>();
     private final SortedMap<GroupSlot, Set<Team>> domains = new TreeMap<>();
 
+    // fast lookup structures
+    private final Set<String> unassignedTeamNames = new HashSet<>();
+    private final Map<String, Set<GroupSlot>> teamToCandidateSlots = new HashMap<>();
+    private final Map<String, Team> currentPotTeams = new HashMap<>();
+
     public AssignmentState(List<GroupSlot> slots, List<Team> teams) {
         this.slots = new ArrayList<>(slots);
         this.allTeams = teams.stream().collect(Collectors.toMap(Team::getName, t -> t));
@@ -29,6 +36,17 @@ public class AssignmentState {
         for (GroupSlot slot : slots) {
             assignments.put(slot, null);
             domains.put(slot, new HashSet<>(teams));
+        }
+        // initialize indexes
+        for (Team t : teams) {
+            unassignedTeamNames.add(t.getName());
+            teamToCandidateSlots.put(t.getName(), new HashSet<>());
+        }
+        // each slot initially can accept all teams
+        for (GroupSlot s : slots) {
+            for (Team t : teams) {
+                teamToCandidateSlots.get(t.getName()).add(s);
+            }
         }
     }
 
@@ -46,13 +64,32 @@ public class AssignmentState {
 
     public void assign(GroupSlot slot, Team team) {
         assignments.put(slot, team);
-        domains.get(slot).clear(); // Slot is now assigned
+        // update domains/indexes: slot domain becomes the singleton team
+        Set<Team> old = domains.get(slot);
+        if (old != null) {
+            for (Team t : new HashSet<>(old)) {
+                if (!t.getName().equals(team.getName())) {
+                    // remove slot from candidate list of t
+                    Set<GroupSlot> sset = teamToCandidateSlots.get(t.getName());
+                    if (sset != null) sset.remove(slot);
+                }
+            }
+        }
         domains.put(slot, new HashSet<>(Collections.singleton(team)));
+        // mark team as assigned
+        unassignedTeamNames.remove(team.getName());
     }
 
     public void unassign(GroupSlot slot, List<Team> originalDomain) {
         assignments.put(slot, null);
-        domains.put(slot, new HashSet<>(originalDomain));
+        // restore domain
+        Set<Team> newDom = new HashSet<>(originalDomain);
+        domains.put(slot, newDom);
+        // update candidate index
+        for (Team t : newDom) {
+            teamToCandidateSlots.computeIfAbsent(t.getName(), k -> new HashSet<>()).add(slot);
+            unassignedTeamNames.add(t.getName());
+        }
     }
 
     public boolean isAssigned(GroupSlot slot) {
@@ -158,5 +195,110 @@ public class AssignmentState {
             }
         }
         return result;
+    }
+
+    // --- Index helpers ---
+    public boolean isTeamUnassigned(String teamName) {
+        return unassignedTeamNames.contains(teamName);
+    }
+
+    public Set<GroupSlot> getCandidateSlotsForTeam(String teamName) {
+        return teamToCandidateSlots.getOrDefault(teamName, new HashSet<>());
+    }
+
+    /** Remove a single team (by name) from a slot's domain and update indexes. */
+    public boolean removeTeamFromDomain(GroupSlot slot, String teamName) {
+        Set<Team> dom = domains.get(slot);
+        if (dom == null) return false;
+        boolean removed = dom.removeIf(t -> t.getName().equals(teamName));
+        if (removed) {
+            Set<GroupSlot> sset = teamToCandidateSlots.get(teamName);
+            if (sset != null) sset.remove(slot);
+        }
+        return removed;
+    }
+
+    /** Remove all teams matching a predicate from a slot domain; returns count removed. */
+    public int removeIfFromDomain(GroupSlot slot, Predicate<Team> pred) {
+        Set<Team> dom = domains.get(slot);
+        if (dom == null) return 0;
+        int removed = 0;
+        for (Team t : new HashSet<>(dom)) {
+            if (pred.test(t)) {
+                dom.remove(t);
+                Set<GroupSlot> sset = teamToCandidateSlots.get(t.getName());
+                if (sset != null) sset.remove(slot);
+                removed++;
+            }
+        }
+        return removed;
+    }
+
+    /** Replace all domains from the provided snapshot and rebuild indexes. */
+    public void restoreDomains(Map<GroupSlot, Set<Team>> snapshot) {
+        domains.clear();
+        for (Map.Entry<GroupSlot, Set<Team>> e : snapshot.entrySet()) {
+            domains.put(e.getKey(), new HashSet<>(e.getValue()));
+        }
+        // rebuild candidate index
+        teamToCandidateSlots.clear();
+        unassignedTeamNames.clear();
+        for (Team t : allTeams.values()) {
+            unassignedTeamNames.add(t.getName());
+            teamToCandidateSlots.put(t.getName(), new HashSet<>());
+        }
+        for (Map.Entry<GroupSlot, Set<Team>> e : domains.entrySet()) {
+            GroupSlot s = e.getKey();
+            for (Team t : e.getValue()) {
+                teamToCandidateSlots.computeIfAbsent(t.getName(), k -> new HashSet<>()).add(s);
+            }
+        }
+        // remove assigned teams from unassigned set
+        for (Team assigned : assignments.values()) {
+            if (assigned != null) unassignedTeamNames.remove(assigned.getName());
+        }
+    }
+
+    /**
+     * Return list of unassigned team names that do not appear in any
+     * unassigned slot domain (i.e. cannot be placed anywhere).
+     */
+    public List<String> findUnassignedTeamsWithNoUnassignedDomain() {
+        List<String> missing = new ArrayList<>();
+        Set<String> teamsInUnassignedDomains = new HashSet<>();
+        for (Map.Entry<GroupSlot, Set<Team>> e : getUnassignedDomains().entrySet()) {
+            for (Team t : e.getValue()) {
+                teamsInUnassignedDomains.add(t.getName());
+            }
+        }
+
+        for (String teamName : getAllTeams().keySet()) {
+            if (isTeamUnassigned(teamName) && !teamsInUnassignedDomains.contains(teamName)) {
+                missing.add(teamName);
+            }
+        }
+        return missing;
+    }
+
+    /**
+     * More efficient check using candidate index: return unassigned teams
+     * that have no candidate unassigned slot.
+     */
+    public List<String> findUnassignedTeamsWithNoUnassignedCandidateSlot() {
+        List<String> missing = new ArrayList<>();
+        Set<GroupSlot> unassignedSlots = new HashSet<>(getUnassignedSlots());
+
+        for (String teamName : getAllTeams().keySet()) {
+            if (!isTeamUnassigned(teamName)) continue;
+            Set<GroupSlot> candidates = getCandidateSlotsForTeam(teamName);
+            boolean hasUnassigned = candidates.stream().anyMatch(unassignedSlots::contains);
+            if (!hasUnassigned) missing.add(teamName);
+        }
+        return missing;
+    }
+
+
+    public Map<String, Team> currentPotTeams() {
+        return Collections.unmodifiableMap(currentPotTeams);
     }
 }

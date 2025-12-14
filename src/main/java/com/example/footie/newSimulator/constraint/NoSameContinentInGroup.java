@@ -30,7 +30,7 @@ public class NoSameContinentInGroup implements Constraint {
     public void forwardCheck(AssignmentState state, GroupSlot slot, Team assignedTeam) {
         for (GroupSlot s : state.getUnassignedSlots()) {
             if (s.getGroupName().equals(slot.getGroupName())) {
-                state.getDomains().get(s).removeIf(t -> t.getContinents().stream()
+                state.removeIfFromDomain(s, t -> t.getContinents().stream()
                         .anyMatch(continent -> assignedTeam.getContinents().contains(continent)));
             }
         }

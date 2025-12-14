@@ -45,8 +45,8 @@ public class NoSameContinentInGroupForNonEurope implements Constraint {
         }
 
         for (GroupSlot s : state.getUnassignedSlots()) {
-            if (!s.getGroupName().equals(slot.getGroupName())) continue;
-            state.getDomains().get(s).removeIf(candidate -> candidate.getContinents().stream()
+                if (!s.getGroupName().equals(slot.getGroupName())) continue;
+                state.removeIfFromDomain(s, candidate -> candidate.getContinents().stream()
                     .anyMatch(c -> present.contains(c.toLowerCase())));
         }
     }
