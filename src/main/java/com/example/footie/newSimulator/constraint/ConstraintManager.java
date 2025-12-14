@@ -103,9 +103,8 @@ public class ConstraintManager {
                 }
             }
         }
-        // final sanity check: ensure no unplaceable teams remain
-        List<String> missing = state.findUnassignedTeamsWithNoUnassignedCandidateSlot();
-        return missing.isEmpty();
+        // final sanity check: ensure matching covers all unassigned slots
+        return hasPerfectMatching(state);
     }
 
     /**
@@ -180,9 +179,16 @@ public class ConstraintManager {
                 }
             }
         }
-
         // final sanity check
-        List<String> missing = state.findUnassignedTeamsWithNoUnassignedCandidateSlot();
-        return missing.isEmpty();
+
+        return hasPerfectMatching(state);
+    }
+
+    /**
+     * Delegates to AssignmentState to check for a perfect matching between
+     * unassigned slots and unassigned teams (detects Hall violations).
+     */
+    public boolean hasPerfectMatching(AssignmentState state) {
+        return state.hasPerfectMatchingForUnassignedSlots();
     }
 }

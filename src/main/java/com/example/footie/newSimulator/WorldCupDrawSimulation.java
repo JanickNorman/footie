@@ -1,6 +1,7 @@
 package com.example.footie.newSimulator;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -66,10 +67,11 @@ public class WorldCupDrawSimulation {
         // simulator.placeOnlyTeam("Uzbekistan");
         // simulator.placeOnlyTeam("Panama");
         // simulator.placeOnlyTeam("Norway");
-        teams.stream().filter(t -> t.pot() == 2).forEach(t -> simulator.placeTeam(t.getName()));
-        teams.stream().filter(t -> t.pot() == 3).forEach(t -> simulator.placeTeam(t.getName()));
-        teams.stream().filter(t -> t.pot() == 4).forEach(t -> simulator.placeTeam(t.getName()));
-        simulator.makePlacements();
+        Collections.shuffle(teams);
+        teams.stream().filter(t -> t.pot() == 2).forEach(t -> simulator.placeOnlyTeam(t.getName()));
+        teams.stream().filter(t -> t.pot() == 3).forEach(t -> simulator.placeOnlyTeam(t.getName()));
+        teams.stream().filter(t -> t.pot() == 4).forEach(t -> simulator.placeOnlyTeam(t.getName()));
+        // simulator.makePlacements();
 
 
         

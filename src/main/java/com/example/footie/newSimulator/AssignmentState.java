@@ -6,6 +6,7 @@
 package com.example.footie.newSimulator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -318,6 +319,68 @@ public class AssignmentState {
             if (!hasUnassigned) missing.add(teamName);
         }
         return missing;
+    }
+
+    /**
+     * Check whether there exists a matching that assigns every unassigned slot
+     * to a distinct unassigned team from its domain. Returns true if such a
+     * perfect matching exists (i.e. no Hall violation detected).
+     */
+    public boolean hasPerfectMatchingForUnassignedSlots() {
+        List<GroupSlot> slots = getUnassignedSlots();
+        int n = slots.size();
+        if (n == 0) return true;
+
+        // build index of unassigned teams that appear in any unassigned slot domain
+        Map<String, Integer> teamIndex = new HashMap<>();
+        for (GroupSlot s : slots) {
+            Set<Team> dom = getDomains(s);
+            if (dom == null) continue;
+            for (Team t : dom) {
+                if (!isTeamUnassigned(t.getName())) continue;
+                if (!teamIndex.containsKey(t.getName()))
+                    teamIndex.put(t.getName(), teamIndex.size());
+            }
+        }
+
+        int m = teamIndex.size();
+        if (m < n) return false; // not enough teams to cover slots
+
+        List<List<Integer>> adj = new ArrayList<>(n);
+        for (GroupSlot s : slots) {
+            List<Integer> edges = new ArrayList<>();
+            Set<Team> dom = getDomains(s);
+            if (dom != null) {
+                for (Team t : dom) {
+                    Integer idx = teamIndex.get(t.getName());
+                    if (idx != null) edges.add(idx);
+                }
+            }
+            adj.add(edges);
+        }
+
+        int[] matchTeam = new int[m];
+        Arrays.fill(matchTeam, -1);
+
+        for (int slot = 0; slot < n; slot++) {
+            boolean[] seen = new boolean[m];
+            if (!dfsMatch(slot, adj, matchTeam, seen))
+                return false;
+        }
+
+        return true;
+    }
+
+    private boolean dfsMatch(int slot, List<List<Integer>> adj, int[] matchTeam, boolean[] seen) {
+        for (int team : adj.get(slot)) {
+            if (seen[team]) continue;
+            seen[team] = true;
+            if (matchTeam[team] == -1 || dfsMatch(matchTeam[team], adj, matchTeam, seen)) {
+                matchTeam[team] = slot;
+                return true;
+            }
+        }
+        return false;
     }
 
 

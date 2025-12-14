@@ -163,6 +163,18 @@ public class BacktrackingSolver {
         // summarize domain changes after forward-check (only show diffs)
         summarizeDomainChanges(oldDomains, stateCopy, 0);
 
+        // detect Hall violations: ensure a matching exists covers all
+        // unassigned slots; if not, this assignment leads to impossibility
+        if (!constraintManager.hasPerfectMatching(stateCopy)) {
+            for (GroupSlot restoreSlot : oldDomains.keySet()) {
+                stateCopy.getDomains().put(restoreSlot, oldDomains.get(restoreSlot));
+            }
+            Set<Team> slotDomain = oldDomains.get(slot);
+            List<Team> originalDomainForSlot = slotDomain != null ? new ArrayList<>(slotDomain) : new ArrayList<>();
+            stateCopy.unassign(slot, originalDomainForSlot);
+            return null;
+        }
+
         // detect unassigned teams that have no candidate unassigned slot
         List<String> missingTeams = stateCopy.findUnassignedTeamsWithNoUnassignedCandidateSlot();
         if (!missingTeams.isEmpty()) {
