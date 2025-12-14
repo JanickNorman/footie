@@ -63,6 +63,9 @@ public class WorldCupDrawSimulation {
         simulator.placeTeam("Scotland");
         simulator.placeTeam("SaudiArabia");
         simulator.placeTeam("Algeria");
+        simulator.placeTeam("Uzbekistan");
+        simulator.placeTeam("Panama");
+        simulator.placeTeam("Norway");
 
 
 
