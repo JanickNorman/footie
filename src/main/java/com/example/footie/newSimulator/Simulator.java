@@ -33,6 +33,32 @@ public class Simulator {
         this.backtrackingSolver = new BacktrackingSolver(cm);
     }
 
+    /** Register a team to be placed later via team-first solver. */
+    public void placeTeam(String teamName) {
+        Team t = assignedTeams.get(teamName);
+        if (t == null) {
+            System.out.println("Unknown team: " + teamName);
+            return;
+        }
+        registeredTeams.add(t);
+    }
+
+    /** Place all previously registered teams using a team-first backtracking solver. */
+    public boolean makePlacements() {
+        if (registeredTeams.isEmpty()) {
+            System.out.println("No registered teams to place");
+            return true;
+        }
+        boolean ok = backtrackingSolver.solveTeamFirst(this.state, new ArrayList<>(registeredTeams));
+        if (ok) {
+            System.out.println("✅ Successfully placed registered teams");
+            registeredTeams.clear();
+        } else {
+            System.out.println("❌ Failed to place all registered teams");
+        }
+        return ok;
+    }
+
     public AssignmentState getState() {
         return state;
     }
