@@ -1,6 +1,7 @@
 package com.example.footie.newSimulator;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -27,6 +28,52 @@ public class BacktrackingSolver {
         return backtrack(state, 0);
     }
 
+    /**
+     * Team-first backtracking: place the given list of teams (order will be
+     * chosen with MRV-on-teams) into the state. Returns true if a complete
+     * placement for those teams exists.
+     */
+    public boolean solveTeamFirst(AssignmentState state, List<Team> teamsToPlace) {
+        // choose team with fewest candidate slots (MRV on teams)
+
+        if (teamsToPlace.isEmpty())
+            return true; // all placed
+        // Team chosen = teamsToPlace.stream()
+        //         .min(Comparator.comparingInt(t -> candidateSlots(state, t).size()))
+        //         .orElse(null);
+        // chose team from the order of register
+        Team chosen = teamsToPlace.get(0);
+
+        List<GroupSlot> candidates = candidateSlots(state, chosen);
+        for (GroupSlot slot : candidates) {
+            StringBuilder reason = new StringBuilder();
+            if (!constraintManager.isAssignmentValid(state, slot, chosen, reason))
+                continue;
+
+            Map<GroupSlot, Set<Team>> snapshot = assignWithSnapshot(state, slot, chosen);
+            if (snapshot == null)
+                continue;
+
+            List<Team> remaining = new ArrayList<>(teamsToPlace);
+            remaining.remove(chosen);
+            if (solveTeamFirst(state, remaining))
+                return true;
+
+            // backtrack
+            restoreFromSnapshot(state, slot, snapshot);
+        }
+
+        return false;
+    }
+
+    private List<GroupSlot> candidateSlots(AssignmentState state, Team team) {
+        return state.getUnassignedSlots().stream()
+                .filter(s -> state.getDomains().getOrDefault(s, Set.of()).contains(team))
+                .sorted(Comparator.comparing((GroupSlot s) -> s.getPosition())
+                        .thenComparing(s -> s.getGroupName()))
+                .collect(Collectors.toList());
+    }
+
     private boolean backtrack(AssignmentState stateCopy, int depth) {
         // if no unassigned slots remain, solution found
         List<GroupSlot> unassigned = stateCopy.getUnassignedSlots();
@@ -37,7 +84,9 @@ public class BacktrackingSolver {
         }
 
         // choose next slot(s) to try using state's heuristic
-        List<GroupSlot> slotsToTry = stateCopy.nextSlotsToTry();
+        List<GroupSlot> slotsToTry = stateCopy.nextSlotsByLeastDomainSize();
+        log(depth, "Unassigned slots to try: "
+                + slotsToTry.stream().map(Object::toString).collect(Collectors.joining(", ")));
         if (slotsToTry.isEmpty())
             return false;
 
@@ -49,6 +98,28 @@ public class BacktrackingSolver {
         // modification)
         Set<Team> domain = stateCopy.getDomains().get(slot);
         List<Team> candidates = domain != null ? new ArrayList<>(domain) : new ArrayList<>();
+
+        // LCV: score candidates by how constraining they are. We simulate the
+        // assignment on a copy of the state and compute total remaining domain
+        // sizes; prefer candidates that leave larger total domains (less
+        // constraining).
+        Map<Team, Integer> score = new HashMap<>();
+        for (Team cand : candidates) {
+            AssignmentState copy = stateCopy;
+            Map<GroupSlot, Set<Team>> snap = assignWithSnapshot(copy, slot, cand);
+            if (snap == null) {
+                score.put(cand, Integer.MIN_VALUE); // immediate dead-end -> worst
+                continue;
+            }
+            int total = 0;
+            for (GroupSlot u : copy.getUnassignedSlots()) {
+                total += copy.getDomains().getOrDefault(u, Set.of()).size();
+            }
+            score.put(cand, total);
+        }
+
+        candidates.sort(Comparator.comparingInt((Team t) -> score.getOrDefault(t, Integer.MIN_VALUE)).reversed());
+
         // Collections.shuffle(candidates); // randomize order to get different solutions on different runs
         for (Team candidate : candidates) {
             StringBuilder reason = new StringBuilder();
@@ -88,6 +159,18 @@ public class BacktrackingSolver {
 
         stateCopy.assign(slot, team);
         constraintManager.forwardCheck(stateCopy, slot, team);
+
+        // detect if propagation made some teams unplaceable (appearing in no domain)
+        if (!constraintManager.validateDomainsAndTeams(stateCopy)) {
+            // restore and unassign on the provided stateCopy
+            for (GroupSlot restoreSlot : oldDomains.keySet()) {
+                stateCopy.getDomains().put(restoreSlot, oldDomains.get(restoreSlot));
+            }
+            Set<Team> slotDomain = oldDomains.get(slot);
+            List<Team> originalDomainForSlot = slotDomain != null ? new ArrayList<>(slotDomain) : new ArrayList<>();
+            stateCopy.unassign(slot, originalDomainForSlot);
+            return null;
+        }
 
         // summarize domain changes after forward-check (only show diffs)
         summarizeDomainChanges(oldDomains, stateCopy, 0);
