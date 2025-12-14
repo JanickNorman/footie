@@ -385,7 +385,7 @@ public class Simulator {
         Team teamToAssign = assignedTeams.get(teamName);
         if (teamToAssign == null)
             return false;
-        List<GroupSlot> candidates = this.state.nextSlotsToTry().stream()
+        List<GroupSlot> candidates = this.state.nextSlots().stream()
                 .filter(s -> s != null && !state.isAssigned(s)
                         && state.getDomains().getOrDefault(s, Set.of()).contains(teamToAssign))
                 .collect(Collectors.toList());

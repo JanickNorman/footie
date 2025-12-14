@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -168,6 +169,28 @@ public class AssignmentState {
         s.getPosition()).thenComparing(s -> s.getGroupName()));
 
         return slotsToTry;
+    }
+
+    public List<GroupSlot> nextSlots() {
+        Map<String, PriorityQueue<GroupSlot>> slotsByGroup = getUnassignedSlots().stream()
+            .collect(Collectors.groupingBy(GroupSlot::getGroupName, 
+                Collectors.toCollection(() -> new PriorityQueue<>(Comparator.comparingInt(GroupSlot::getPosition)))));
+
+        List<GroupSlot> result = new ArrayList<>();
+        int maxPosition = slotsByGroup.values().stream()
+            .mapToInt(q -> q.size())
+            .max().orElse(0);
+        
+        for (int pos = 0; pos < maxPosition; pos++) {
+            for (PriorityQueue<GroupSlot> pq : slotsByGroup.values()) {
+                if (!pq.isEmpty()) {
+                    result.add(pq.poll());
+                }
+            }
+        }
+
+        return result;
+
     }
 
     public List<GroupSlot> nextSlotsByLeastDomainSize() {

@@ -67,6 +67,7 @@ public class WorldCupDrawSimulation {
         simulator.placeOnlyTeam("Panama");
         simulator.placeOnlyTeam("Norway");
 
+        
 
     
         // simulator.makePlacements();
