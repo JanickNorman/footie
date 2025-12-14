@@ -128,10 +128,17 @@ public class AssignmentState {
 
         // slotsToTry.sort(Comparator
                 // .comparing((GroupSlot s) -> (int) s.getGroupName().charAt(0) + ((s.getPosition() - 1) % maxSize) * 10));
-        slotsToTry.sort(Comparator.comparing((GroupSlot s) -> s.getPosition()).thenComparing(s -> s.getGroupName()));
+        slotsToTry.sort(Comparator.comparing((GroupSlot s) ->
+        s.getPosition()).thenComparing(s -> s.getGroupName()));
 
         return slotsToTry;
     }
+
+    public List<GroupSlot> nextSlotsByLeastDomainSize() {
+        List<GroupSlot> unassigned = getUnassignedSlots();
+        unassigned.sort(Comparator.comparingInt(s -> domains.get(s).size()));
+        return unassigned;
+    }   
 
     @Override
     public String toString() {
@@ -140,5 +147,17 @@ public class AssignmentState {
             sb.append(entry.getKey()).append(" -> ").append(entry.getValue()).append("\n");
         }
         return sb.toString();
+    }
+
+    public SortedMap<GroupSlot, Set<Team>> getUnassignedDomains() {
+        SortedMap<GroupSlot, Set<Team>> result = new TreeMap<>();
+        for (Map.Entry<GroupSlot, Team> e : assignments.entrySet()) {
+            if (e.getValue() == null) {
+                GroupSlot s = e.getKey();
+                Set<Team> dom = domains.get(s);
+                result.put(s, dom != null ? new HashSet<>(dom) : new HashSet<>());
+            }
+        }
+        return result;
     }
 }
