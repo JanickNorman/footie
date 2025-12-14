@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class PrettyPrinter {
 
@@ -69,6 +71,24 @@ public class PrettyPrinter {
                 row.append(String.format(" %" + (-w) + "s|", cell));
             }
             System.out.println(row.toString());
+        }
+    }
+
+    /**
+     * Print a sorted map of unassigned slots -> candidate domains.
+     */
+    public static void prettyPrint(java.util.SortedMap<GroupSlot, Set<Team>> unassignedDomains) {
+        System.out.println("Unassigned slot domains:");
+        if (unassignedDomains == null || unassignedDomains.isEmpty()) {
+            System.out.println("  (none)");
+            return;
+        }
+
+        for (Map.Entry<GroupSlot, Set<Team>> e : unassignedDomains.entrySet()) {
+            GroupSlot s = e.getKey();
+            Set<Team> dom = e.getValue();
+            String list = dom == null ? "(empty)" : dom.stream().map(Team::getName).sorted().collect(Collectors.joining(", "));
+            System.out.println("  " + s + " -> [" + list + "]");
         }
     }
 
