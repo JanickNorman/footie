@@ -1,6 +1,7 @@
 package com.example.footie.newSimulator;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -31,45 +32,32 @@ public class WorldCupDrawSimulation {
         simulator.assignTeamToSlot("A1", "Mexico");
         simulator.assignTeamToSlot("B1", "Canada");
         simulator.assignTeamToSlot("D1", "USA");
-        simulator.assignTeamToSlot("E1", "Argentina");
-        System.out.println(simulator.state.getDomains("F1"));
-        simulator.assignTeamToSlot("F1", "Spain");
-        // simulator.solveWithBacktracking();
+        simulator.placeOnlyTeam("Brazil");
+        simulator.placeOnlyTeam("Argentina");
+        simulator.placeOnlyTeam("Spain");
+        simulator.placeOnlyTeam("Portugal");
+        simulator.placeOnlyTeam("Netherlands");
+        simulator.placeOnlyTeam("France");
+        simulator.placeOnlyTeam("Germany");
+        simulator.placeOnlyTeam("Brazil");
+        simulator.placeOnlyTeam("Belgium");
+        simulator.placeOnlyTeam("England");
+        
+        Collections.shuffle(teams);
+        teams.stream().filter(t -> t.pot() == 2).forEach(t -> {
+            simulator.placeOnlyTeam(t.getName());
+        });
+        teams.stream().filter(t -> t.pot() == 3).forEach(t -> {
+            if (t.getContinents().contains("Europe")) {
+                simulator.placeOnlyTeam(t.getName());
+                return;
+            }
+            simulator.placeOnlyTeam(t.getName());
+        });
+        teams.stream().filter(t -> t.pot() == 4).forEach(t -> {
+            simulator.placeOnlyTeam(t.getName());
+        });
 
-        // Collections.shuffle(teams);
-        // teams.sort(Comparator.comparing(Team::pot));
-        // teams.forEach(t -> simulator.placeOnlyTeam(t.getName()));
-        // simulator.placeOnlyTeam("Brazil");
-        // simulator.placeOnlyTeam("Spain");
-        // simulator.placeOnlyTeam("Argentina");
-
-        // simulator.tryPlaceTeam("France", 1);
-        // simulator.tryPlaceTeam("Germany", 1);
-        // simulator.tryPlaceTeam("Brazil", 1);
-        // simulator.tryPlaceTeam("Argentina", 1); // Group G
-        // simulator.tryPlaceTeam("Spain", 1); // must go directly to J
-        // simulator.tryPlaceTeam("Belgium", 1);
-        // simulator.tryPlaceTeam("Croatia", 1);
-        // simulator.tryPlaceTeam("England", 1);
-        // simulator.tryPlaceTeam("Japan", 1);
-        // simulator.tryPlaceTeam("Senegal", 3);
-        // simulator.tryPlaceTeam("Portugal", 2);
-        // simulator.tryPlaceTeam("Norway", 2);
-        // simulator.tryPlaceTeam("Curacao", 3);
-        // simulator.tryPlaceTeam("Ecuador", 4);
-        // simulator.tryPlaceTeam("Switzerland", 3);
-        // simulator.tryPlaceTeam("Tunisia", 4);
-        // simulator.tryPlaceTeam("Uruguay", 4);
-        // simulator.tryPlaceTeam("Ghana", 3);
-        // simulator.tryPlaceTeam("SouthKorea", 3);
-        // simulator.tryPlaceTeam("Australia");
-        // simulator.tryPlaceTeam("CapeVerde");
-        // simulator.tryPlaceTeam("European Play-Off A");
-        // // simulator.tryPlaceTeam("CotedIvoire", 2);
-        // simulator.tryPlaceTeam("Haiti", 4);
-
-        // System.out.println("Remaining groups with most slots: " +
-        // simulator.getNextGroupsToAssign());
         simulator.prettyPrintGroupAssignmentsVertical();
     }
 
