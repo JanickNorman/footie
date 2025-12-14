@@ -105,37 +105,6 @@ public class ConstraintManager {
         }
         // final sanity check: ensure no unplaceable teams remain
 
-        return validateDomainsAndTeams(state);
-    }
-
-    /**
-     * Validate domains after propagation: ensure no unassigned slot has an
-     * empty domain and that every unassigned team appears in at least one
-     * unassigned slot's domain. Returns true if OK, false if a problem found.
-     */
-    public boolean validateDomainsAndTeams(AssignmentState state) {
-        // empty-domain check
-        for (GroupSlot s : state.getUnassignedSlots()) {
-            Set<Team> dom = state.getDomains().get(s);
-            if (dom == null || dom.isEmpty())
-                return false;
-        }
-
-        // build union of teams present in any domain
-        Set<Team> inDomains = new HashSet<>();
-        for (GroupSlot s : state.getUnassignedSlots()) {
-            Set<Team> dom = state.getDomains().get(s);
-            if (dom != null) inDomains.addAll(dom);
-        }
-
-        // ensure every unassigned team appears in at least one domain
-        for (Team t : state.getAllTeams().values()) {
-            if (state.getAssignments().containsValue(t))
-                continue; // assigned teams are fine
-            if (!inDomains.contains(t))
-                return false;
-        }
-
         return true;
     }
 
@@ -213,6 +182,6 @@ public class ConstraintManager {
         }
 
         // final sanity check
-        return validateDomainsAndTeams(state);
+        return true;
     }
 }

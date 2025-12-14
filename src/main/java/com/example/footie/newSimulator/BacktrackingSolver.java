@@ -160,18 +160,6 @@ public class BacktrackingSolver {
         stateCopy.assign(slot, team);
         constraintManager.forwardCheck(stateCopy, slot, team);
 
-        // detect if propagation made some teams unplaceable (appearing in no domain)
-        if (!constraintManager.validateDomainsAndTeams(stateCopy)) {
-            // restore and unassign on the provided stateCopy
-            for (GroupSlot restoreSlot : oldDomains.keySet()) {
-                stateCopy.getDomains().put(restoreSlot, oldDomains.get(restoreSlot));
-            }
-            Set<Team> slotDomain = oldDomains.get(slot);
-            List<Team> originalDomainForSlot = slotDomain != null ? new ArrayList<>(slotDomain) : new ArrayList<>();
-            stateCopy.unassign(slot, originalDomainForSlot);
-            return null;
-        }
-
         // summarize domain changes after forward-check (only show diffs)
         summarizeDomainChanges(oldDomains, stateCopy, 0);
 

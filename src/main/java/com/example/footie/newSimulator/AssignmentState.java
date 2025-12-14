@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 public class AssignmentState {
     private final List<GroupSlot> slots;
     private final Map<String, Team> allTeams;
-
     private final SortedMap<GroupSlot, Team> assignments = new TreeMap<>();
     private final SortedMap<GroupSlot, Set<Team>> domains = new TreeMap<>();
 

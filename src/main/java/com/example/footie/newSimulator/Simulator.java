@@ -86,23 +86,8 @@ public class Simulator {
         Map<GroupSlot, Set<Team>> oldDomains = deepCopyDomains();
 
         state.assign(slot, team);
-        state.assign(slot, team);
         constraintManager.forwardCheck(state, slot, team);
         System.out.println("Try assigning: " + slot + " -> " + team + "; running forward-check");
-
-        // detect unplaceable teams after propagation
-        if (!constraintManager.validateDomainsAndTeams(state)) {
-            System.out.println("Assignment caused unplaceable team (team appears in no domain) after assigning " + team + " to " + slot);
-            // Restore domains and unassign
-            for (GroupSlot restoreSlot : oldDomains.keySet()) {
-                state.getDomains().put(restoreSlot, oldDomains.get(restoreSlot));
-            }
-            Set<Team> slotDomain = oldDomains.get(slot);
-            List<Team> originalDomainForSlot = slotDomain != null ? new ArrayList<>(slotDomain) : new ArrayList<>();
-            state.unassign(slot, originalDomainForSlot);
-            System.out.println("❌ Unassigned (backtracked): " + slot + " <- " + team);
-            return false;
-        }
 
         // Check for dead ends (any domain empty)
         for (GroupSlot s : state.getUnassignedSlots()) {
@@ -231,18 +216,6 @@ public class Simulator {
 
         stateCopy.assign(slot, team);
         constraintManager.forwardCheck(stateCopy, slot, team);
-
-        // detect unplaceable teams after propagation
-        if (!constraintManager.validateDomainsAndTeams(stateCopy)) {
-            // restore and unassign on the provided stateCopy
-            for (GroupSlot restoreSlot : oldDomains.keySet()) {
-                stateCopy.getDomains().put(restoreSlot, oldDomains.get(restoreSlot));
-            }
-            Set<Team> slotDomain = oldDomains.get(slot);
-            List<Team> originalDomainForSlot = slotDomain != null ? new ArrayList<>(slotDomain) : new ArrayList<>();
-            stateCopy.unassign(slot, originalDomainForSlot);
-            return null;
-        }
 
         // summarize domain changes after forward-check (only show diffs)
         summarizeDomainChanges(oldDomains, stateCopy, 0);
@@ -440,15 +413,6 @@ public class Simulator {
             // assign and run forward-check
             state.assign(slot, teamToAssign);
             constraintManager.forwardCheck(state, slot, teamToAssign);
-
-            // detect unplaceable teams after propagation
-            if (!constraintManager.validateDomainsAndTeams(state)) {
-                restoreDomains(snapshot);
-                state.unassign(slot, domainListFromSnapshot(snapshot, slot));
-                System.out.println("Placement of " + teamToAssign + " into " + slot
-                        + " caused unplaceable team (team appears in no domain); trying next");
-                continue;
-            }
 
             // immediate wipeout?
             if (hasImmediateWipeout()) {
