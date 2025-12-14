@@ -17,6 +17,7 @@ public class Simulator {
     private final Map<String, GroupSlot> slotsByKey;
     final AssignmentState state;
     private final ConstraintManager constraintManager;
+    private final BacktrackingSolver backtrackingSolver;
     private final Map<String, Team> assignedTeams;
 
     public Simulator(List<GroupSlot> slots, ConstraintManager cm, List<Team> teams) {
@@ -29,6 +30,7 @@ public class Simulator {
         this.constraintManager = cm;
         this.assignedTeams = new HashMap<>(teams.stream()
                 .collect(Collectors.toMap(Team::getName, t -> t)));
+        this.backtrackingSolver = new BacktrackingSolver(cm);
     }
 
     public AssignmentState getState() {
@@ -110,7 +112,7 @@ public class Simulator {
      * Returns true if a complete assignment was found.
      */
     public boolean solveWithBacktracking() {
-        return backtrack(this.state, 0);
+        return backtrackingSolver.solve(this.state);
     }
     // wrapper so older callers can still call backtrack(stateCopy)
     private boolean backtrack(AssignmentState stateCopy) {
@@ -451,55 +453,7 @@ public class Simulator {
      * Example header: "Group | 1 | 2 | 3 | 4"
      */
     public void prettyPrintGroupAssignmentsVertical() {
-        // Build a map: groupName -> map(position -> teamName)
-        Map<String, Map<Integer, String>> groups = new HashMap<>();
-        int maxPosition = 0;
-        for (GroupSlot slot : drawOrder) {
-            String g = slot.getGroupName();
-            groups.putIfAbsent(g, new HashMap<>());
-            Team team = state.getAssignments().get(slot);
-            groups.get(g).put(slot.getPosition(), team != null ? team.getName() : "-");
-            if (slot.getPosition() > maxPosition)
-                maxPosition = slot.getPosition();
-        }
-
-        // Sort groups by name
-        List<String> groupNames = new ArrayList<>(groups.keySet());
-        Collections.sort(groupNames);
-
-        // Compute widths
-        int groupLabelWidth = Math.max(5, groupNames.stream().mapToInt(String::length).max().orElse(5));
-        int cellWidth = 15; // width per position column
-
-        // Header
-        StringBuilder header = new StringBuilder();
-        header.append(String.format("%-" + (groupLabelWidth + 2) + "s", "Group"));
-        for (int p = 1; p <= maxPosition; p++) {
-            header.append(String.format(" %" + (-cellWidth) + "s", String.valueOf(p)));
-        }
-        System.out.println(header.toString());
-
-        // Separator
-        StringBuilder sep = new StringBuilder();
-        sep.append("".repeat(Math.max(0, groupLabelWidth + 2))).append("-");
-        for (int p = 1; p <= maxPosition; p++) {
-            sep.append("".repeat(1)).append("".repeat(Math.max(0, cellWidth))).append("-");
-        }
-        System.out.println(sep.toString());
-
-        // Rows
-        for (String g : groupNames) {
-            StringBuilder row = new StringBuilder();
-            row.append(String.format("%-" + (groupLabelWidth + 2) + "s", "Group " + g));
-            Map<Integer, String> col = groups.get(g);
-            for (int p = 1; p <= maxPosition; p++) {
-                String cell = col.getOrDefault(p, "-");
-                if (cell.length() > cellWidth - 3)
-                    cell = cell.substring(0, cellWidth - 6) + "...";
-                row.append(String.format(" %" + (-cellWidth) + "s", cell));
-            }
-            System.out.println(row.toString());
-        }
+        PrettyPrinter.prettyPrintGroupAssignmentsVertical(drawOrder, state);
     }
 
      // Summarize domain changes: print only slots whose domain changed (removed/added)
