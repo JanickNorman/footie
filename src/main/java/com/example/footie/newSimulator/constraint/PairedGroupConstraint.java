@@ -120,8 +120,6 @@ public class PairedGroupConstraint implements Constraint {
         for (GroupSlot s : state.getUnassignedSlots()) {
             state.getDomains().get(s)
                     .removeIf(t -> t.getName().equals(teamName) && !allowedGroups.contains(s.getGroupName()));
-            try { java.nio.file.Files.write(java.nio.file.Paths.get("d:\\User\\Projects\\12FootballJava\\footie\\.cursor\\debug.log"), ( "{\"id\":\"" + java.util.UUID.randomUUID().toString() + "\",\"timestamp\":" + System.currentTimeMillis() + ",\"location\":\"PairedGroupConstraint.java:129\",\"message\":\"Pruning check for slot (pruneTeamToGroups)\",\"data\":{\"slot\":\"" + s.getGroupName() + "\",\"teamName\":\"" + teamName + "\",\"allowedGroups\":" + allowedGroups + ",\"domainSize\":" + state.getDomains().get(s).size() + "},\"sessionId\":\"debug-session\",\"runId\":\"run2\",\"hypothesisId\":\"H4\",\"logLevel\":\"INFO\"}\n").getBytes(java.nio.charset.StandardCharsets.UTF_8), java.nio.file.StandardOpenOption.APPEND, java.nio.file.StandardOpenOption.CREATE); } catch (java.io.IOException e) { System.err.println("Failed to write to log file: " + e.getMessage()); }
-            // #endregion
         }
     }
 
@@ -129,7 +127,6 @@ public class PairedGroupConstraint implements Constraint {
         for (GroupSlot s : state.getUnassignedSlots()) {
             state.getDomains().get(s)
                     .removeIf(t -> t.getName().equals(teamName) && excludedGroups.contains(s.getGroupName()));
-            try { java.nio.file.Files.write(java.nio.file.Paths.get("d:\\User\\Projects\\12FootballJava\\footie\\.cursor\\debug.log"), ( "{\"id\":\"" + java.util.UUID.randomUUID().toString() + "\",\"timestamp\":" + System.currentTimeMillis() + ",\"location\":\"PairedGroupConstraint.java:138\",\"message\":\"Pruning check for slot (pruneTeamToGroupsExcluding)\",\"data\":{\"slot\":\"" + s.getGroupName() + "\",\"teamName\":\"" + teamName + "\",\"excludedGroups\":" + excludedGroups + ",\"domainSize\":" + state.getDomains().get(s).size() + "},\"sessionId\":\"debug-session\",\"runId\":\"run2\",\"hypothesisId\":\"H4\",\"logLevel\":\"INFO\"}\n").getBytes(java.nio.charset.StandardCharsets.UTF_8), java.nio.file.StandardOpenOption.APPEND, java.nio.file.StandardOpenOption.CREATE); } catch (java.io.IOException e) { System.err.println("Failed to write to log file: " + e.getMessage()); }
         }
     }
 }
