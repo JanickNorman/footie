@@ -94,6 +94,10 @@ public class AssignmentState {
         }
     }
 
+    public boolean isTeamAssigned(Team team) {
+        return !unassignedTeamNames.contains(team.getName());
+    }
+
     public boolean isAssigned(GroupSlot slot) {
         return assignments.get(slot) != null;
     }
