@@ -82,34 +82,14 @@ public class Simulator {
                     + (reason.length() > 0 ? reason.toString() : "unknown"));
             return false;
         }
-        // Save original domains for backtracking
-        Map<GroupSlot, Set<Team>> oldDomains = deepCopyDomains();
-
-        state.assign(slot, team);
-        constraintManager.forwardCheck(state, slot, team);
-        System.out.println("Try assigning: " + slot + " -> " + team + "; running forward-check");
-
-        // Check for dead ends (any domain empty)
-        for (GroupSlot s : state.getUnassignedSlots()) {
-            if (state.getDomains().get(s).isEmpty()) {
-                // Report which slot hit an empty domain
-                System.out.println("Assignment caused dead end: domain emptied for slot " + s + " after assigning "
-                        + team + " to " + slot);
-                // Restore domains and unassign
-                    state.restoreDomains(oldDomains);
-                // Restore the slot's original domain from oldDomains rather than
-                // overwriting it with the singleton we just tried.
-                Set<Team> slotDomain = oldDomains.get(slot);
-                List<Team> originalDomainForSlot = slotDomain != null ? new ArrayList<>(slotDomain) : new ArrayList<>();
-                state.unassign(slot, originalDomainForSlot);
-                System.out.println("❌ Unassigned (backtracked): " + slot + " <- " + team);
-                return false;
-            }
+        // Delegate assignment + forward-check + snapshot handling to assignWithSnapshot
+        Map<GroupSlot, Set<Team>> snapshot = assignWithSnapshot(this.state, slot, team);
+        if (snapshot == null) {
+            System.out.println("Assignment FAILED (caused inconsistency): " + slot + " -> " + team);
+            return false;
         }
 
-        // Success
         System.out.println("✅ Assignment SUCCEEDED: " + slot + " -> " + team);
-
         return true;
     }
 
@@ -130,6 +110,36 @@ public class Simulator {
             oldDomains.put(s, d != null ? new HashSet<>(d) : new HashSet<>());
         }
         return oldDomains;
+    }
+
+    public boolean shuffleAndSolve() {
+        List<Team> teams = assignedTeams.values().stream().collect(Collectors.toList());
+        Collections.shuffle(teams);
+        teams.stream().filter(t -> t.pot() == 1).forEach(t -> placeTeam(t.getName()));
+        teams.stream().filter(t -> t.pot() == 2).forEach(t -> placeTeam(t.getName()));
+        teams.stream().filter(t -> t.pot() == 3).forEach(t -> placeTeam(t.getName()));
+        teams.stream().filter(t -> t.pot() == 4).forEach(t -> placeTeam(t.getName()));
+        return makePlacements();
+    }
+
+    public boolean solveWorldCup2026Draw() {
+        assignTeamToSlot("A1", "Mexico");
+        assignTeamToSlot("B1", "Canada");
+        assignTeamToSlot("D1", "USA");
+        
+
+        List<Team> teams = assignedTeams.values().stream().collect(Collectors.toList());
+        // assignTeamToSlot("D1", "USA");
+        Collections.shuffle(teams);
+        
+        // placeTeam("Mexico");
+        // placeTeam("Canada");
+        
+        teams.stream().filter(t -> t.pot() == 1).forEach(t -> placeTeam(t.getName()));
+        teams.stream().filter(t -> t.pot() == 2).forEach(t -> placeTeam(t.getName()));
+        teams.stream().filter(t -> t.pot() == 3).forEach(t -> placeTeam(t.getName()));
+        teams.stream().filter(t -> t.pot() == 4).forEach(t -> placeTeam(t.getName()));
+        return makePlacements();
     }
 
     /**
