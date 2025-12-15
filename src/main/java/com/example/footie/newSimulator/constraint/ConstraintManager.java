@@ -58,6 +58,11 @@ public class ConstraintManager {
             return false;
         }
 
+        if (state.isTeamAssigned(team)) {
+            reason.append("Assignment FAILED: Team " + team.getName() + " is already assigned to a slot");
+            return false;
+        }
+
         return true;
     }
 
