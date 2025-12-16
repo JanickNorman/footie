@@ -49,7 +49,9 @@ public class Simulator {
         }
     }
 
-    /** Place all previously registered teams using a team-first backtracking solver. */
+    /**
+     * Place all previously registered teams using a team-first backtracking solver.
+     */
     public boolean makePlacements() {
         if (registeredTeams.isEmpty()) {
             System.out.println("No registered teams to place");
@@ -83,27 +85,21 @@ public class Simulator {
         GroupSlot slot = slotsByKey.get(slotKey);
         Team team = assignedTeams.get(teamName);
         if (slot == null || team == null) {
-            System.out.println("Invalid slot or team: " + slotKey + ", " + teamName);
             return false;
         }
         return assignTeamToSlot(slot, team);
     }
 
     public boolean assignTeamToSlot(GroupSlot slot, Team team) {
-        StringBuilder reason = new StringBuilder();
-        if (!constraintManager.isAssignmentValid(state, slot, team, reason)) {
-            System.out.println("Assignment FAILED: " + slot + " -> " + team + "; reason="
-                    + (reason.length() > 0 ? reason.toString() : "unknown"));
-            return false;
-        }
-        // Delegate assignment + forward-check + snapshot handling to assignWithSnapshot
-        Map<GroupSlot, Set<Team>> snapshot = backtrackingSolver.assignWithSnapshot(this.state, slot, team, 0);
-        if (snapshot == null) {
-            System.out.println("Assignment FAILED (caused inconsistency): " + slot + " -> " + team);
+        if (!constraintManager.isAssignmentValid(state, slot, team)) {
             return false;
         }
 
-        System.out.println("✅ Assignment SUCCEEDED: " + slot + " -> " + team);
+        AssignmentState.DomainsSnapshot snapshot = backtrackingSolver.assignWithSnapshot(this.state, slot, team, 0);
+        if (snapshot == null) {
+            return false;
+        }
+
         return true;
     }
 
@@ -121,14 +117,9 @@ public class Simulator {
         assignTeamToSlot("A1", "Mexico");
         assignTeamToSlot("B1", "Canada");
         assignTeamToSlot("D1", "USA");
-        
 
         List<Team> teams = assignedTeams.values().stream().collect(Collectors.toList());
-        // assignTeamToSlot("D1", "USA");
         Collections.shuffle(teams);
-        
-        // placeTeam("Mexico");
-        
         teams.stream().filter(t -> t.pot() == 1).forEach(t -> placeTeam(t.getName()));
         teams.stream().filter(t -> t.pot() == 2).forEach(t -> placeTeam(t.getName()));
         teams.stream().filter(t -> t.pot() == 3).forEach(t -> placeTeam(t.getName()));
@@ -142,7 +133,6 @@ public class Simulator {
      * before the assignment. Returns null if the assignment immediately causes a
      * domain wipeout.
      */
-    
 
     public void printAssignments() {
         System.out.println("Assignments:");
@@ -174,8 +164,7 @@ public class Simulator {
         return false;
     }
 
-
-       /**
+    /**
      * Print groups vertically: one row per group, columns are positions.
      * Example header: "Group | 1 | 2 | 3 | 4"
      */
@@ -188,7 +177,8 @@ public class Simulator {
         PrettyPrinter.prettyPrint(unassignedDomains);
     }
 
-     // Summarize domain changes: print only slots whose domain changed (removed/added)
+    // Summarize domain changes: print only slots whose domain changed
+    // (removed/added)
     @SuppressWarnings("unused")
     private void summarizeDomainChanges(Map<GroupSlot, Set<Team>> before, AssignmentState afterState, int depth) {
         for (GroupSlot s : before.keySet()) {
@@ -226,6 +216,5 @@ public class Simulator {
         }
         System.out.println(indent + msg);
     }
-
 
 }
