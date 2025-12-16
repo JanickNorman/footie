@@ -97,7 +97,7 @@ public class Simulator {
             return false;
         }
         // Delegate assignment + forward-check + snapshot handling to assignWithSnapshot
-        Map<GroupSlot, Set<Team>> snapshot = assignWithSnapshot(this.state, slot, team);
+        Map<GroupSlot, Set<Team>> snapshot = backtrackingSolver.assignWithSnapshot(this.state, slot, team, 0);
         if (snapshot == null) {
             System.out.println("Assignment FAILED (caused inconsistency): " + slot + " -> " + team);
             return false;
@@ -105,17 +105,6 @@ public class Simulator {
 
         System.out.println("✅ Assignment SUCCEEDED: " + slot + " -> " + team);
         return true;
-    }
-
-    // deep copy domains from a specific AssignmentState (used for search-stack
-    // operations so we don't mix global `state` with local copies)
-    private Map<GroupSlot, Set<Team>> deepCopyDomains(AssignmentState st) {
-        Map<GroupSlot, Set<Team>> oldDomains = new HashMap<>();
-        for (GroupSlot s : st.getUnassignedSlots()) {
-            Set<Team> d = st.getDomains().get(s);
-            oldDomains.put(s, d != null ? new HashSet<>(d) : new HashSet<>());
-        }
-        return oldDomains;
     }
 
     public boolean shuffleAndSolve() {
@@ -153,34 +142,7 @@ public class Simulator {
      * before the assignment. Returns null if the assignment immediately causes a
      * domain wipeout.
      */
-    private Map<GroupSlot, Set<Team>> assignWithSnapshot(AssignmentState stateCopy, GroupSlot slot, Team team) {
-        Map<GroupSlot, Set<Team>> oldDomains = deepCopyDomains(stateCopy);
-
-        // log candidate lists per slot (before forward-check)
-        for (Map.Entry<GroupSlot, Set<Team>> e : oldDomains.entrySet()) {
-            GroupSlot s = e.getKey();
-            Set<Team> teams = e.getValue();
-            String list = teams.stream().map(Object::toString).collect(Collectors.joining(", "));
-            log(0, "Candidates for " + s + " before: " + (list.isEmpty() ? "(empty)" : list));
-        }
-
-        stateCopy.assign(slot, team);
-        constraintManager.forwardCheck(stateCopy, slot, team);
-
-        // summarize domain changes after forward-check (only show diffs)
-        summarizeDomainChanges(oldDomains, stateCopy, 0);
-        // Run centralized global consistency checks (cheap -> expensive).
-        if (!constraintManager.checkGlobalConsistency(stateCopy)) {
-            // restore domains and unassign the slot on the provided stateCopy
-            stateCopy.restoreDomains(oldDomains);
-            Set<Team> slotDomain = oldDomains.get(slot);
-            List<Team> originalDomainForSlot = slotDomain != null ? new ArrayList<>(slotDomain) : new ArrayList<>();
-            stateCopy.unassign(slot, originalDomainForSlot);
-            return null;
-        }
-
-        return oldDomains;
-    }
+    
 
     public void printAssignments() {
         System.out.println("Assignments:");
@@ -227,6 +189,7 @@ public class Simulator {
     }
 
      // Summarize domain changes: print only slots whose domain changed (removed/added)
+    @SuppressWarnings("unused")
     private void summarizeDomainChanges(Map<GroupSlot, Set<Team>> before, AssignmentState afterState, int depth) {
         for (GroupSlot s : before.keySet()) {
             Set<Team> beforeSet = before.getOrDefault(s, Set.of());

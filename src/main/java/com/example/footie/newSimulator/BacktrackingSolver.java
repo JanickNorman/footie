@@ -14,6 +14,8 @@ public class BacktrackingSolver {
 
     private final ConstraintManager constraintManager;
 
+    int onlyCheckDomainAfter = 30;
+
     public BacktrackingSolver(ConstraintManager constraintManager) {
         this.constraintManager = constraintManager;
     }
@@ -72,14 +74,17 @@ public class BacktrackingSolver {
      * before the assignment. Returns null if the assignment immediately causes a
      * domain wipeout.
      */
-    private Map<GroupSlot, Set<Team>> assignWithSnapshot(AssignmentState stateCopy, GroupSlot slot, Team team, int depth) {
+    public Map<GroupSlot, Set<Team>> assignWithSnapshot(AssignmentState stateCopy, GroupSlot slot, Team team, int depth) {
         Map<GroupSlot, Set<Team>> oldDomains = deepCopyDomains(stateCopy);
 
         stateCopy.assign(slot, team);
         constraintManager.forwardCheck(stateCopy, slot, team);
 
         // summarize domain changes after forward-check (only show diffs)
-        // summarizeDomainChanges(oldDomains, stateCopy, depth);
+        summarizeDomainChanges(oldDomains, stateCopy, depth);
+
+        if (this.dontCheckConsistencyBefore(depth)) 
+            return oldDomains;
 
         // Run global consistency checks (AC-3, Hall/missing-team, domain wipeout)
         if (!constraintManager.checkGlobalConsistency(stateCopy)) {
@@ -93,6 +98,10 @@ public class BacktrackingSolver {
         }
 
         return oldDomains;
+    }
+
+    private boolean dontCheckConsistencyBefore(int depth) {
+        return depth < onlyCheckDomainAfter;
     }
 
     // restore domains/assignment into the provided AssignmentState
