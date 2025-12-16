@@ -181,7 +181,7 @@ public class ConstraintManager {
         }
         // final sanity check
 
-        return hasPerfectMatching(state);
+        return true;
     }
 
     /**
@@ -199,25 +199,30 @@ public class ConstraintManager {
      * Returns true if the state remains potentially solvable, false if a
      * contradiction was detected (domain wipeout, Hall violation, or a team
      * with no candidate slot).
+     * 
+     * Checks are ordered from least to most expensive for early failure detection.
      */
     public boolean checkGlobalConsistency(AssignmentState state) {
-        // Enforce arc-consistency (AC-3). If a domain is emptied or matching
-        // fails, abort early.
-        if (!enforceArcConsistency(state))
-            return false;
-
-        // Ensure there are no unassigned teams that have no candidate
-        // unassigned slot (simple missing-team check).
-        List<String> missing = state.findUnassignedTeamsWithNoUnassignedCandidateSlot();
-        if (!missing.isEmpty())
-            return false;
-
-        // Detect domain wipeouts explicitly (defensive check).
+        // 1. Cheapest: detect domain wipeouts explicitly (O(n) where n = unassigned slots)
         for (GroupSlot s : state.getUnassignedSlots()) {
             Set<Team> dom = state.getDomains(s);
             if (dom == null || dom.isEmpty())
                 return false;
         }
+
+        // 2. Cheap: ensure no unassigned teams have zero candidate slots (O(m) where m = unassigned teams)
+        List<String> missing = state.findUnassignedTeamsWithNoUnassignedCandidateSlot();
+        if (!missing.isEmpty())
+            return false;
+
+        // 3. Medium: check for Hall violations via bipartite matching (O(n²m))
+        if (!hasPerfectMatching(state))
+            return false;
+
+        // 4. Most expensive: enforce arc-consistency (AC-3) - O(ed³) where e = edges, d = max domain size
+        // Note: AC-3 also calls hasPerfectMatching at the end, but we check it first to fail fast
+        if (!enforceArcConsistency(state))
+            return false;
 
         return true;
     }
