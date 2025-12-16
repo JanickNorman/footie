@@ -33,7 +33,7 @@ public class BacktrackingSolver {
      * chosen with MRV-on-teams) into the state. Returns true if a complete
      * placement for those teams exists.
      */
-    public boolean solveTeamFirst(AssignmentState state, List<Team> teamsToPlace) {
+    public boolean solveTeamFirst(AssignmentState state, List<Team> teamsToPlace, int depth) {
         // choose team with fewest candidate slots (MRV on teams)
 
         if (teamsToPlace.isEmpty())
@@ -50,13 +50,13 @@ public class BacktrackingSolver {
             if (!constraintManager.isAssignmentValid(state, slot, chosen, reason))
                 continue;
 
-            Map<GroupSlot, Set<Team>> snapshot = assignWithSnapshot(state, slot, chosen);
+            Map<GroupSlot, Set<Team>> snapshot = assignWithSnapshot(state, slot, chosen, depth);
             if (snapshot == null)
                 continue;
 
             List<Team> remaining = new ArrayList<>(teamsToPlace);
             remaining.remove(chosen);
-            if (solveTeamFirst(state, remaining))
+            if (solveTeamFirst(state, remaining, depth + 1))
                 return true;
 
             // backtrack
@@ -148,24 +148,27 @@ public class BacktrackingSolver {
         return false;
     }
 
+    private Map<GroupSlot, Set<Team>> assignWithSnapshot(AssignmentState stateCopy, GroupSlot slot, Team team) {
+        return assignWithSnapshot(stateCopy, slot, team, 0);
+    }
+
     /**
      * Assign a team to a slot, perform forward checking and return a snapshot of
      * domains
      * before the assignment. Returns null if the assignment immediately causes a
      * domain wipeout.
      */
-    private Map<GroupSlot, Set<Team>> assignWithSnapshot(AssignmentState stateCopy, GroupSlot slot, Team team) {
+    private Map<GroupSlot, Set<Team>> assignWithSnapshot(AssignmentState stateCopy, GroupSlot slot, Team team, int depth) {
         Map<GroupSlot, Set<Team>> oldDomains = deepCopyDomains(stateCopy);
 
         stateCopy.assign(slot, team);
         constraintManager.forwardCheck(stateCopy, slot, team);
 
         // summarize domain changes after forward-check (only show diffs)
-        summarizeDomainChanges(oldDomains, stateCopy, 0);
+        summarizeDomainChanges(oldDomains, stateCopy, depth);
 
-        // detect Hall violations: ensure a matching exists covers all
-        // unassigned slots; if not, this assignment leads to impossibility
-        if (!constraintManager.hasPerfectMatching(stateCopy)) {
+        // Run global consistency checks (AC-3, Hall/missing-team, domain wipeout)
+        if (!constraintManager.checkGlobalConsistency(stateCopy)) {
             for (GroupSlot restoreSlot : oldDomains.keySet()) {
                 stateCopy.getDomains().put(restoreSlot, oldDomains.get(restoreSlot));
             }
@@ -173,34 +176,6 @@ public class BacktrackingSolver {
             List<Team> originalDomainForSlot = slotDomain != null ? new ArrayList<>(slotDomain) : new ArrayList<>();
             stateCopy.unassign(slot, originalDomainForSlot);
             return null;
-        }
-
-        // detect unassigned teams that have no candidate unassigned slot
-        List<String> missingTeams = stateCopy.findUnassignedTeamsWithNoUnassignedCandidateSlot();
-        if (!missingTeams.isEmpty()) {
-            // restore domains and unassign on the provided stateCopy
-            for (GroupSlot restoreSlot : oldDomains.keySet()) {
-                stateCopy.getDomains().put(restoreSlot, oldDomains.get(restoreSlot));
-            }
-            Set<Team> slotDomain = oldDomains.get(slot);
-            List<Team> originalDomainForSlot = slotDomain != null ? new ArrayList<>(slotDomain) : new ArrayList<>();
-            stateCopy.unassign(slot, originalDomainForSlot);
-            return null;
-        }
-
-        // detect domain wipeout
-        for (GroupSlot s : stateCopy.getUnassignedSlots()) {
-            Set<Team> dom = stateCopy.getDomains().get(s);
-            if (dom == null || dom.isEmpty()) {
-                // restore and unassign on the provided stateCopy
-                for (GroupSlot restoreSlot : oldDomains.keySet()) {
-                    stateCopy.getDomains().put(restoreSlot, oldDomains.get(restoreSlot));
-                }
-                Set<Team> slotDomain = oldDomains.get(slot);
-                List<Team> originalDomainForSlot = slotDomain != null ? new ArrayList<>(slotDomain) : new ArrayList<>();
-                stateCopy.unassign(slot, originalDomainForSlot);
-                return null;
-            }
         }
 
         return oldDomains;
