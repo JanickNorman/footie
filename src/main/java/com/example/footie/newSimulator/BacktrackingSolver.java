@@ -1,7 +1,6 @@
 package com.example.footie.newSimulator;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -17,15 +16,6 @@ public class BacktrackingSolver {
 
     public BacktrackingSolver(ConstraintManager constraintManager) {
         this.constraintManager = constraintManager;
-    }
-
-    /**
-     * Solve remaining assignments using recursive backtracking with forward
-     * checking.
-     * Returns true if a complete assignment was found.
-     */
-    public boolean solve(AssignmentState state) {
-        return backtrack(state, 0);
     }
 
     /**
@@ -74,84 +64,6 @@ public class BacktrackingSolver {
         return results.stream()
                 .filter(s -> state.getDomains().getOrDefault(s, Set.of()).contains(team))
                 .collect(Collectors.toList());
-    }
-
-    private boolean backtrack(AssignmentState stateCopy, int depth) {
-        // if no unassigned slots remain, solution found
-        List<GroupSlot> unassigned = stateCopy.getUnassignedSlots();
-        log(depth, "ENTER backtrack; unassignedSlots=" + unassigned.size());
-        if (unassigned.isEmpty()) {
-            log(depth, "SOLUTION found (no unassigned slots)");
-            return true;
-        }
-
-        // choose next slot(s) to try using state's heuristic
-        List<GroupSlot> slotsToTry = stateCopy.nextSlotsByLeastDomainSize();
-        log(depth, "Unassigned slots to try: "
-                + slotsToTry.stream().map(Object::toString).collect(Collectors.joining(", ")));
-        if (slotsToTry.isEmpty())
-            return false;
-
-        GroupSlot slot = slotsToTry.get(0);
-        log(depth, "Chose slot: " + slot + " (domainSize="
-                + (stateCopy.getDomains().get(slot) != null ? stateCopy.getDomains().get(slot).size() : 0) + ")");
-
-        // iterate over candidates in domain (make a copy to avoid concurrent
-        // modification)
-        Set<Team> domain = stateCopy.getDomains().get(slot);
-        List<Team> candidates = domain != null ? new ArrayList<>(domain) : new ArrayList<>();
-
-        // LCV: score candidates by how constraining they are. We simulate the
-        // assignment on a copy of the state and compute total remaining domain
-        // sizes; prefer candidates that leave larger total domains (less
-        // constraining).
-        Map<Team, Integer> score = new HashMap<>();
-        for (Team cand : candidates) {
-            AssignmentState copy = stateCopy;
-            Map<GroupSlot, Set<Team>> snap = assignWithSnapshot(copy, slot, cand);
-            if (snap == null) {
-                score.put(cand, Integer.MIN_VALUE); // immediate dead-end -> worst
-                continue;
-            }
-            int total = 0;
-            for (GroupSlot u : copy.getUnassignedSlots()) {
-                total += copy.getDomains().getOrDefault(u, Set.of()).size();
-            }
-            score.put(cand, total);
-        }
-
-        candidates.sort(Comparator.comparingInt((Team t) -> score.getOrDefault(t, Integer.MIN_VALUE)).reversed());
-
-        // Collections.shuffle(candidates); // randomize order to get different solutions on different runs
-        for (Team candidate : candidates) {
-            StringBuilder reason = new StringBuilder();
-            if (!constraintManager.isAssignmentValid(stateCopy, slot, candidate, reason)) {
-                continue; // skip invalid candidate
-            }
-
-            log(depth, "Trying candidate: " + candidate);
-            Map<GroupSlot, Set<Team>> snapshot = assignWithSnapshot(stateCopy, slot, candidate);
-            if (snapshot == null) {
-                // immediate inconsistency, try next candidate
-                log(depth, "  -> immediate inconsistency with candidate: " + candidate + ", backtrack");
-                continue;
-            }
-
-            // recurse
-            if (backtrack(stateCopy, depth + 1))
-                return true;
-
-            // backtrack: restore state
-            restoreFromSnapshot(stateCopy, slot, snapshot);
-            log(depth, "  <- Backtracked from candidate: " + candidate + " for slot " + slot);
-        }
-
-        // no candidate led to a solution
-        return false;
-    }
-
-    private Map<GroupSlot, Set<Team>> assignWithSnapshot(AssignmentState stateCopy, GroupSlot slot, Team team) {
-        return assignWithSnapshot(stateCopy, slot, team, 0);
     }
 
     /**
