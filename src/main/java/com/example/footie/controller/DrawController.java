@@ -46,10 +46,7 @@ public class DrawController {
             Simulator simulator = new Simulator(slots, cm, teams);
 
             // Shuffle teams to get varied solutions
-            Collections.shuffle(teams);
-
-            boolean solved = simulator.solveWithBacktracking();
-
+            boolean solved = simulator.shuffleAndSolve();
             Map<String, List<String>> grouped = new TreeMap<>();
 
             if (!solved) {
