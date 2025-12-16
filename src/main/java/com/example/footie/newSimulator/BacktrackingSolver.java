@@ -47,8 +47,10 @@ public class BacktrackingSolver {
         List<GroupSlot> candidates = candidateSlots(state, chosen);
         for (GroupSlot slot : candidates) {
             StringBuilder reason = new StringBuilder();
-            if (!constraintManager.isAssignmentValid(state, slot, chosen, reason))
+            if (!constraintManager.isAssignmentValid(state, slot, chosen, reason)) {
+                log(depth, "Skipping invalid assignment of " + chosen + " to " + slot + ": " + reason);
                 continue;
+            }
 
             Map<GroupSlot, Set<Team>> snapshot = assignWithSnapshot(state, slot, chosen, depth);
             if (snapshot == null)
@@ -165,7 +167,7 @@ public class BacktrackingSolver {
         constraintManager.forwardCheck(stateCopy, slot, team);
 
         // summarize domain changes after forward-check (only show diffs)
-        summarizeDomainChanges(oldDomains, stateCopy, depth);
+        // summarizeDomainChanges(oldDomains, stateCopy, depth);
 
         // Run global consistency checks (AC-3, Hall/missing-team, domain wipeout)
         if (!constraintManager.checkGlobalConsistency(stateCopy)) {
@@ -203,6 +205,7 @@ public class BacktrackingSolver {
     }
 
     // Summarize domain changes: print only slots whose domain changed (removed/added)
+    @SuppressWarnings("unused")
     private void summarizeDomainChanges(Map<GroupSlot, Set<Team>> before, AssignmentState afterState, int depth) {
         for (GroupSlot s : before.keySet()) {
             Set<Team> beforeSet = before.getOrDefault(s, Set.of());

@@ -42,7 +42,11 @@ public class Simulator {
             System.out.println("Unknown team: " + teamName);
             return;
         }
-        registeredTeams.add(t);
+        if (state.isTeamUnassigned(t.getName())) {
+            registeredTeams.add(t);
+        } else {
+            System.out.println("Team already assigned, skipping registration: " + teamName);
+        }
     }
 
     /** Place all previously registered teams using a team-first backtracking solver. */
@@ -51,7 +55,17 @@ public class Simulator {
             System.out.println("No registered teams to place");
             return true;
         }
-        boolean ok = backtrackingSolver.solveTeamFirst(this.state, new ArrayList<>(registeredTeams), 0);
+        // filter out teams that have been assigned since registration
+        List<Team> toPlace = registeredTeams.stream()
+                .filter(t -> state.isTeamUnassigned(t.getName()))
+                .collect(Collectors.toList());
+        if (toPlace.isEmpty()) {
+            System.out.println("All registered teams are already assigned");
+            registeredTeams.clear();
+            return true;
+        }
+
+        boolean ok = backtrackingSolver.solveTeamFirst(this.state, new ArrayList<>(toPlace), 0);
         if (ok) {
             System.out.println("✅ Successfully placed registered teams");
             registeredTeams.clear();
@@ -133,12 +147,13 @@ public class Simulator {
         Collections.shuffle(teams);
         
         // placeTeam("Mexico");
-        // placeTeam("Canada");
+        placeTeam("Canada");
+        placeTeam("Brazil");
         
-        teams.stream().filter(t -> t.pot() == 1).forEach(t -> placeTeam(t.getName()));
-        teams.stream().filter(t -> t.pot() == 2).forEach(t -> placeTeam(t.getName()));
-        teams.stream().filter(t -> t.pot() == 3).forEach(t -> placeTeam(t.getName()));
-        teams.stream().filter(t -> t.pot() == 4).forEach(t -> placeTeam(t.getName()));
+        // teams.stream().filter(t -> t.pot() == 1).forEach(t -> placeTeam(t.getName()));
+        // teams.stream().filter(t -> t.pot() == 2).forEach(t -> placeTeam(t.getName()));
+        // teams.stream().filter(t -> t.pot() == 3).forEach(t -> placeTeam(t.getName()));
+        // teams.stream().filter(t -> t.pot() == 4).forEach(t -> placeTeam(t.getName()));
         return makePlacements();
     }
 
@@ -227,18 +242,14 @@ public class Simulator {
 
         // summarize domain changes after forward-check (only show diffs)
         summarizeDomainChanges(oldDomains, stateCopy, 0);
-
-        // detect domain wipeout
-        for (GroupSlot s : stateCopy.getUnassignedSlots()) {
-            Set<Team> dom = stateCopy.getDomains().get(s);
-            if (dom == null || dom.isEmpty()) {
-                // restore and unassign on the provided stateCopy
-                    stateCopy.restoreDomains(oldDomains);
-                Set<Team> slotDomain = oldDomains.get(slot);
-                List<Team> originalDomainForSlot = slotDomain != null ? new ArrayList<>(slotDomain) : new ArrayList<>();
-                stateCopy.unassign(slot, originalDomainForSlot);
-                return null;
-            }
+        // Run centralized global consistency checks (cheap -> expensive).
+        if (!constraintManager.checkGlobalConsistency(stateCopy)) {
+            // restore domains and unassign the slot on the provided stateCopy
+            stateCopy.restoreDomains(oldDomains);
+            Set<Team> slotDomain = oldDomains.get(slot);
+            List<Team> originalDomainForSlot = slotDomain != null ? new ArrayList<>(slotDomain) : new ArrayList<>();
+            stateCopy.unassign(slot, originalDomainForSlot);
+            return null;
         }
 
         return oldDomains;
@@ -352,46 +363,35 @@ public class Simulator {
             state.assign(slot, teamToAssign);
             constraintManager.forwardCheck(state, slot, teamToAssign);
 
-            // immediate wipeout?
-            if (hasImmediateWipeout()) {
+            // Run centralized global consistency checks (cheap -> expensive).
+            // This replaces the previous immediate-wipeout + AC-3 sequence.
+            boolean ok = constraintManager.checkGlobalConsistency(state);
+            if (!ok) {
                 restoreDomains(snapshot);
                 state.unassign(slot, domainListFromSnapshot(snapshot, slot));
                 System.out.println("Placement of " + teamToAssign + " into " + slot
-                        + " caused immediate domain wipeout; trying next");
-                continue;
-            }
-
-            // enforce full arc-consistency (AC-3)
-            boolean ac3ok = constraintManager.enforceArcConsistency(state);
-            if (!ac3ok) {
-                restoreDomains(snapshot);
-                state.unassign(slot, domainListFromSnapshot(snapshot, slot));
-                System.out.println("Placement of " + teamToAssign + " into " + slot
-                        + " caused AC-3 domain wipeout; trying next");
+                        + " caused inconsistency after propagation; trying next");
                 continue;
             }
 
             if (!verifyCompleteSolution) {
-                // Accept the placement based on AC-3 pruning (fast path)
-                Map<GroupSlot, Set<Team>> snapshotAfterAC3 = deepCopyDomains();
-                // restore prior assignments, then ensure this slot remains assigned
+                // Accept the placement based on propagation (fast path)
+                Map<GroupSlot, Set<Team>> snapshotAfterPrune = deepCopyDomains();
                 restoreAssignments(assignmentSnapshot);
                 state.getAssignments().put(slot, teamToAssign);
-                // apply post-AC3 domains defensively
-                state.restoreDomains(snapshotAfterAC3);
-                System.out.println("✅ Placed " + teamToAssign + " into " + slot + " (AC-3 accepted)");
+                state.restoreDomains(snapshotAfterPrune);
+                System.out.println("✅ Placed " + teamToAssign + " into " + slot + " (propagation accepted)");
                 return true;
             }
 
-            // AC-3 passed. Verify a complete solution exists via backtracking.
-            Map<GroupSlot, Set<Team>> snapshotAfterAC3 = deepCopyDomains();
+            // Propagation passed. Verify a complete solution exists via backtracking.
+            Map<GroupSlot, Set<Team>> snapshotAfterPrune = deepCopyDomains();
             var deepCopyState = this.state.copyForSearch();
             boolean solutionExists = backtrack(deepCopyState);
 
             if (solutionExists) {
-                // Restore domains to post-AC3 pruning (use defensive copy)
-                state.restoreDomains(snapshotAfterAC3);
-                // restore prior assignments, then ensure this slot remains assigned
+                // Restore domains to post-propagation pruning
+                state.restoreDomains(snapshotAfterPrune);
                 restoreAssignments(assignmentSnapshot);
                 state.getAssignments().put(slot, teamToAssign);
 
