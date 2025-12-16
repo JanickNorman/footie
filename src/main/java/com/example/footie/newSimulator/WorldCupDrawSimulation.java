@@ -85,8 +85,8 @@ public class WorldCupDrawSimulation {
                 // simulator.shuffleAndSolve();
         simulator.prettyPrintGroupAssignmentsVertical();
 
-        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        List<Future<?>> futures = new ArrayList<>();
+        // ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        // List<Future<?>> futures = new ArrayList<>();
 
         // for (int i = 0; i < 5; i++) {
         //     final int threadIndex = i;
