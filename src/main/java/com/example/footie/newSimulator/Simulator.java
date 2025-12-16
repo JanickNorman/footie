@@ -51,7 +51,7 @@ public class Simulator {
             System.out.println("No registered teams to place");
             return true;
         }
-        boolean ok = backtrackingSolver.solveTeamFirst(this.state, new ArrayList<>(registeredTeams));
+        boolean ok = backtrackingSolver.solveTeamFirst(this.state, new ArrayList<>(registeredTeams), 0);
         if (ok) {
             System.out.println("✅ Successfully placed registered teams");
             registeredTeams.clear();
