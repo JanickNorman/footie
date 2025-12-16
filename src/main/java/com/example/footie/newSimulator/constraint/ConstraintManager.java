@@ -70,14 +70,9 @@ public class ConstraintManager {
         for (Constraint c : constraints) {
             c.forwardCheck(state, slot, team);
         }
-        // Enforce that a team can only be assigned once: remove the assigned team
-        // from the domains of all other unassigned slots.
-        for (GroupSlot s : state.getUnassignedSlots()) {
-            if (!s.equals(slot)) {
-                state.removeTeamFromDomain(s, team.getName());
-            }
-        }
     }
+
+    // team-removal is handled by the AllDifferent constraint implementation
 
     /**
      * Enforce arc-consistency (AC-3) across all unassigned variables.
@@ -195,5 +190,35 @@ public class ConstraintManager {
      */
     public boolean hasPerfectMatching(AssignmentState state) {
         return state.hasPerfectMatchingForUnassignedSlots();
+    }
+
+    /**
+     * Run a set of global consistency checks on the current state after
+     * forward-checking. This includes (configurable) arc-consistency
+     * enforcement, Hall/matching check and simple domain/missing-team checks.
+     * Returns true if the state remains potentially solvable, false if a
+     * contradiction was detected (domain wipeout, Hall violation, or a team
+     * with no candidate slot).
+     */
+    public boolean checkGlobalConsistency(AssignmentState state) {
+        // Enforce arc-consistency (AC-3). If a domain is emptied or matching
+        // fails, abort early.
+        if (!enforceArcConsistency(state))
+            return false;
+
+        // Ensure there are no unassigned teams that have no candidate
+        // unassigned slot (simple missing-team check).
+        List<String> missing = state.findUnassignedTeamsWithNoUnassignedCandidateSlot();
+        if (!missing.isEmpty())
+            return false;
+
+        // Detect domain wipeouts explicitly (defensive check).
+        for (GroupSlot s : state.getUnassignedSlots()) {
+            Set<Team> dom = state.getDomains(s);
+            if (dom == null || dom.isEmpty())
+                return false;
+        }
+
+        return true;
     }
 }
