@@ -18,6 +18,7 @@ import com.example.footie.newSimulator.GroupSlot;
 import com.example.footie.newSimulator.Simulator;
 import com.example.footie.newSimulator.Team;
 import com.example.footie.newSimulator.TeamFactory;
+import com.example.footie.newSimulator.constraint.AllDifferent;
 import com.example.footie.newSimulator.constraint.AtMostTwoEuropeTeamsPerGroup;
 import com.example.footie.newSimulator.constraint.ConstraintManager;
 import com.example.footie.newSimulator.constraint.NoSameContinentInGroupForNonEurope;
@@ -39,6 +40,7 @@ public class DrawController {
 
             // Setup constraints similar to existing simulation
             ConstraintManager cm = new ConstraintManager();
+            cm.addConstraint(new AllDifferent());
             cm.addConstraint(new SamePotCantBeInTheSameGroup());
             cm.addConstraint(new AtMostTwoEuropeTeamsPerGroup());
             cm.addConstraint(new NoSameContinentInGroupForNonEurope());
