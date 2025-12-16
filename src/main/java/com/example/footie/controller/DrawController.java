@@ -18,10 +18,12 @@ import com.example.footie.newSimulator.GroupSlot;
 import com.example.footie.newSimulator.Simulator;
 import com.example.footie.newSimulator.Team;
 import com.example.footie.newSimulator.TeamFactory;
+import com.example.footie.newSimulator.constraint.AllDifferent;
 import com.example.footie.newSimulator.constraint.AtMostTwoEuropeTeamsPerGroup;
 import com.example.footie.newSimulator.constraint.ConstraintManager;
 import com.example.footie.newSimulator.constraint.NoSameContinentInGroupForNonEurope;
 import com.example.footie.newSimulator.constraint.SamePotCantBeInTheSameGroup;
+import com.example.footie.newSimulator.constraint.TopSeedsBracketSeparation;
 
 import reactor.core.publisher.Mono;
 
@@ -39,17 +41,22 @@ public class DrawController {
 
             // Setup constraints similar to existing simulation
             ConstraintManager cm = new ConstraintManager();
+            cm.addConstraint(new AllDifferent());
             cm.addConstraint(new SamePotCantBeInTheSameGroup());
             cm.addConstraint(new AtMostTwoEuropeTeamsPerGroup());
             cm.addConstraint(new NoSameContinentInGroupForNonEurope());
+            cm.addConstraint(new TopSeedsBracketSeparation(Map.of(
+                    "Argentina", 1,
+                    "Spain", 2,
+                    "France", 3,
+                    "England", 4
+            )));   
+
 
             Simulator simulator = new Simulator(slots, cm, teams);
 
             // Shuffle teams to get varied solutions
-            Collections.shuffle(teams);
-
-            boolean solved = simulator.solveWithBacktracking();
-
+            boolean solved = simulator.solveWorldCup2026Draw();
             Map<String, List<String>> grouped = new TreeMap<>();
 
             if (!solved) {
