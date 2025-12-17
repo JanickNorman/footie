@@ -1,6 +1,5 @@
 package com.example.footie.repository;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Repository;
 
@@ -13,13 +12,12 @@ import reactor.core.publisher.Mono;
 @Repository
 public class ReactiveTeamRepository {
 
-    private static final String SELECT_ALL = "SELECT name, code, continent FROM teams ORDER BY name";
-    private static final String SELECT_BY_CODE = "SELECT name, code, continent FROM teams WHERE code = :code";
-    private static final String UPSERT = "INSERT INTO teams (name, code, continent) VALUES (:name, :code, :continent) "
-            + "ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name, continent = EXCLUDED.continent, updated_at = CURRENT_TIMESTAMP";
-    private static final String DELETE_BY_CODE = "DELETE FROM teams WHERE code = :code";
+        private static final String SELECT_ALL = "SELECT name, code, continent, flag_url FROM teams ORDER BY name";
+        private static final String SELECT_BY_CODE = "SELECT name, code, continent, flag_url FROM teams WHERE code = :code";
+        private static final String UPSERT = "INSERT INTO teams (name, code, continent, flag_url) VALUES (:name, :code, :continent, :flag_url) "
+            + "ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name, continent = EXCLUDED.continent, flag_url = EXCLUDED.flag_url, updated_at = CURRENT_TIMESTAMP";
+        private static final String DELETE_BY_CODE = "DELETE FROM teams WHERE code = :code";
 
-    @Autowired
     private final DatabaseClient client;
 
     public ReactiveTeamRepository(DatabaseClient client) {
@@ -31,7 +29,8 @@ public class ReactiveTeamRepository {
                 row.get("name", String.class),
                 row.get("continent", String.class),
                 0,
-                row.get("code", String.class)
+                row.get("code", String.class),
+                row.get("flag_url", String.class)
         );
     }
 
@@ -53,7 +52,7 @@ public class ReactiveTeamRepository {
                 .bind("name", team.getName())
                 .bind("code", team.getCode())
                 .bind("continent", team.getContinents().stream().findFirst().orElse(null))
-                .bind("pot", team.pot())
+                .bind("flag_url", team.getFlagUrl())
                 .fetch()
                 .rowsUpdated();
     }

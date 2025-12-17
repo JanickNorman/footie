@@ -13,18 +13,19 @@ import com.example.footie.newSimulator.Team;
 @Repository
 public class TeamRepository {
 
-    private static final String SELECT_ALL = "SELECT name, code, continent, pot FROM teams ORDER BY pot, name";
-    private static final String SELECT_BY_CODE = "SELECT name, code, continent, pot FROM teams WHERE code = ?";
-    private static final String UPSERT = "INSERT INTO teams (name, code, continent, pot) VALUES (?, ?, ?, ?) "
+        private static final String SELECT_ALL = "SELECT name, code, continent, pot, flag_url FROM teams ORDER BY pot, name";
+        private static final String SELECT_BY_CODE = "SELECT name, code, continent, pot, flag_url FROM teams WHERE code = ?";
+        private static final String UPSERT = "INSERT INTO teams (name, code, continent, pot, flag_url) VALUES (?, ?, ?, ?, ?) "
             + "ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name, continent = EXCLUDED.continent, pot = EXCLUDED.pot, updated_at = CURRENT_TIMESTAMP";
     private static final String DELETE_BY_CODE = "DELETE FROM teams WHERE code = ?";
 
-    private static final RowMapper<Team> TEAM_ROW_MAPPER = (rs, rowNum) -> new ConcreteTeam(
+        private static final RowMapper<Team> TEAM_ROW_MAPPER = (rs, rowNum) -> new ConcreteTeam(
             rs.getString("name"),
             rs.getString("continent"),
-            0,
-            rs.getString("code")
-    );
+            rs.getInt("pot"),
+            rs.getString("code"),
+            rs.getString("flag_url")
+        );
 
     private final JdbcTemplate jdbc;
 
@@ -55,9 +56,11 @@ public class TeamRepository {
      */
     public int save(Team team) {
         return jdbc.update(UPSERT,
-                team.getName(),
-                team.getCode(),
-                team.getContinents().stream().findFirst().orElse(null));
+            team.getName(),
+            team.getCode(),
+            team.getContinents().stream().findFirst().orElse(null),
+            team.pot(),
+            team.getFlagUrl());
     }
 
     /**
