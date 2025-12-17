@@ -1,7 +1,6 @@
 package com.example.footie.newSimulator;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +43,7 @@ public class BacktrackingSolver {
                 continue;
             }
 
-            Map<GroupSlot, Set<Team>> snapshot = assignWithSnapshot(state, slot, chosen, depth);
+            AssignmentSnapshot snapshot = assignWithSnapshot(state, slot, chosen, depth);
             if (snapshot == null)
                 continue;
 
@@ -54,7 +53,7 @@ public class BacktrackingSolver {
                 return true;
 
             // backtrack
-            restoreFromSnapshot(state, slot, snapshot);
+            state.restoreFromSnapshot(snapshot);
         }
 
         return false;
@@ -74,56 +73,32 @@ public class BacktrackingSolver {
      * before the assignment. Returns null if the assignment immediately causes a
      * domain wipeout.
      */
-    public Map<GroupSlot, Set<Team>> assignWithSnapshot(AssignmentState stateCopy, GroupSlot slot, Team team, int depth) {
-        Map<GroupSlot, Set<Team>> oldDomains = deepCopyDomains(stateCopy);
+    public AssignmentSnapshot assignWithSnapshot(AssignmentState stateCopy, GroupSlot slot, Team team, int depth) {
+        // create a snapshot from the state (captures domains + assignments)
+        AssignmentSnapshot oldSnapshot = stateCopy.createSnapshot();
 
         stateCopy.assign(slot, team);
         constraintManager.forwardCheck(stateCopy, slot, team);
 
         // summarize domain changes after forward-check (only show diffs)
-        summarizeDomainChanges(oldDomains, stateCopy, depth);
+        summarizeDomainChanges(oldSnapshot.getDomainsSnapshot(), stateCopy, depth);
 
-        if (this.dontCheckConsistencyBefore(depth)) 
-            return oldDomains;
+        if (this.dontCheckConsistencyBefore(depth))
+            return oldSnapshot;
 
         // Run global consistency checks (AC-3, Hall/missing-team, domain wipeout)
         if (!constraintManager.checkGlobalConsistency(stateCopy)) {
-            for (GroupSlot restoreSlot : oldDomains.keySet()) {
-                stateCopy.getDomains().put(restoreSlot, oldDomains.get(restoreSlot));
-            }
-            Set<Team> slotDomain = oldDomains.get(slot);
-            List<Team> originalDomainForSlot = slotDomain != null ? new ArrayList<>(slotDomain) : new ArrayList<>();
-            stateCopy.unassign(slot, originalDomainForSlot);
+            oldSnapshot.restore();
             return null;
         }
 
-        return oldDomains;
+        return oldSnapshot;
     }
 
     private boolean dontCheckConsistencyBefore(int depth) {
         return depth < onlyCheckDomainAfter;
     }
 
-    // restore domains/assignment into the provided AssignmentState
-    private void restoreFromSnapshot(AssignmentState target, GroupSlot slot, Map<GroupSlot, Set<Team>> snapshot) {
-        for (GroupSlot restoreSlot : snapshot.keySet()) {
-            target.getDomains().put(restoreSlot, snapshot.get(restoreSlot));
-        }
-        Set<Team> slotDomain = snapshot.get(slot);
-        List<Team> originalDomainForSlot = slotDomain != null ? new ArrayList<>(slotDomain) : new ArrayList<>();
-        target.unassign(slot, originalDomainForSlot);
-    }
-
-    // deep copy domains from a specific AssignmentState (used for search-stack
-    // operations so we don't mix global `state` with local copies)
-    private Map<GroupSlot, Set<Team>> deepCopyDomains(AssignmentState st) {
-        Map<GroupSlot, Set<Team>> oldDomains = new HashMap<>();
-        for (GroupSlot s : st.getSlots()) {
-            Set<Team> d = st.getDomains().get(s);
-            oldDomains.put(s, d != null ? new HashSet<>(d) : new HashSet<>());
-        }
-        return oldDomains;
-    }
 
     // Summarize domain changes: print only slots whose domain changed (removed/added)
     @SuppressWarnings("unused")

@@ -97,7 +97,7 @@ public class Simulator {
             return false;
         }
         // Delegate assignment + forward-check + snapshot handling to assignWithSnapshot
-        Map<GroupSlot, Set<Team>> snapshot = backtrackingSolver.assignWithSnapshot(this.state, slot, team, 0);
+        AssignmentSnapshot snapshot = backtrackingSolver.assignWithSnapshot(this.state, slot, team, 0);
         if (snapshot == null) {
             System.out.println("Assignment FAILED (caused inconsistency): " + slot + " -> " + team);
             return false;
