@@ -407,14 +407,13 @@ public class AssignmentState {
      * perfect matching exists (i.e. no Hall violation detected).
      */
     public boolean hasPerfectMatchingForUnassignedSlots() {
-        List<GroupSlot> slots = getUnassignedSlots();
-        int n = slots.size();
-        if (n == 0)
-            return true;
+        List<GroupSlot> unassignedSlots = getUnassignedSlots();
+        int n = unassignedSlots.size();
+        if (n == 0) return true;
 
         // build index of unassigned teams that appear in any unassigned slot domain
         Map<String, Integer> teamIndex = new HashMap<>();
-        for (GroupSlot s : slots) {
+        for (GroupSlot s : unassignedSlots) {
             Set<Team> dom = getDomains(s);
             if (dom == null)
                 continue;
@@ -431,7 +430,7 @@ public class AssignmentState {
             return false; // not enough teams to cover slots
 
         List<List<Integer>> adj = new ArrayList<>(n);
-        for (GroupSlot s : slots) {
+        for (GroupSlot s : unassignedSlots) {
             List<Integer> edges = new ArrayList<>();
             Set<Team> dom = getDomains(s);
             if (dom != null) {
@@ -471,5 +470,22 @@ public class AssignmentState {
 
     public Map<String, Team> currentPotTeams() {
         return Collections.unmodifiableMap(currentPotTeams);
+    }
+
+    /** Create a snapshot object capturing current assignments and domains. */
+    public AssignmentSnapshot createSnapshot() {
+        Map<GroupSlot, Set<Team>> domainsCopy = new HashMap<>();
+        for (Map.Entry<GroupSlot, Set<Team>> e : domains.entrySet()) {
+            domainsCopy.put(e.getKey(), new HashSet<>(e.getValue()));
+        }
+        Map<GroupSlot, Team> assignmentsCopy = new HashMap<>();
+        assignmentsCopy.putAll(assignments);
+        return new AssignmentSnapshot(this, domainsCopy, assignmentsCopy);
+    }
+
+    /** Restore state from an AssignmentSnapshot produced by this state. */
+    public void restoreFromSnapshot(AssignmentSnapshot snapshot) {
+        if (snapshot == null) return;
+        snapshot.restore();
     }
 }

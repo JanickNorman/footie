@@ -80,9 +80,56 @@ public final class TeamFactory {
     private TeamFactory() {
     }
 
+    private static final Map<String, String> NAME_TO_CODE = new HashMap<>();
+    static {
+        // ISO3 / common football codes for teams used in the lists
+        NAME_TO_CODE.put("Canada", "CAN");
+        NAME_TO_CODE.put("Mexico", "MEX");
+        NAME_TO_CODE.put("USA", "USA");
+        NAME_TO_CODE.put("Spain", "ESP");
+        NAME_TO_CODE.put("Argentina", "ARG");
+        NAME_TO_CODE.put("France", "FRA");
+        NAME_TO_CODE.put("England", "ENG");
+        NAME_TO_CODE.put("Brazil", "BRA");
+        NAME_TO_CODE.put("Portugal", "POR");
+        NAME_TO_CODE.put("Netherlands", "NLD");
+        NAME_TO_CODE.put("Belgium", "BEL");
+        NAME_TO_CODE.put("Germany", "DEU");
+        NAME_TO_CODE.put("Croatia", "CRO");
+        NAME_TO_CODE.put("Morocco", "MAR");
+        NAME_TO_CODE.put("Colombia", "COL");
+        NAME_TO_CODE.put("Uruguay", "URY");
+        NAME_TO_CODE.put("Switzerland", "CHE");
+        NAME_TO_CODE.put("Japan", "JPN");
+        NAME_TO_CODE.put("Senegal", "SEN");
+        NAME_TO_CODE.put("Iran", "IRN");
+        NAME_TO_CODE.put("SouthKorea", "KOR");
+        NAME_TO_CODE.put("Ecuador", "ECU");
+        NAME_TO_CODE.put("Austria", "AUT");
+        NAME_TO_CODE.put("Australia", "AUS");
+        NAME_TO_CODE.put("Norway", "NOR");
+        NAME_TO_CODE.put("Panama", "PAN");
+        NAME_TO_CODE.put("Egypt", "EGY");
+        NAME_TO_CODE.put("Algeria", "DZA");
+        NAME_TO_CODE.put("Scotland", "SCO");
+        NAME_TO_CODE.put("Paraguay", "PRY");
+        NAME_TO_CODE.put("Tunisia", "TUN");
+        NAME_TO_CODE.put("CotedIvoire", "CIV");
+        NAME_TO_CODE.put("Uzbekistan", "UZB");
+        NAME_TO_CODE.put("Qatar", "QAT");
+        NAME_TO_CODE.put("SaudiArabia", "SAU");
+        NAME_TO_CODE.put("SouthAfrica", "ZAF");
+        NAME_TO_CODE.put("Jordan", "JOR");
+        NAME_TO_CODE.put("CapeVerde", "CPV");
+        NAME_TO_CODE.put("Ghana", "GHA");
+        NAME_TO_CODE.put("Curacao", "CUW");
+        NAME_TO_CODE.put("Haiti", "HTI");
+        NAME_TO_CODE.put("NewZealand", "NZL");
+    }
+
     public static Team create(String name) {
         String continent = CONTINENT_MAP.getOrDefault(name, "Unknown");
-        return new ConcreteTeam(name, continent, 1);
+        return new ConcreteTeam(name, continent, 1, NAME_TO_CODE.get(name));
     }
 
     public static Team createPlaceholder(String placeholderName, int pot) {
@@ -141,7 +188,8 @@ public final class TeamFactory {
                     teams.put(teamName, new PlaceholderTeam(teamName, Set.of("Africa", "NorthAmerica", "Oceania"),
                             "placeholder", pot));
                 } else {
-                    teams.put(teamName, new ConcreteTeam(teamName, CONTINENT_MAP.get(teamName), pot));
+                    teams.put(teamName, new ConcreteTeam(teamName, CONTINENT_MAP.get(teamName), pot,
+                            NAME_TO_CODE.get(teamName)));
                 }
             }
         }

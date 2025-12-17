@@ -7,11 +7,23 @@ public class ConcreteTeam implements Team {
     private final String name;
     private final String continent;
     private final int pot;
+    private final String code;
+    private final String flagUrl;
     
     public ConcreteTeam(String name, String continent, int pot) {
+        this(name, continent, pot, null, null);
+    }
+
+    public ConcreteTeam(String name, String continent, int pot, String code) {
+        this(name, continent, pot, code, null);
+    }
+
+    public ConcreteTeam(String name, String continent, int pot, String code, String flagUrl) {
         this.name = name;
         this.continent = continent;
         this.pot = pot;
+        this.code = code;
+        this.flagUrl = flagUrl;
     }
 
     @Override
@@ -49,5 +61,14 @@ public class ConcreteTeam implements Team {
     @Override
     public int hashCode() {
         return Objects.hash(name);
+    }
+
+    @Override
+    public String getCode() { return code; }
+
+    @Override
+    public String getFlagUrl() {
+        if (flagUrl != null && !flagUrl.isEmpty()) return flagUrl;
+        return code != null ? "/flags/" + code + ".svg" : null;
     }
 }

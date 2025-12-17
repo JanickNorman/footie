@@ -104,7 +104,7 @@ public class ConstraintManager {
             }
         }
         // final sanity check: ensure matching covers all unassigned slots
-        return hasPerfectMatching(state);
+        return true;
     }
 
     /**
@@ -203,6 +203,11 @@ public class ConstraintManager {
      * Checks are ordered from least to most expensive for early failure detection.
      */
     public boolean checkGlobalConsistency(AssignmentState state) {
+        // 4. Most expensive: enforce arc-consistency (AC-3) - O(ed³) where e = edges, d = max domain size
+        // Note: AC-3 also calls hasPerfectMatching at the end, but we check it first to fail fast
+        if (!enforceArcConsistency(state))
+            return false;
+
         // 1. Cheapest: detect domain wipeouts explicitly (O(n) where n = unassigned slots)
         for (GroupSlot s : state.getUnassignedSlots()) {
             Set<Team> dom = state.getDomains(s);
@@ -214,16 +219,8 @@ public class ConstraintManager {
         List<String> missing = state.findUnassignedTeamsWithNoUnassignedCandidateSlot();
         if (!missing.isEmpty())
             return false;
-
         // 3. Medium: check for Hall violations via bipartite matching (O(n²m))
-        if (!hasPerfectMatching(state))
-            return false;
 
-        // 4. Most expensive: enforce arc-consistency (AC-3) - O(ed³) where e = edges, d = max domain size
-        // Note: AC-3 also calls hasPerfectMatching at the end, but we check it first to fail fast
-        if (!enforceArcConsistency(state))
-            return false;
-
-        return true;
+        return hasPerfectMatching(state);
     }
 }

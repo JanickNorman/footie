@@ -14,4 +14,11 @@ public interface Team {
     Set<String> getContinents();
 
     int pot();
+
+    default String getCode() { return null; }
+
+    default String getFlagUrl() {
+        String code = getCode();
+        return code != null ? "/flags/" + code + ".svg" : null;
+    }
 }

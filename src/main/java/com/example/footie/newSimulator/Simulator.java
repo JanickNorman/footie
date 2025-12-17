@@ -91,12 +91,16 @@ public class Simulator {
     }
 
     public boolean assignTeamToSlot(GroupSlot slot, Team team) {
-        if (!constraintManager.isAssignmentValid(state, slot, team)) {
+        StringBuilder reason = new StringBuilder();
+        if (!constraintManager.isAssignmentValid(state, slot, team, reason)) {
+            System.out.println("Assignment FAILED: " + slot + " -> " + team + "; reason="
+                    + (reason.length() > 0 ? reason.toString() : "unknown"));
             return false;
         }
-
-        AssignmentState.DomainsSnapshot snapshot = backtrackingSolver.assignWithSnapshot(this.state, slot, team, 0);
+        // Delegate assignment + forward-check + snapshot handling to assignWithSnapshot
+        AssignmentSnapshot snapshot = backtrackingSolver.assignWithSnapshot(this.state, slot, team, 0);
         if (snapshot == null) {
+            System.out.println("Assignment FAILED (caused inconsistency): " + slot + " -> " + team);
             return false;
         }
 
