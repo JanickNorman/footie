@@ -219,11 +219,8 @@ public class ConstraintManager {
         List<String> missing = state.findUnassignedTeamsWithNoUnassignedCandidateSlot();
         if (!missing.isEmpty())
             return false;
-
         // 3. Medium: check for Hall violations via bipartite matching (O(n²m))
-        if (!hasPerfectMatching(state))
-            return false;
 
-        return true;
+        return hasPerfectMatching(state);
     }
 }
