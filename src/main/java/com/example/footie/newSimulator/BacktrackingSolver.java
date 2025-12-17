@@ -18,7 +18,7 @@ public class BacktrackingSolver {
 
     // Node counting for search-limits
     private final AtomicLong nodesVisited = new AtomicLong(0);
-    private volatile long maxNodes = 1000L; // default: no limit
+    private volatile long maxNodes = 125L; // default: no limit
 
     public BacktrackingSolver(ConstraintManager constraintManager) {
         this.constraintManager = constraintManager;
@@ -98,7 +98,7 @@ public class BacktrackingSolver {
         constraintManager.forwardCheck(stateCopy, slot, team);
 
         // summarize domain changes after forward-check (only show diffs)
-        summarizeDomainChanges(oldSnapshot.getDomainsSnapshot(), stateCopy, depth);
+        // summarizeDomainChanges(oldSnapshot.getDomainsSnapshot(), stateCopy, depth);
 
         if (this.dontCheckConsistencyBefore(depth))
             return oldSnapshot;
