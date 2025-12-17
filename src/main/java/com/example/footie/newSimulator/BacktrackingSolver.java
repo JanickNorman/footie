@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import com.example.footie.newSimulator.constraint.ConstraintManager;
@@ -15,8 +16,26 @@ public class BacktrackingSolver {
 
     int onlyCheckDomainAfter = 30;
 
+    // Node counting for search-limits
+    private final AtomicLong nodesVisited = new AtomicLong(0);
+    private volatile long maxNodes = 1000L; // default: no limit
+
     public BacktrackingSolver(ConstraintManager constraintManager) {
         this.constraintManager = constraintManager;
+    }
+
+    /** Set a maximum number of search nodes to explore. Use <=0 to disable. */
+    public void setMaxNodes(long max) {
+        this.maxNodes = max > 0 ? max : Long.MAX_VALUE;
+        this.nodesVisited.set(0);
+    }
+
+    public long getNodesVisited() {
+        return nodesVisited.get();
+    }
+
+    public boolean isNodeLimitReached() {
+        return nodesVisited.get() >= maxNodes;
     }
 
     /**
@@ -25,14 +44,12 @@ public class BacktrackingSolver {
      * placement for those teams exists.
      */
     public boolean solveTeamFirst(AssignmentState state, List<Team> teamsToPlace, int depth) {
-        // choose team with fewest candidate slots (MRV on teams)
+        long visited = nodesVisited.incrementAndGet();
+        if (visited > maxNodes) throw new RuntimeException("Node limit reached");
 
         if (teamsToPlace.isEmpty())
-            return true; // all placed
-        // Team chosen = teamsToPlace.stream()
-        //         .min(Comparator.comparingInt(t -> candidateSlots(state, t).size()))
-        //         .orElse(null);
-        // chose team from the order of register
+            return true;
+
         Team chosen = teamsToPlace.get(0);
 
         List<GroupSlot> candidates = candidateSlots(state, chosen);
