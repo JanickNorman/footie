@@ -92,14 +92,14 @@ public final class TeamFactory {
         NAME_TO_CODE.put("England", "ENG");
         NAME_TO_CODE.put("Brazil", "BRA");
         NAME_TO_CODE.put("Portugal", "POR");
-        NAME_TO_CODE.put("Netherlands", "NLD");
+        NAME_TO_CODE.put("Netherlands", "NED");
         NAME_TO_CODE.put("Belgium", "BEL");
-        NAME_TO_CODE.put("Germany", "DEU");
+        NAME_TO_CODE.put("Germany", "GER");
         NAME_TO_CODE.put("Croatia", "CRO");
         NAME_TO_CODE.put("Morocco", "MAR");
         NAME_TO_CODE.put("Colombia", "COL");
         NAME_TO_CODE.put("Uruguay", "URY");
-        NAME_TO_CODE.put("Switzerland", "CHE");
+        NAME_TO_CODE.put("Switzerland", "SUI");
         NAME_TO_CODE.put("Japan", "JPN");
         NAME_TO_CODE.put("Senegal", "SEN");
         NAME_TO_CODE.put("Iran", "IRN");

@@ -6,5 +6,4 @@ import reactor.core.publisher.Mono;
 
 public interface TeamReactiveRepository extends ReactiveCrudRepository<TeamEntity, Long> {
     Mono<TeamEntity> findByCode(String code);
-    Mono<Void> deleteByCode(String code);
 }

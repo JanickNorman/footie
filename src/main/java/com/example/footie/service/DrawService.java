@@ -32,17 +32,14 @@ public class DrawService {
         this.teamRepository = teamRepository;
     }
 
-    public Mono<Map<String, List<String>>> runDraw() {
-        Mono<String> teams = teamRepository.findAll().map(Team::getName).collect(Collectors.joining(", "));
-        teams.subscribe(t -> System.out.println("Fetching teams from repository for draw..." + t));
-        System.out.println("Fetching teams from repository for draw..." + teams.toString());
+    public Mono<Map<String, List<Team>>> runDraw() {
         return teamRepository.findAll().collectList()
                 .defaultIfEmpty(TeamFactory.createWorldCupTeams(4)).map(this::doRun);
                 // .flatMap(teams -> Mono.fromCallable(() -> doRun(teams)).subscribeOn(Schedulers.boundedElastic()));
     }
 
-    private Map<String, List<String>> doRun(List<Team> teams) {
-        // teams = TeamFactory.createWorldCupTeams(4);
+    private Map<String, List<Team>> doRun(List<Team> teams) {
+        teams = TeamFactory.createWorldCupTeams(4);
 
         List<GroupSlot> slots = buildWorldCupSlots();
 
@@ -61,7 +58,7 @@ public class DrawService {
         Simulator simulator = new Simulator(slots, cm, teams);
         boolean solved = simulator.solveWorldCup2026Draw();
 
-        Map<String, List<String>> grouped = new TreeMap<>();
+        Map<String, List<Team>> grouped = new TreeMap<>();
         if (!solved) return grouped;
 
         AssignmentState state = simulator.getState();
@@ -74,16 +71,16 @@ public class DrawService {
                         opt -> opt.map(GroupSlot::getPosition).orElse(0))));
 
         for (Map.Entry<String, Integer> e : maxPos.entrySet()) {
-            List<String> list = new ArrayList<>(Collections.nCopies(e.getValue(), null));
+            List<Team> list = new ArrayList<>(Collections.nCopies(e.getValue(), (Team) null));
             grouped.put(e.getKey(), list);
         }
 
         assignments.forEach((slot, team) -> {
             if (team == null) return;
-            List<String> list = grouped.get(slot.getGroupName());
+            List<Team> list = grouped.get(slot.getGroupName());
             int idx = slot.getPosition() - 1;
             if (list != null && idx >= 0 && idx < list.size()) {
-                list.set(idx, team.getName());
+                list.set(idx, team);
             }
         });
 

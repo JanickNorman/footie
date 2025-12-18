@@ -16,6 +16,7 @@ public class TeamEntity {
 
     private String code;
 
+    @Column("fifa_continent")
     private String continent;
 
     private Integer pot;
@@ -31,11 +32,10 @@ public class TeamEntity {
 
     public TeamEntity() {}
 
-    public TeamEntity(String name, String code, String continent, Integer pot, String flagUrl) {
+    public TeamEntity(String name, String code, String continent, String flagUrl) {
         this.name = name;
         this.code = code;
         this.continent = continent;
-        this.pot = pot;
         this.flagUrl = flagUrl;
     }
 
@@ -50,9 +50,6 @@ public class TeamEntity {
 
     public String getContinent() { return continent; }
     public void setContinent(String continent) { this.continent = continent; }
-
-    public Integer getPot() { return pot; }
-    public void setPot(Integer pot) { this.pot = pot; }
 
     public String getFlagUrl() { return flagUrl; }
     public void setFlagUrl(String flagUrl) { this.flagUrl = flagUrl; }

@@ -12,11 +12,12 @@ export default function DrawSimulator(){
     try{
       // fetch draw and teams in parallel so we can show flags
       const [draw, teams] = await Promise.all([runDraw(), getTeams()])
+      console.log('draw result', teams, draw);
       // build name -> flagUrl map
       const flagMap = {}
       if (Array.isArray(teams)) {
         teams.forEach(t => {
-          if (t && t.name) flagMap[t.name] = t.flagUrl || t.flag_url || t.flag || (t.code ? `/flags/${t.code}.svg` : null)
+          if (t && t.code) flagMap[t.code] = t.flagUrl || t.flag_url || t.flag || (t.code ? `/flags/${t.code}.svg` : null)
         })
       }
       setResult({ draw, flagMap })
@@ -38,17 +39,17 @@ export default function DrawSimulator(){
             <div key={group} className="group-card">
               <h3>{group}</h3>
               <ul className="team-list">
-                {teams.map((teamName, i) => {
-                  const src = flagMap[teamName]
+                {teams.map((team, i) => {
+                  const src = flagMap[team.code]
                   const imgSrc = src && src.startsWith('/') ? (import.meta.env.VITE_API_BASE || 'http://localhost:8080') + src : src
                   return (
                     <li key={i} className="team-row">
                       {imgSrc ? (
-                        <img src={imgSrc} alt={`flag ${teamName}`} />
+                        <img src={imgSrc} alt={`flag ${team.code}`} />
                       ) : (
                         <span style={{display:'inline-block', width:36}} />
                       )}
-                      <span className="team-name">{teamName || '—'}</span>
+                      <span className="team-name">{team.name || '—'}</span>
                     </li>
                   )
                 })}
