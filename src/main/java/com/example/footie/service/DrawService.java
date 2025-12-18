@@ -21,26 +21,28 @@ import com.example.footie.newSimulator.constraint.ConstraintManager;
 import com.example.footie.newSimulator.constraint.NoSameContinentInGroupForNonEurope;
 import com.example.footie.newSimulator.constraint.SamePotCantBeInTheSameGroup;
 import com.example.footie.newSimulator.constraint.TopSeedsBracketSeparation;
-import com.example.footie.repository.ReactiveTeamRepository;
 
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 @Service
 public class DrawService {
-    private final ReactiveTeamRepository teamRepository;
+    private final TeamService teamRepository;
 
-    public DrawService(ReactiveTeamRepository teamRepository) {
+    public DrawService(TeamService teamRepository) {
         this.teamRepository = teamRepository;
     }
 
     public Mono<Map<String, List<String>>> runDraw() {
+        System.out.println("Fetching teams from repository for draw..." + teamRepository.findAll().collectList());
         return teamRepository.findAll().collectList()
                 .defaultIfEmpty(TeamFactory.createWorldCupTeams(4))
                 .flatMap(teams -> Mono.fromCallable(() -> doRun(teams)).subscribeOn(Schedulers.boundedElastic()));
     }
 
     private Map<String, List<String>> doRun(List<Team> teams) {
+        // teams = TeamFactory.createWorldCupTeams(4);
+
         List<GroupSlot> slots = buildWorldCupSlots();
 
         ConstraintManager cm = new ConstraintManager();

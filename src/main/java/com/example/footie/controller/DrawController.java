@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.footie.newSimulator.Team;
-import com.example.footie.repository.ReactiveTeamRepository;
 import com.example.footie.service.DrawService;
+import com.example.footie.service.TeamService;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -22,11 +22,11 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/api")
 public class DrawController {
     private final DrawService drawService;
-    private final ReactiveTeamRepository teamRepository;
+    private final TeamService teamService;
 
-    public DrawController(DrawService drawService, ReactiveTeamRepository teamRepository) {
+    public DrawController(DrawService drawService, TeamService teamService) {
         this.drawService = drawService;
-        this.teamRepository = teamRepository;
+        this.teamService = teamService;
     }
     
     @PostMapping("/draw")
@@ -36,7 +36,7 @@ public class DrawController {
 
     @GetMapping("/teams")
     public Flux<Team> teams() {
-        return teamRepository.findAll();
+        return teamService.findAll();
     }
     
 }
