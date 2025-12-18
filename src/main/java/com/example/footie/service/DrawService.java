@@ -23,7 +23,6 @@ import com.example.footie.newSimulator.constraint.SamePotCantBeInTheSameGroup;
 import com.example.footie.newSimulator.constraint.TopSeedsBracketSeparation;
 
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 @Service
 public class DrawService {
@@ -34,10 +33,12 @@ public class DrawService {
     }
 
     public Mono<Map<String, List<String>>> runDraw() {
-        System.out.println("Fetching teams from repository for draw..." + teamRepository.findAll().collectList());
+        Mono<String> teams = teamRepository.findAll().map(Team::getName).collect(Collectors.joining(", "));
+        teams.subscribe(t -> System.out.println("Fetching teams from repository for draw..." + t));
+        System.out.println("Fetching teams from repository for draw..." + teams.toString());
         return teamRepository.findAll().collectList()
-                .defaultIfEmpty(TeamFactory.createWorldCupTeams(4))
-                .flatMap(teams -> Mono.fromCallable(() -> doRun(teams)).subscribeOn(Schedulers.boundedElastic()));
+                .defaultIfEmpty(TeamFactory.createWorldCupTeams(4)).map(this::doRun);
+                // .flatMap(teams -> Mono.fromCallable(() -> doRun(teams)).subscribeOn(Schedulers.boundedElastic()));
     }
 
     private Map<String, List<String>> doRun(List<Team> teams) {
