@@ -5,3 +5,9 @@ export async function runDraw(){
   if(!res.ok) throw new Error(`API error ${res.status}`)
   return res.json()
 }
+
+export async function getTeams(){
+  const res = await fetch(`${BASE}/api/teams`)
+  if(!res.ok) throw new Error(`API error ${res.status}`)
+  return res.json()
+}

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="32">
+  <rect width="48" height="10" y="0" fill="#ae1c28"/>
+  <rect width="48" height="12" y="10" fill="#ffffff"/>
+  <rect width="48" height="10" y="22" fill="#21468b"/>
+  <text x="24" y="20" font-size="8" font-family="Arial" fill="#ffffff" text-anchor="middle">NLD</text>
+</svg>

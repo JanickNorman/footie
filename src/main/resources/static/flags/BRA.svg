@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="32">
+  <rect width="48" height="32" fill="#009b3a"/>
+  <circle cx="24" cy="16" r="9" fill="#ffdf00"/>
+  <text x="24" y="20" font-size="8" font-family="Arial" fill="#002776" text-anchor="middle">BRA</text>
+</svg>

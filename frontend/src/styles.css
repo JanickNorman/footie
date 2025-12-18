@@ -11,3 +11,31 @@ button{background:var(--accent);color:white;padding:8px 12px;border:none;border-
 button:disabled{opacity:0.6;cursor:not-allowed}
 .result{white-space:pre-wrap;margin-top:12px;font-size:13px}
 .error{color:#b83232;margin-top:8px}
+
+/* Groups grid */
+.groups-grid{
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap:16px;
+  margin-top:16px;
+}
+.group-card{
+  background:linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  border-radius:10px;
+  padding:12px;
+  box-shadow:0 6px 18px rgba(43,108,176,0.08);
+  border:1px solid rgba(43,108,176,0.06);
+}
+.group-card h3{margin:0 0 8px 0;font-size:14px;color:var(--accent)}
+.team-list{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(1,1fr);row-gap:8px}
+.team-row{display:flex;align-items:center;padding:6px;border-radius:6px;transition:background .15s}
+.team-row:hover{background:rgba(43,108,176,0.04)}
+.team-row img{width:36px;height:24px;object-fit:cover;border-radius:3px;margin-right:10px;box-shadow:0 2px 6px rgba(2,6,23,0.06)}
+.team-name{font-weight:600}
+
+@media (max-width:900px){
+  .groups-grid{grid-template-columns:repeat(3,1fr)}
+}
+@media (max-width:600px){
+  .groups-grid{grid-template-columns:repeat(2,1fr)}
+}
