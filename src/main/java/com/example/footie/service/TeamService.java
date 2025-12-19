@@ -40,12 +40,12 @@ public class TeamService {
     }
 
     public Flux<Team> findAll() {
-        Query q = Query.empty();
+        Query q = Query.query(where("team_type").is("national"));
         return template.select(q, TeamEntity.class).index().map(tuple -> toDomain(tuple.getT2(), tuple.getT1()));
     }
 
     public Mono<Team> findByCode(String code) {
-        Query q = Query.query(where("code").is(code));
+        Query q = Query.query(where("code").is(code).and("team_type").is("national"));
         return template.selectOne(q, TeamEntity.class).map(e -> toDomain(e, 0L));
     }
 
@@ -60,7 +60,7 @@ public class TeamService {
                 "Oceania", 1
         );
 
-        return template.select(Query.empty(), TeamEntity.class)
+        return template.select(Query.query(where("team_type").is("national")), TeamEntity.class)
                 .collectList()
                 .flatMapMany(list -> {
                     if (list.isEmpty()) return Flux.empty();
@@ -114,7 +114,7 @@ public class TeamService {
     // }
 
     public Mono<Void> deleteByCode(String code) {
-        Query q = Query.query(where("code").is(code));
+        Query q = Query.query(where("code").is(code).and("team_type").is("national"));
         return template.delete(q, TeamEntity.class).then();
     }
 }
