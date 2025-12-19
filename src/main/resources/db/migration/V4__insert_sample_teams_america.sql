@@ -52,4 +52,4 @@ INSERT INTO teams ("name", division_id, division, flag_url, team_type, code) VAL
 ('Paraguay',13,'South America','https://upload.wikimedia.org/wikipedia/commons/2/27/Flag_of_Paraguay.svg','national','PRY'),
 ('Peru',13,'South America','https://upload.wikimedia.org/wikipedia/commons/c/cf/Flag_of_Peru.svg','national','PER'),
 ('Uruguay',13,'South America','https://upload.wikimedia.org/wikipedia/commons/f/fe/Flag_of_Uruguay.svg','national','URY'),
-('Venezuela',13,'South America','https://upload.wikimedia.org/wikipedia/commons/0/06/Flag_of_Venezuela.svg','national','VEN'),
+('Venezuela',13,'South America','https://upload.wikimedia.org/wikipedia/commons/0/06/Flag_of_Venezuela.svg','national','VEN')

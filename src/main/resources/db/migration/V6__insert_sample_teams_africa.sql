@@ -53,4 +53,4 @@ INSERT INTO teams ("name", division_id, division, flag_url, team_type, code) VAL
 ('Seychelles',24,'Southern Africa','https://upload.wikimedia.org/wikipedia/commons/f/fc/Flag_of_Seychelles.svg','national','SYC'),
 ('South Africa',24,'Southern Africa','https://upload.wikimedia.org/wikipedia/commons/a/af/Flag_of_South_Africa.svg','national','ZAF'),
 ('Zambia',24,'Southern Africa','https://upload.wikimedia.org/wikipedia/commons/0/06/Flag_of_Zambia.svg','national','ZMB'),
-('Zimbabwe',24,'Southern Africa','https://upload.wikimedia.org/wikipedia/commons/6/6a/Flag_of_Zimbabwe.svg','national','ZWE'),
+('Zimbabwe',24,'Southern Africa','https://upload.wikimedia.org/wikipedia/commons/6/6a/Flag_of_Zimbabwe.svg','national','ZWE')

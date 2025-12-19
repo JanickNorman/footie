@@ -67,4 +67,4 @@ INSERT INTO teams ("name", division_id, division, flag_url, team_type, code) VAL
 ('Syria',19,'Middle East','https://upload.wikimedia.org/wikipedia/commons/5/54/Flag_of_Syria_%282025-%29.svg','national','SYR'),
 ('United Arab Emirates',19,'Middle East','https://upload.wikimedia.org/wikipedia/commons/c/cb/Flag_of_the_United_Arab_Emirates.svg','national','ARE'),
 ('Yemen',19,'Middle East','https://upload.wikimedia.org/wikipedia/commons/8/89/Flag_of_Yemen.svg','national','YEM'),
-('Syrian Arab Republic',19,'Middle East','https://upload.wikimedia.org/wikipedia/commons/e/e1/Flag_of_the_United_Arab_Republic_%281958%E2%80%931971%29%2C_Flag_of_Syria_%281980%E2%80%932024%29.svg','national','SYR-AR'),
+('Syrian Arab Republic',19,'Middle East','https://upload.wikimedia.org/wikipedia/commons/e/e1/Flag_of_the_United_Arab_Republic_%281958%E2%80%931971%29%2C_Flag_of_Syria_%281980%E2%80%932024%29.svg','national','SYR-AR')

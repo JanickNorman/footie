@@ -60,4 +60,4 @@ INSERT INTO teams ("name", division_id, division, flag_url, team_type, code) VAL
 ('Northern Cyprus',8,'Southeastern Europe','https://upload.wikimedia.org/wikipedia/commons/1/1e/Flag_of_the_Turkish_Republic_of_Northern_Cyprus.svg','national','NCYP'),
 ('Abkhazia',8,'Southeastern Europe','https://upload.wikimedia.org/wikipedia/commons/7/7a/Flag_of_the_Republic_of_Abkhazia.svg','national','ABK'),
 ('South Ossetia',8,'Southeastern Europe','https://upload.wikimedia.org/wikipedia/commons/1/12/Flag_of_South_Ossetia.svg','national','SOS'),
-('Artsakh',8,'Southeastern Europe','https://upload.wikimedia.org/wikipedia/commons/3/3d/Flag_of_Artsakh.svg','national','ART'),
+('Artsakh',8,'Southeastern Europe','https://upload.wikimedia.org/wikipedia/commons/3/3d/Flag_of_Artsakh.svg','national','ART')
