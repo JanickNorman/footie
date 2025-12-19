@@ -18,7 +18,7 @@ import reactor.core.publisher.Mono;
 
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(originPatterns = {"http://localhost:3000","http://127.0.0.1:3000","https://*.ngrok-free.app","http://*.ngrok.io"})
 @RequestMapping("/api")
 public class DrawController {
     private final DrawService drawService;
@@ -30,7 +30,7 @@ public class DrawController {
     }
     
     @PostMapping("/draw")
-    public Mono<Map<String, List<String>>> runDraw() {
+    public Mono<Map<String, List<Team>>> runDraw() {
         return drawService.runDraw();
     }
 

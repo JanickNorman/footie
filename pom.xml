@@ -31,7 +31,7 @@
 		<!-- Flyway defaults; override via -Dflyway.url / -Dflyway.user / -Dflyway.password or environment vars -->
 		<flyway.url>jdbc:postgresql://localhost:5432/footie</flyway.url>
 		<flyway.user>postgres</flyway.user>
-		<flyway.password>securepassword</flyway.password>
+		<flyway.password>W3lcome123</flyway.password>
 	</properties>
 	<dependencies>
 		<dependency>

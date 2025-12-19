@@ -27,31 +27,32 @@ public class TeamService {
         this.client = client;
     }
 
-    private Team toDomain(TeamEntity e) {
+    private Team toDomain(TeamEntity e, Long index) {
         if (e == null) return null;
-        return new ConcreteTeam(e.getName(), e.getContinent(), e.getPot() == null ? 0 : e.getPot(), e.getCode(), e.getFlagUrl());
+        int pot = (int)(index % 4) + 1;
+        return new ConcreteTeam(e.getName(), e.getContinent(), pot, e.getCode(), e.getFlagUrl());
     }
 
     public Flux<Team> findAll() {
         Query q = Query.empty();
-        return template.select(q, TeamEntity.class).map(this::toDomain);
+        return template.select(q, TeamEntity.class).index().map(tuple -> toDomain(tuple.getT2(), tuple.getT1()));
     }
 
     public Mono<Team> findByCode(String code) {
         Query q = Query.query(where("code").is(code));
-        return template.selectOne(q, TeamEntity.class).map(this::toDomain);
+        return template.selectOne(q, TeamEntity.class).map(e -> toDomain(e, 0L));
     }
 
-    public Mono<Long> save(Team team) {
-        return client.sql(UPSERT_SQL)
-                .bind("name", team.getName())
-                .bind("code", team.getCode())
-                .bind("continent", team.getContinents().stream().findFirst().orElse(null))
-                .bind("pot", team.pot())
-                .bind("flag_url", team.getFlagUrl())
-                .fetch()
-                .rowsUpdated();
-    }
+    // public Mono<Long> save(Team team) {
+    //     return client.sql(UPSERT_SQL)
+    //             .bind("name", team.getName())
+    //             .bind("code", team.getCode())
+    //             .bind("continent", team.getContinents().stream().findFirst().orElse(null))
+    //             .bind("pot", team.pot())
+    //             .bind("flag_url", team.getFlagUrl())
+    //             .fetch()
+    //             .rowsUpdated();
+    // }
 
     public Mono<Void> deleteByCode(String code) {
         Query q = Query.query(where("code").is(code));
