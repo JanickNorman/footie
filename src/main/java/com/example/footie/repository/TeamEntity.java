@@ -19,8 +19,6 @@ public class TeamEntity {
     @Column("fifa_continent")
     private String continent;
 
-    private Integer pot;
-
     @Column("flag_url")
     private String flagUrl;
 

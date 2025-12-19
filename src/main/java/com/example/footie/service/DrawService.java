@@ -22,6 +22,7 @@ import com.example.footie.newSimulator.constraint.NoSameContinentInGroupForNonEu
 import com.example.footie.newSimulator.constraint.SamePotCantBeInTheSameGroup;
 import com.example.footie.newSimulator.constraint.TopSeedsBracketSeparation;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -33,14 +34,17 @@ public class DrawService {
     }
 
     public Mono<Map<String, List<Team>>> runDraw() {
-        return teamRepository.findAll().collectList()
+        Flux<Team> teams = this.teamRepository.getRandomWorldCupTeams(48);
+
+        return teams.collectList()
                 .defaultIfEmpty(TeamFactory.createWorldCupTeams(4)).map(this::doRun);
                 // .flatMap(teams -> Mono.fromCallable(() -> doRun(teams)).subscribeOn(Schedulers.boundedElastic()));
     }
 
     private Map<String, List<Team>> doRun(List<Team> teams) {
-        teams = TeamFactory.createWorldCupTeams(4);
-
+        // teams = TeamFactory.createWorldCupTeams(4);
+        System.out.println("Running draw with teams: " + teams.stream().map(t -> t.getName() + " (" + t.pot() + ")").collect(Collectors.joining(", ")));
+        System.out.println("Total teams: " + teams.size());
         List<GroupSlot> slots = buildWorldCupSlots();
 
         ConstraintManager cm = new ConstraintManager();

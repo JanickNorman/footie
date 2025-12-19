@@ -1,5 +1,11 @@
 package com.example.footie.service;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import static org.springframework.data.relational.core.query.Criteria.where;
 import org.springframework.data.relational.core.query.Query;
@@ -43,30 +49,58 @@ public class TeamService {
         return template.selectOne(q, TeamEntity.class).map(e -> toDomain(e, 0L));
     }
 
-        public Flux<Team> getRandomTeams(int count) {
-        // Use template-based querying and shuffle in-memory — acceptable for a small teams table.
-            return template.select(Query.empty(), TeamEntity.class)
+    public Flux<Team> getRandomWorldCupTeams(int count) {
+        // Fixed quotas per continent for the world cup selection.
+        final Map<String, Integer> quotas = Map.of(
+                "Europe", 16,
+                "Asia", 9,
+                "Africa", 9,
+                "SouthAmerica", 7,
+                "NorthAmerica", 6,
+                "Oceania", 1
+        );
+
+        return template.select(Query.empty(), TeamEntity.class)
                 .collectList()
                 .flatMapMany(list -> {
-                if (list.isEmpty() || count <= 0) return Flux.empty();
-                java.util.Collections.shuffle(list);
-                int to = Math.min(count, list.size());
-                return Flux.fromIterable(list.subList(0, to))
-                    .index()
-                    .map(tuple -> {
-                    TeamEntity e = tuple.getT2();
-                    int pot = ((int)(tuple.getT1() / 12)) + 1;
-                    pot = Math.min(pot, 4);
-                    return new ConcreteTeam(
-                        e.getName(),
-                        e.getContinent(),
-                        pot,
-                        e.getCode(),
-                        e.getFlagUrl()
-                    );
+                    if (list.isEmpty()) return Flux.empty();
+
+                    // group by continent (fifa_continent stored in TeamEntity.continent)
+                    Map<String, List<TeamEntity>> byContinent = list.stream()
+                            .collect(Collectors.groupingBy(e -> e.getContinent() == null ? "" : e.getContinent()));
+
+                    List<TeamEntity> selected = new ArrayList<>();
+
+                    // sample per quota
+                    quotas.forEach((continent, q) -> {
+                        List<TeamEntity> pool = byContinent.getOrDefault(continent, List.of());
+                        if (pool.isEmpty()) return;
+                        Collections.shuffle(pool);
+                        int take = Math.min(q, pool.size());
+                        for (int i = 0; i < take; i++) {
+                            TeamEntity e = pool.get(i);
+                            selected.add(e);
+                        }
                     });
+
+                    List<TeamEntity> finalSelection = selected;
+                    if (count > 0 && selected.size() > count) {
+                        Collections.shuffle(selected);
+                        finalSelection = new ArrayList<>(selected.subList(0, count));
+                    }
+
+                    // map to domain and assign pots by index (group teams into pots of 12)
+                    List<Team> result = new ArrayList<>(finalSelection.size());
+                    for (int i = 0; i < finalSelection.size(); i++) {
+                        TeamEntity e = finalSelection.get(i);
+                        int pot = (i / 12) + 1;
+                        pot = Math.min(pot, 4);
+                        result.add(new ConcreteTeam(e.getName(), e.getContinent(), pot, e.getCode(), e.getFlagUrl()));
+                    }
+
+                    return Flux.fromIterable(result);
                 });
-        }
+    }
 
     // public Mono<Long> save(Team team) {
     //     return client.sql(UPSERT_SQL)
