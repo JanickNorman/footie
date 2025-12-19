@@ -52,7 +52,7 @@ public class Simulator {
     /**
      * Place all previously registered teams using a team-first backtracking solver.
      */
-    public boolean makePlacements() {
+    public boolean makePlacements() throws RuntimeException {
         if (registeredTeams.isEmpty()) {
             System.out.println("No registered teams to place");
             return true;
@@ -111,7 +111,7 @@ public class Simulator {
         return true;
     }
 
-    public boolean shuffleAndSolve() {
+    public boolean shuffleAndSolve() throws RuntimeException {
         List<Team> teams = assignedTeams.values().stream().collect(Collectors.toList());
         Collections.shuffle(teams);
         teams.stream().filter(t -> t.pot() == 1).forEach(t -> placeTeam(t.getName()));

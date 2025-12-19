@@ -47,7 +47,7 @@ public class BacktrackingSolver {
      * chosen with MRV-on-teams) into the state. Returns true if a complete
      * placement for those teams exists.
      */
-    public boolean solveTeamFirst(AssignmentState state, List<Team> teamsToPlace, int depth) {
+    public boolean solveTeamFirst(AssignmentState state, List<Team> teamsToPlace, int depth) throws RuntimeException {
         long visited = nodesVisited.incrementAndGet();
         if (visited > maxNodes) throw new RuntimeException("Node limit reached");
 
