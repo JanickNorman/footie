@@ -9,6 +9,34 @@ import java.util.Set;
 public final class TeamFactory {
     public static final Map<String, String> CONTINENT_MAP = new HashMap<>();
 
+    public static final String[][] worldCup2026TeamsByPot = {
+                {
+                        "Canada", "Mexico", "USA",
+                        "Spain", "Argentina", "France",
+                        "England", "Brazil", "Portugal",
+                        "Netherlands", "Belgium", "Germany"
+                },
+                {
+                        "Croatia", "Morocco", "Colombia",
+                        "Uruguay", "Switzerland", "Japan",
+                        "Senegal", "Iran", "SouthKorea",
+                        "Ecuador", "Austria", "Australia"
+                },
+                {
+                        "Norway", "Panama", "Egypt",
+                        "Algeria", "Scotland", "Paraguay",
+                        "Tunisia", "CotedIvoire", "Uzbekistan",
+                        "Qatar", "SaudiArabia", "SouthAfrica"
+                },
+                {
+                        "Jordan", "CapeVerde", "Ghana",
+                        "Curacao", "Haiti", "NewZealand",
+                        "Euro A", "Euro B",
+                        "Euro C", "Euro D",
+                        "FIFA 1", "FIFA 2"
+                }
+        };
+
     static {
         CONTINENT_MAP.put("Germany", "Europe");
         CONTINENT_MAP.put("Spain", "Europe");
@@ -148,34 +176,6 @@ public final class TeamFactory {
 
     public static List<Team> createWorldCupTeams(final int total_pot) {
         Map<String, Team> teams = new HashMap<>();
-
-        String[][] worldCup2026TeamsByPot = {
-                {
-                        "Canada", "Mexico", "USA",
-                        "Spain", "Argentina", "France",
-                        "England", "Brazil", "Portugal",
-                        "Netherlands", "Belgium", "Germany"
-                },
-                {
-                        "Croatia", "Morocco", "Colombia",
-                        "Uruguay", "Switzerland", "Japan",
-                        "Senegal", "Iran", "SouthKorea",
-                        "Ecuador", "Austria", "Australia"
-                },
-                {
-                        "Norway", "Panama", "Egypt",
-                        "Algeria", "Scotland", "Paraguay",
-                        "Tunisia", "CotedIvoire", "Uzbekistan",
-                        "Qatar", "SaudiArabia", "SouthAfrica"
-                },
-                {
-                        "Jordan", "CapeVerde", "Ghana",
-                        "Curacao", "Haiti", "NewZealand",
-                        "Euro A", "Euro B",
-                        "Euro C", "Euro D",
-                        "FIFA 1", "FIFA 2"
-                }
-        };
 
         for (int pot = 1; pot <= worldCup2026TeamsByPot.length; pot++) {
             for (String teamName : worldCup2026TeamsByPot[pot - 1]) {
