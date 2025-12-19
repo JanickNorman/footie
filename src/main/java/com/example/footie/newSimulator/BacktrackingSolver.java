@@ -30,6 +30,10 @@ public class BacktrackingSolver {
         this.nodesVisited.set(0);
     }
 
+    public void setOnlyCheckDomainAfter(int onlyCheckDomainAfter) {
+        this.onlyCheckDomainAfter = onlyCheckDomainAfter;
+    }
+
     public long getNodesVisited() {
         return nodesVisited.get();
     }

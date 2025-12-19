@@ -60,6 +60,7 @@ public class DrawService {
         )));
 
         Simulator simulator = new Simulator(slots, cm, teams);
+        simulator.setOnlyCheckDomainAfter(1);
         boolean solved = simulator.solveWorldCup2026Draw();
 
         Map<String, List<Team>> grouped = new TreeMap<>();

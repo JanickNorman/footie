@@ -77,6 +77,10 @@ public class Simulator {
         return ok;
     }
 
+    public void setOnlyCheckDomainAfter(int onlyCheckDomainAfter) {
+        backtrackingSolver.setOnlyCheckDomainAfter(onlyCheckDomainAfter);
+    }
+
     public AssignmentState getState() {
         return state;
     }
