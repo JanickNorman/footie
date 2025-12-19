@@ -20,10 +20,10 @@ import com.example.footie.newSimulator.constraint.AtMostTwoEuropeTeamsPerGroup;
 import com.example.footie.newSimulator.constraint.ConstraintManager;
 import com.example.footie.newSimulator.constraint.NoSameContinentInGroupForNonEurope;
 import com.example.footie.newSimulator.constraint.SamePotCantBeInTheSameGroup;
-import com.example.footie.newSimulator.constraint.TopSeedsBracketSeparation;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @Service
 public class DrawService {
@@ -37,8 +37,8 @@ public class DrawService {
         Flux<Team> teams = this.teamRepository.getRandomWorldCupTeams(48);
 
         return teams.collectList()
-                .defaultIfEmpty(TeamFactory.createWorldCupTeams(4)).map(this::doRun);
-                // .flatMap(teams -> Mono.fromCallable(() -> doRun(teams)).subscribeOn(Schedulers.boundedElastic()));
+                .defaultIfEmpty(TeamFactory.createWorldCupTeams(4))
+                .flatMap(list -> Mono.fromCallable(() -> doRun(list)).subscribeOn(Schedulers.boundedElastic()));
     }
 
     private Map<String, List<Team>> doRun(List<Team> teams) {
@@ -52,16 +52,24 @@ public class DrawService {
         cm.addConstraint(new SamePotCantBeInTheSameGroup());
         cm.addConstraint(new AtMostTwoEuropeTeamsPerGroup());
         cm.addConstraint(new NoSameContinentInGroupForNonEurope());
-        cm.addConstraint(new TopSeedsBracketSeparation(Map.of(
-                "Argentina", 1,
-                "Spain", 2,
-                "France", 3,
-                "England", 4
-        )));
+        // cm.addConstraint(new TopSeedsBracketSeparation(Map.of(
+        //         "Argentina", 1,
+        //         "Spain", 2,
+        //         "France", 3,
+        //         "England", 4
+        // )));
 
         Simulator simulator = new Simulator(slots, cm, teams);
-        simulator.setOnlyCheckDomainAfter(1);
-        boolean solved = simulator.solveWorldCup2026Draw();
+        simulator.setOnlyCheckDomainAfter(28);
+
+        boolean solved = false;
+        try {
+            solved = simulator.solveWorldCup2026Draw();
+            
+        } catch (RuntimeException e) {
+            solved = simulator.solveWorldCup2026Draw();
+            System.out.println("Failed to set max nodes: " + e.getMessage());
+        }
 
         Map<String, List<Team>> grouped = new TreeMap<>();
         if (!solved) return grouped;
