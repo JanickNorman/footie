@@ -43,6 +43,31 @@ public class TeamService {
         return template.selectOne(q, TeamEntity.class).map(e -> toDomain(e, 0L));
     }
 
+        public Flux<Team> getRandomTeams(int count) {
+        // Use template-based querying and shuffle in-memory — acceptable for a small teams table.
+            return template.select(Query.empty(), TeamEntity.class)
+                .collectList()
+                .flatMapMany(list -> {
+                if (list.isEmpty() || count <= 0) return Flux.empty();
+                java.util.Collections.shuffle(list);
+                int to = Math.min(count, list.size());
+                return Flux.fromIterable(list.subList(0, to))
+                    .index()
+                    .map(tuple -> {
+                    TeamEntity e = tuple.getT2();
+                    int pot = ((int)(tuple.getT1() / 12)) + 1;
+                    pot = Math.min(pot, 4);
+                    return new ConcreteTeam(
+                        e.getName(),
+                        e.getContinent(),
+                        pot,
+                        e.getCode(),
+                        e.getFlagUrl()
+                    );
+                    });
+                });
+        }
+
     // public Mono<Long> save(Team team) {
     //     return client.sql(UPSERT_SQL)
     //             .bind("name", team.getName())
