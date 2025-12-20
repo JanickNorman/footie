@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,7 +31,10 @@ public class DrawController {
     }
     
     @PostMapping("/draw")
-    public Mono<Map<String, List<Team>>> runDraw() {
+    public Mono<Map<String, List<Team>>> runDraw(@RequestBody(required = false) Map<String, Object> body) {
+        if (body != null && body.get("random") == Boolean.TRUE) {
+            return drawService.runDrawRandomTeams(List.of());
+        }
         return drawService.runDraw();
     }
     

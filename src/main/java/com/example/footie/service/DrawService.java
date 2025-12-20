@@ -42,6 +42,13 @@ public class DrawService {
                 .flatMap(list -> Mono.fromCallable(() -> doRun(list)).subscribeOn(Schedulers.boundedElastic()));
     }
 
+    public Mono<Map<String, List<Team>>> runDrawRandomTeams(List<Team> teams) {
+        Flux<Team> teamsFlux = teamRepository.getRandomWorldCupTeams(48);
+        return teamsFlux.collectList()
+                .defaultIfEmpty(TeamFactory.createWorldCupTeams(4))
+                .flatMap(list -> Mono.fromCallable(() -> doRun(list)).subscribeOn(Schedulers.boundedElastic()));
+    }
+
     private Map<String, List<Team>> doRun(List<Team> teams) {
         System.out.println("Running draw with teams: " + teams.stream().map(t -> t.getName() + " (" + t.pot() + ")").collect(Collectors.joining(", ")));
         System.out.println("Total teams: " + teams.size());

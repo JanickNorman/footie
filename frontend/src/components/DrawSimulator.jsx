@@ -11,7 +11,7 @@ export default function DrawSimulator(){
     setError(null)
     try{
       // fetch draw and teams in parallel so we can show flags
-      const [draw] = await Promise.all([runDraw()])
+      const [draw] = await Promise.all([runDraw({ random: false })])
       console.log('draw result', draw);
       setResult({ draw })
     }catch(e){
