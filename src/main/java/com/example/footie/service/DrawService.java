@@ -36,7 +36,7 @@ public class DrawService {
     public Mono<Map<String, List<Team>>> runDraw() {
         // Flux<Team> teams = this.teamRepository.getRandomWorldCupTeams(48);
         Flux<Team> teams = getWorldCupTeams();
-
+ 
         return teams.collectList()
                 .defaultIfEmpty(TeamFactory.createWorldCupTeams(4))
                 .flatMap(list -> Mono.fromCallable(() -> doRun(list)).subscribeOn(Schedulers.boundedElastic()));

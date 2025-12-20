@@ -66,6 +66,7 @@ public final class TeamFactory {
         CONTINENT_MAP.put("Peru", "SouthAmerica");
         CONTINENT_MAP.put("Venezuela", "SouthAmerica");
         CONTINENT_MAP.put("Paraguay", "SouthAmerica");
+        CONTINENT_MAP.put("Bolivia", "SouthAmerica");
 
         CONTINENT_MAP.put("Egypt", "Africa");
         CONTINENT_MAP.put("Nigeria", "Africa");
@@ -101,8 +102,10 @@ public final class TeamFactory {
         CONTINENT_MAP.put("ElSalvador", "NorthAmerica");
         CONTINENT_MAP.put("Haiti", "NorthAmerica");
         CONTINENT_MAP.put("Curacao", "NorthAmerica");
+        CONTINENT_MAP.put("Suriname", "NorthAmerica");
 
         CONTINENT_MAP.put("NewZealand", "Oceania");
+        CONTINENT_MAP.put("NewCaledonia", "Oceania");
     }
 
     private TeamFactory() {
@@ -153,6 +156,24 @@ public final class TeamFactory {
         NAME_TO_CODE.put("Curacao", "CUW");
         NAME_TO_CODE.put("Haiti", "HTI");
         NAME_TO_CODE.put("NewZealand", "NZL");
+        NAME_TO_CODE.put("Denmark", "DEN");
+        NAME_TO_CODE.put("Azerbaijan", "AZE");
+        NAME_TO_CODE.put("Wales", "WAL");
+        NAME_TO_CODE.put("Hungary", "HUN");
+        NAME_TO_CODE.put("Slovakia", "SVK");
+        NAME_TO_CODE.put("Serbia", "SRB");
+        NAME_TO_CODE.put("RepublicOfIreland", "IRL");
+        NAME_TO_CODE.put("Sweden", "SWE");
+        NAME_TO_CODE.put("Poland", "POL");
+        NAME_TO_CODE.put("Turkey", "TUR");
+        NAME_TO_CODE.put("Finland", "FIN");
+        NAME_TO_CODE.put("Bolivia", "BOL");
+        NAME_TO_CODE.put("Iraq", "IRQ");
+        NAME_TO_CODE.put("Suriname", "SUR");
+        NAME_TO_CODE.put("DRCongo", "COD");
+        NAME_TO_CODE.put("Jamaica", "JAM");
+        NAME_TO_CODE.put("NewCaledonia", "NCL");
+        
     }
 
     public static Team create(String name) {
@@ -179,14 +200,18 @@ public final class TeamFactory {
 
         for (int pot = 1; pot <= worldCup2026TeamsByPot.length; pot++) {
             for (String teamName : worldCup2026TeamsByPot[pot - 1]) {
-                if (teamName.startsWith("Euro")) {
-                    teams.put(teamName, new PlaceholderTeam(teamName, Set.of("Europe"), "placeholder", pot, "https://upload.wikimedia.org/wikipedia/en/9/9d/UEFA_full_logo.svg"));
+                if (teamName.startsWith("Euro A")) {
+                    teams.put(teamName, new PlaceholderTeam(teamName, List.of(create("Denmark"), create("Azerbaijan"), create("Wales")), "placeholder", pot, "https://upload.wikimedia.org/wikipedia/en/9/9d/UEFA_full_logo.svg"));
+                } else if (teamName.startsWith("Euro B")) {
+                    teams.put(teamName, new PlaceholderTeam(teamName, List.of(create("Hungary"), create("Norway"), create("Slovakia")), "placeholder", pot, "https://upload.wikimedia.org/wikipedia/en/9/9d/UEFA_full_logo.svg"));
+                } else if (teamName.startsWith("Euro C")) {
+                    teams.put(teamName, new PlaceholderTeam(teamName, List.of(create("Serbia"), create("RepublicOfIreland"), create("Sweden")), "placeholder", pot, "https://upload.wikimedia.org/wikipedia/en/9/9d/UEFA_full_logo.svg"));
+                } else if (teamName.startsWith("Euro D")) {
+                    teams.put(teamName, new PlaceholderTeam(teamName, List.of(create("Poland"), create("Turkey"), create("Finland")), "placeholder", pot, "https://upload.wikimedia.org/wikipedia/en/9/9d/UEFA_full_logo.svg"));
                 } else if (teamName.equals("FIFA 1")) {
-                    teams.put(teamName, new PlaceholderTeam(teamName, Set.of("SouthAmerica", "Asia", "NorthAmerica"),
-                            "placeholder", pot, "https://upload.wikimedia.org/wikipedia/commons/1/10/Flag_of_FIFA.svg"));
+                    teams.put(teamName, new PlaceholderTeam(teamName, List.of(create("Bolivia"), create("Iraq"), create("Suriname")), "placeholder", pot, "https://upload.wikimedia.org/wikipedia/commons/1/10/Flag_of_FIFA.svg"));
                 } else if (teamName.equals("FIFA 2")) {
-                    teams.put(teamName, new PlaceholderTeam(teamName, Set.of("Africa", "NorthAmerica", "Oceania"),
-                            "placeholder", pot, "https://upload.wikimedia.org/wikipedia/commons/1/10/Flag_of_FIFA.svg"));
+                    teams.put(teamName, new PlaceholderTeam(teamName, List.of(create("DRCongo"), create("Jamaica"), create("NewCaledonia")), "placeholder", pot, "https://upload.wikimedia.org/wikipedia/commons/1/10/Flag_of_FIFA.svg"));
                 } else {
                     teams.put(teamName, new ConcreteTeam(teamName, CONTINENT_MAP.get(teamName), pot,
                             NAME_TO_CODE.get(teamName)));
