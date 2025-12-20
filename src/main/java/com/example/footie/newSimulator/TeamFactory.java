@@ -180,13 +180,13 @@ public final class TeamFactory {
         for (int pot = 1; pot <= worldCup2026TeamsByPot.length; pot++) {
             for (String teamName : worldCup2026TeamsByPot[pot - 1]) {
                 if (teamName.startsWith("Euro")) {
-                    teams.put(teamName, new PlaceholderTeam(teamName, Set.of("Europe"), "placeholder", pot));
+                    teams.put(teamName, new PlaceholderTeam(teamName, Set.of("Europe"), "placeholder", pot, "https://upload.wikimedia.org/wikipedia/en/9/9d/UEFA_full_logo.svg"));
                 } else if (teamName.equals("FIFA 1")) {
                     teams.put(teamName, new PlaceholderTeam(teamName, Set.of("SouthAmerica", "Asia", "NorthAmerica"),
-                            "placeholder", pot));
+                            "placeholder", pot, "https://upload.wikimedia.org/wikipedia/commons/1/10/Flag_of_FIFA.svg"));
                 } else if (teamName.equals("FIFA 2")) {
                     teams.put(teamName, new PlaceholderTeam(teamName, Set.of("Africa", "NorthAmerica", "Oceania"),
-                            "placeholder", pot));
+                            "placeholder", pot, "https://upload.wikimedia.org/wikipedia/commons/1/10/Flag_of_FIFA.svg"));
                 } else {
                     teams.put(teamName, new ConcreteTeam(teamName, CONTINENT_MAP.get(teamName), pot,
                             NAME_TO_CODE.get(teamName)));

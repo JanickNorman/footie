@@ -33,6 +33,11 @@ public class DrawController {
     public Mono<Map<String, List<Team>>> runDraw() {
         return drawService.runDraw();
     }
+    
+    @GetMapping("/draw")
+    public Mono<Map<String, List<Team>>> getRunDraw() {
+        return drawService.runDraw();
+    }
 
     @GetMapping("/teams")
     public Flux<Team> teams() {

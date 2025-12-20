@@ -102,16 +102,6 @@ public class TeamService {
                 });
     }
 
-    // public Mono<Long> save(Team team) {
-    //     return client.sql(UPSERT_SQL)
-    //             .bind("name", team.getName())
-    //             .bind("code", team.getCode())
-    //             .bind("continent", team.getContinents().stream().findFirst().orElse(null))
-    //             .bind("pot", team.pot())
-    //             .bind("flag_url", team.getFlagUrl())
-    //             .fetch()
-    //             .rowsUpdated();
-    // }
 
     public Mono<Void> deleteByCode(String code) {
         Query q = Query.query(where("code").is(code).and("team_type").is("national"));

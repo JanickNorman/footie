@@ -21,4 +21,6 @@ public interface Team {
         String code = getCode();
         return code != null ? "/flags/" + code + ".svg" : null;
     }
+
+    void setFlag(String url);
 }

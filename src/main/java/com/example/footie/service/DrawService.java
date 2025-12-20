@@ -34,7 +34,8 @@ public class DrawService {
     }
 
     public Mono<Map<String, List<Team>>> runDraw() {
-        Flux<Team> teams = this.teamRepository.getRandomWorldCupTeams(48);
+        // Flux<Team> teams = this.teamRepository.getRandomWorldCupTeams(48);
+        Flux<Team> teams = getWorldCupTeams();
 
         return teams.collectList()
                 .defaultIfEmpty(TeamFactory.createWorldCupTeams(4))
@@ -42,7 +43,6 @@ public class DrawService {
     }
 
     private Map<String, List<Team>> doRun(List<Team> teams) {
-        // teams = TeamFactory.createWorldCupTeams(4);
         System.out.println("Running draw with teams: " + teams.stream().map(t -> t.getName() + " (" + t.pot() + ")").collect(Collectors.joining(", ")));
         System.out.println("Total teams: " + teams.size());
         List<GroupSlot> slots = buildWorldCupSlots();
@@ -98,6 +98,23 @@ public class DrawService {
         });
 
         return grouped;
+    }
+
+    private Flux<Team> getWorldCupTeams() {
+        List<Team> teams = TeamFactory.createWorldCupTeams(4);
+        return teamRepository.findAll().collectList()
+            .map(dbTeams -> {
+                if (!dbTeams.isEmpty()) {
+                    Map<String, Team> dbTeamMap = dbTeams.stream()
+                        .collect(Collectors.toMap(Team::getCode, t -> t));
+                    for (Team t : teams) {
+                        Team dbTeam = dbTeamMap.get(t.getCode());
+                        if (dbTeam != null) t.setFlag(dbTeam.getFlagUrl());
+                    }
+                }
+                return teams;
+            })
+            .flatMapMany(Flux::fromIterable);
     }
 
     private List<GroupSlot> buildWorldCupSlots() {
