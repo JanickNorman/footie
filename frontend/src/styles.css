@@ -1,11 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root{
   --bg:#f7fafc;
   --card:#ffffff;
   --accent:#2b6cb0;
   --text:#1a202c;
 }
+
 body{font-family:Inter,Segoe UI,Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);margin:0;padding:24px}
-.app{max-width:900px;margin:0 auto}
+.app{max-width:1200px;margin:0 auto}
 .draw-sim{background:var(--card);padding:16px;border-radius:8px;box-shadow:0 8px 24px rgba(2,6,23,0.06)}
 button{background:var(--accent);color:white;padding:8px 12px;border:none;border-radius:6px;cursor:pointer}
 button:disabled{opacity:0.6;cursor:not-allowed}
@@ -39,3 +44,62 @@ button:disabled{opacity:0.6;cursor:not-allowed}
 @media (max-width:600px){
   .groups-grid{grid-template-columns:repeat(2,1fr)}
 }
+
+/* Bracket styles */
+.bracket{display:flex;gap:28px;align-items:flex-start;overflow-x:auto;padding:8px 0}
+.bracket-column{min-width:160px;display:flex;flex-direction:column;gap:12px;align-items:center}
+.round-title{margin:0 0 8px 0;font-size:13px;color:var(--accent)}
+.round-list{display:flex;flex-direction:column;gap:12px}
+.round-item{display:flex;justify-content:center}
+.match-box{background:linear-gradient(180deg,#ffffff,#fbfdff);border-radius:10px;padding:8px;min-width:140px;box-shadow:0 10px 24px rgba(43,108,176,0.08);border:1px solid rgba(43,108,176,0.06)}
+.team-line{display:flex;justify-content:space-between;padding:6px 8px;border-radius:6px;margin:2px 0;align-items:center}
+.team-line.winner{background:linear-gradient(90deg,rgba(43,108,176,0.06),transparent);font-weight:700}
+.team-label{font-size:13px}
+.team-score{background:rgba(2,6,23,0.05);padding:4px 8px;border-radius:6px;font-weight:600;font-size:12px}
+.match-box.empty{opacity:0.6;min-height:56px;display:flex;align-items:center;justify-content:center}
+.match-box.small{min-width:100px;padding:6px}
+
+@media (max-width:800px){
+  .bracket{gap:14px}
+  .bracket-column{min-width:120px}
+}
+
+/* Grid-based bracket layout */
+.bracket-grid{display:grid;grid-template-columns:160px 160px 160px 260px 160px 160px 160px;gap:12px;align-items:start;overflow-x:auto}
+.bracket-grid .col{position:relative}
+.bracket-grid .col .round-title{margin-bottom:12px;text-align:center}
+.bracket-grid .match-item{width:100%;display:flex;align-items:center;justify-content:center}
+.bracket-grid .match-item .match-box{width:92%}
+.final-col .match-item{display:flex;align-items:center;justify-content:center}
+
+.bracket-connectors{position:absolute;pointer-events:none;left:0;top:0}
+
+
+/* Group table styles */
+.group-table{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.group-table-header{display:grid;grid-template-columns: 1fr repeat(7, 40px);gap:8px;align-items:center;padding:6px 8px;border-bottom:1px solid rgba(2,6,23,0.06);font-size:13px}
+.group-table-body{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.group-row{display:grid;grid-template-columns: 1fr repeat(7, 40px);gap:8px;align-items:center;padding:6px;border-radius:6px}
+.team-cell{display:flex;align-items:center;gap:8px}
+
+/* Compact group table (flag, name, pts) */
+.group-table-compact{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.compact-row{display:flex;align-items:center;justify-content:space-between;padding:8px;border-radius:8px;background:linear-gradient(180deg,#ffffff,#fbfdff);box-shadow:0 6px 18px rgba(43,108,176,0.04);border:1px solid rgba(43,108,176,0.04)}
+.compact-row.top-two{background:linear-gradient(90deg,rgba(43,108,176,0.04),#ffffff)}
+.pts-col{min-width:44px;text-align:center;font-weight:700}
+.team-flag{width:26px;height:18px;object-fit:cover;border-radius:3px;box-shadow:0 2px 6px rgba(2,6,23,0.06)}
+.flag-wrapper{display:inline-flex;align-items:center}
+.flag-emoji{font-size:18px}
+.team-col{display:flex;align-items:center;gap:8px}
+.stat-col{display:flex;align-items:center;justify-content:center;font-weight:600}
+
+@media (max-width:600px){
+  .group-table-header, .group-row{grid-template-columns: 1fr repeat(7, 34px)}
+  .team-flag{width:20px;height:14px}
+}
+
+/* 12-column grid utilities */
+.grid-12{display:grid;grid-template-columns:repeat(12,1fr);gap:16px;width:100%}
+.col-12{grid-column:1 / -1}
+.col-span-6{grid-column: span 6}
+
