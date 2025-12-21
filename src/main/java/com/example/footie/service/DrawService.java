@@ -36,21 +36,22 @@ public class DrawService {
     public Mono<Map<String, List<Team>>> runDraw() {
         // Flux<Team> teams = this.teamRepository.getRandomWorldCupTeams(48);
         Flux<Team> teams = getWorldCupTeams();
- 
+
         return teams.collectList()
                 .defaultIfEmpty(TeamFactory.createWorldCupTeams(4))
                 .flatMap(list -> Mono.fromCallable(() -> doRun(list)).subscribeOn(Schedulers.boundedElastic()));
     }
 
     public Mono<Map<String, List<Team>>> runDrawRandomTeams(List<Team> teams) {
-        Flux<Team> teamsFlux = teamRepository.getRandomWorldCupTeams(48);
+        Flux<Team> teamsFlux = teamRepository.getRandomWorldCupTeams(48, Math.random() < 0.5);
         return teamsFlux.collectList()
                 .defaultIfEmpty(TeamFactory.createWorldCupTeams(4))
                 .flatMap(list -> Mono.fromCallable(() -> doRun(list)).subscribeOn(Schedulers.boundedElastic()));
     }
 
     private Map<String, List<Team>> doRun(List<Team> teams) {
-        System.out.println("Running draw with teams: " + teams.stream().map(t -> t.getName() + " (" + t.pot() + ")").collect(Collectors.joining(", ")));
+        System.out.println("Running draw with teams: "
+                + teams.stream().map(t -> t.getName() + " (" + t.pot() + ")").collect(Collectors.joining(", ")));
         System.out.println("Total teams: " + teams.size());
         List<GroupSlot> slots = buildWorldCupSlots();
 
@@ -60,10 +61,10 @@ public class DrawService {
         cm.addConstraint(new AtMostTwoEuropeTeamsPerGroup());
         cm.addConstraint(new NoSameContinentInGroupForNonEurope());
         // cm.addConstraint(new TopSeedsBracketSeparation(Map.of(
-        //         "Argentina", 1,
-        //         "Spain", 2,
-        //         "France", 3,
-        //         "England", 4
+        // "Argentina", 1,
+        // "Spain", 2,
+        // "France", 3,
+        // "England", 4
         // )));
 
         Simulator simulator = new Simulator(slots, cm, teams);
@@ -72,22 +73,25 @@ public class DrawService {
         boolean solved = false;
         try {
             solved = simulator.solveWorldCup2026Draw();
-            
+
         } catch (RuntimeException e) {
             solved = simulator.solveWorldCup2026Draw();
             System.out.println("Failed to set max nodes: " + e.getMessage());
         }
 
         Map<String, List<Team>> grouped = new TreeMap<>();
-        if (!solved) return grouped;
+        if (!solved)
+            return grouped;
 
         AssignmentState state = simulator.getState();
         SortedMap<GroupSlot, Team> assignments = state.getAssignments();
 
-        for (GroupSlot s : slots) grouped.computeIfAbsent(s.getGroupName(), k -> new ArrayList<>());
+        for (GroupSlot s : slots)
+            grouped.computeIfAbsent(s.getGroupName(), k -> new ArrayList<>());
 
         Map<String, Integer> maxPos = slots.stream().collect(Collectors.groupingBy(GroupSlot::getGroupName,
-                Collectors.collectingAndThen(Collectors.maxBy((a, b) -> Integer.compare(a.getPosition(), b.getPosition())),
+                Collectors.collectingAndThen(
+                        Collectors.maxBy((a, b) -> Integer.compare(a.getPosition(), b.getPosition())),
                         opt -> opt.map(GroupSlot::getPosition).orElse(0))));
 
         for (Map.Entry<String, Integer> e : maxPos.entrySet()) {
@@ -96,12 +100,14 @@ public class DrawService {
         }
 
         assignments.forEach((slot, team) -> {
-            if (team == null) return;
+            if (team == null)
+                return;
             List<Team> list = grouped.get(slot.getGroupName());
             int idx = slot.getPosition() - 1;
             if (list != null && idx >= 0 && idx < list.size()) {
                 list.set(idx, team);
             }
+
         });
 
         return grouped;
@@ -110,18 +116,19 @@ public class DrawService {
     private Flux<Team> getWorldCupTeams() {
         List<Team> teams = TeamFactory.createWorldCupTeams(4);
         return teamRepository.findAll().collectList()
-            .map(dbTeams -> {
-                if (!dbTeams.isEmpty()) {
-                    Map<String, Team> dbTeamMap = dbTeams.stream()
-                        .collect(Collectors.toMap(Team::getCode, t -> t));
-                    for (Team t : teams) {
-                        Team dbTeam = dbTeamMap.get(t.getCode());
-                        if (dbTeam != null) t.setFlag(dbTeam.getFlagUrl());
+                .map(dbTeams -> {
+                    if (!dbTeams.isEmpty()) {
+                        Map<String, Team> dbTeamMap = dbTeams.stream()
+                                .collect(Collectors.toMap(Team::getCode, t -> t));
+                        for (Team t : teams) {
+                            Team dbTeam = dbTeamMap.get(t.getCode());
+                            if (dbTeam != null)
+                                t.setFlag(dbTeam.getFlagUrl());
+                        }
                     }
-                }
-                return teams;
-            })
-            .flatMapMany(Flux::fromIterable);
+                    return teams;
+                })
+                .flatMapMany(Flux::fromIterable);
     }
 
     private List<GroupSlot> buildWorldCupSlots() {
