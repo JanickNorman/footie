@@ -5,11 +5,10 @@ import TournamentPage from './pages/TournamentPage'
 import TeamProfile from './pages/TeamProfile'
 import WorldCupPage from './pages/WorldCupPage'
 
-import archive from '../public/archive/index.json'
 import DrawSimulator from './components/DrawSimulator'
 
 export default function App(){
-  const tournaments = archive.tournaments || []
+  const tournaments = []
   return (
     <BrowserRouter>
       <div className="app">
