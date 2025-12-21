@@ -17,9 +17,13 @@ import com.example.footie.service.TeamService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-
 @RestController
-@CrossOrigin(originPatterns = {"http://localhost:3000","http://127.0.0.1:3000","https://*.ngrok-free.app","http://*.ngrok.io"})
+@CrossOrigin(originPatterns = {
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "https://*.ngrok-free.app",
+        "http://*.ngrok.io"
+})
 @RequestMapping("/api")
 public class DrawController {
     private final DrawService drawService;
@@ -29,7 +33,7 @@ public class DrawController {
         this.drawService = drawService;
         this.teamService = teamService;
     }
-    
+
     @PostMapping("/draw")
     public Mono<Map<String, List<Team>>> runDraw(@RequestBody(required = false) Map<String, Object> body) {
         if (body != null && body.get("random") == Boolean.TRUE) {
@@ -37,7 +41,7 @@ public class DrawController {
         }
         return drawService.runDraw();
     }
-    
+
     @GetMapping("/draw")
     public Mono<Map<String, List<Team>>> getRunDraw() {
         return drawService.runDraw();
@@ -47,5 +51,5 @@ public class DrawController {
     public Flux<Team> teams() {
         return teamService.findAll();
     }
-    
+
 }
