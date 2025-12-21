@@ -2,8 +2,10 @@ package com.example.footie.service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
@@ -34,8 +36,9 @@ public class TeamService {
     }
 
     private Team toDomain(TeamEntity e, Long index) {
-        if (e == null) return null;
-        int pot = (int)(index % 4) + 1;
+        if (e == null)
+            return null;
+        int pot = (int) (index % 4) + 1;
         return new ConcreteTeam(e.getName(), e.getContinent(), pot, e.getCode(), e.getFlagUrl());
     }
 
@@ -49,21 +52,31 @@ public class TeamService {
         return template.selectOne(q, TeamEntity.class).map(e -> toDomain(e, 0L));
     }
 
-    public Flux<Team> getRandomWorldCupTeams(int count) {
+    public Flux<Team> getRandomWorldCupTeams(int count, boolean nonNational) {
         // Fixed quotas per continent for the world cup selection.
-        final Map<String, Integer> quotas = Map.of(
+        Map<String, Integer> quotas = new HashMap<>(Map.of(
                 "Europe", 16,
-                "Asia", 9,
+                "Asia", 8,
                 "Africa", 9,
-                "SouthAmerica", 7,
+                "SouthAmerica", 6,
                 "NorthAmerica", 6,
-                "Oceania", 1
-        );
+                "Oceania", 1));
+        quotas.compute(List.of("Oceania", "Africa", "NorthAmerica").get(ThreadLocalRandom.current().nextInt(3)),
+                (key, value) -> value + 1);
+        quotas.compute(List.of("SouthAmerica", "Asia", "NorthAmerica").get(ThreadLocalRandom.current().nextInt(3)),
+                (key, value) -> value + 1);
+        System.out.println("Using quotas for world cup draw: " + quotas);
 
-        return template.select(Query.query(where("team_type").is("national")), TeamEntity.class)
+        var filter = nonNational
+                ? where("team_type").not("non_national")
+                : where("team_type").is("national");
+
+        return template
+                .select(Query.query(filter), TeamEntity.class)
                 .collectList()
                 .flatMapMany(list -> {
-                    if (list.isEmpty()) return Flux.empty();
+                    if (list.isEmpty())
+                        return Flux.empty();
 
                     // group by continent (fifa_continent stored in TeamEntity.continent)
                     Map<String, List<TeamEntity>> byContinent = list.stream()
@@ -74,7 +87,8 @@ public class TeamService {
                     // sample per quota
                     quotas.forEach((continent, q) -> {
                         List<TeamEntity> pool = byContinent.getOrDefault(continent, List.of());
-                        if (pool.isEmpty()) return;
+                        if (pool.isEmpty())
+                            return;
                         Collections.shuffle(pool);
                         int take = Math.min(q, pool.size());
                         for (int i = 0; i < take; i++) {
@@ -101,7 +115,6 @@ public class TeamService {
                     return Flux.fromIterable(result);
                 });
     }
-
 
     public Mono<Void> deleteByCode(String code) {
         Query q = Query.query(where("code").is(code).and("team_type").is("national"));
