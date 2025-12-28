@@ -37,8 +37,8 @@ export default function GroupStage({groups=[]}){
         const rows = useMemo(()=> computeStats(g), [g])
         const spanClass = 'col-12'
         return (
-          <div key={g.name} className={`group-card ${spanClass}`}>
-            <h3>Group {g.name}</h3>
+          <div id={`group-${g.name}`} key={g.name} className={`group-card ${spanClass}`}>
+            <h3 id={`group-${g.name}-title`}>Group {g.name}</h3>
 
             <div className="group-table">
               <div className="group-table-header">

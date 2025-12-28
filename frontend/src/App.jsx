@@ -12,9 +12,6 @@ export default function App(){
   return (
     <BrowserRouter>
       <div className="app">
-        <header>
-          <h1><Link to="/">Footie Archive</Link></h1>
-        </header>
         <Routes>
           <Route path="/tourney" element={<TournamentList tournaments={tournaments} />} />
           <Route path="/" element={<DrawSimulator />} />
