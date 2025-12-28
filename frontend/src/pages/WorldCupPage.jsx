@@ -1,6 +1,7 @@
 import GroupStage from '../components/GroupStage';
 import SubNavbar from '../components/SubNavbar';
 import GlobalNavbar from '../components/GlobalNavbar';
+import Bracket from '../components/Bracket';
 
 const sample = {
   name: 'Fictional World Cup',
@@ -27,15 +28,27 @@ const sample = {
   // seeded knockout (round of 16) using typical group pairing logic
   knockout: {
     roundOf16: [
-      // A1 vs B2, C1 vs D2, E1 vs F2, G1 vs H2
-      ['ned','iran'], ['arg','den'], ['esp','can'], ['bra','gha'],
-      // B1 vs A2, D1 vs C2, F1 vs E2, H1 vs G2
-      ['eng','ecu'], ['fra','saudi'], ['bel','crc'], ['por','srb']
+      { home: {id:'ned',name:'Netherlands'}, away: {id:'iran',name:'Iran'}, homeScore: 3, awayScore: 1, venue: 'Khalifa Stadium', time: '16:00' },
+      { home: {id:'arg',name:'Argentina'}, away: {id:'den',name:'Denmark'}, homeScore: 2, awayScore: 1, venue: 'Ahmad Bin Ali', time: '20:00' },
+      { home: {id:'esp',name:'Spain'}, away: {id:'can',name:'Canada'}, homeScore: 4, awayScore: 0, venue: 'Al Thumama', time: '16:00' },
+      { home: {id:'bra',name:'Brazil'}, away: {id:'gha',name:'Ghana'}, homeScore: 3, awayScore: 0, venue: 'Stadium 974', time: '20:00' },
+      { home: {id:'eng',name:'England'}, away: {id:'ecu',name:'Ecuador'}, homeScore: 2, awayScore: 0, venue: 'Al Bayt Stadium', time: '16:00' },
+      { home: {id:'fra',name:'France'}, away: {id:'saudi',name:'Saudi Arabia'}, homeScore: 3, awayScore: 1, venue: 'Education City', time: '20:00' },
+      { home: {id:'bel',name:'Belgium'}, away: {id:'crc',name:'Costa Rica'}, homeScore: 1, awayScore: 0, venue: 'Al Janoub', time: '16:00' },
+      { home: {id:'por',name:'Portugal'}, away: {id:'srb',name:'Serbia'}, homeScore: 2, awayScore: 1, venue: 'Lusail Stadium', time: '20:00' },
     ],
-    quarterfinals: [],
-    semifinals: [],
-    final: [],
-    thirdPlace: []
+    quarterfinals: [
+      { home: {id:'ned',name:'Netherlands'}, away: {id:'arg',name:'Argentina'}, homeScore: 2, awayScore: 3, venue: 'Lusail Stadium', time: '20:00', winner: 'arg' },
+      { home: {id:'eng',name:'England'}, away: {id:'fra',name:'France'}, homeScore: 1, awayScore: 2, venue: 'Al Bayt Stadium', time: '20:00' },
+      { home: {id:'bra',name:'Brazil'}, away: {id:'esp',name:'Spain'}, homeScore: 1, awayScore: 0, venue: 'Education City', time: '16:00' },
+      { home: {id:'bel',name:'Belgium'}, away: {id:'por',name:'Portugal'}, homeScore: 0, awayScore: 2, venue: 'Al Thumama', time: '16:00' },
+    ],
+    semifinals: [
+      { home: {id:'arg',name:'Argentina'}, away: {id:'bra',name:'Brazil'}, homeScore: 2, awayScore: 0, venue: 'Lusail Stadium', time: '20:00' },
+      { home: {id:'fra',name:'France'}, away: {id:'por',name:'Portugal'}, homeScore: 2, awayScore: 1, venue: 'Al Bayt Stadium', time: '20:00' },
+    ],
+    final: { home: {id:'arg',name:'Argentina'}, away: {id:'fra',name:'France'}, homeScore: 3, awayScore: 3, venue: 'Lusail Stadium', time: '18:00', winner: 'arg' },
+    thirdPlace: { home: {id:'bra',name:'Brazil'}, away: {id:'por',name:'Portugal'}, homeScore: 2, awayScore: 1, venue: 'Khalifa Stadium', time: '16:00' }
   }
 }
 
@@ -60,6 +73,7 @@ export default function WorldCupPage({ tournament }) {
         <h3 id="knockout" style={{ marginTop: 24 }}>
           Knockout Stage
         </h3>
+        <Bracket data={t.knockout} />
       </div>
     </div>
   );
