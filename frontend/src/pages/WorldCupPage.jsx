@@ -5,7 +5,10 @@ const sample = {
   name: 'Fictional World Cup',
   year: 2026,
   groups: [
-    { name: 'A', teams: [ {id:'qatar',name:'Qatar'},{id:'ecu',name:'Ecuador'},{id:'sen',name:'Senegal'},{id:'ned',name:'Netherlands'} ] },
+    { name: 'A', teams: [ {id:'qatar',name:'Qatar'},{id:'ecu',name:'Ecuador'},{id:'sen',name:'Senegal'},{id:'ned',name:'Netherlands'} ], matches: [
+      { day:1, date:'15 Jun', group:'A', home:{id:'ned',name:'Netherlands'}, away:{id:'ecu',name:'Ecuador'}, homeScore:3, awayScore:0, venue:'Stadium A', time:'20:00', scorers:[ {team:'home',player:'G. Wijnaldum',minute:23}, {team:'home',player:'D. Bergwijn',minute:67}, {team:'home',player:'B. Devrij',minute:81} ] },
+      { day:1, date:'15 Jun', group:'A', home:{id:'qatar',name:'Qatar'}, away:{id:'sen',name:'Senegal'}, homeScore:1, awayScore:2, venue:'Stadium B', time:'17:00', scorers:[ {team:'away',player:'S. Mane',minute:12}, {team:'home',player:'A. Almoez',minute:55}, {team:'away',player:'I. Gueye',minute:88} ] }
+    ] },
     { name: 'B', teams: [ {id:'eng',name:'England'},{id:'iran',name:'Iran'},{id:'usa',name:'USA'},{id:'wales',name:'Wales'} ] },
     { name: 'C', teams: [ {id:'arg',name:'Argentina'},{id:'saudi',name:'Saudi Arabia'},{id:'mex',name:'Mexico'},{id:'pol',name:'Poland'} ] },
     { name: 'D', teams: [ {id:'fra',name:'France'},{id:'aus',name:'Australia'},{id:'den',name:'Denmark'},{id:'tun',name:'Tunisia'} ] },
