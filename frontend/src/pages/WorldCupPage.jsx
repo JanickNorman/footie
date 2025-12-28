@@ -1,5 +1,6 @@
-import GroupStage from '../components/GroupStage'
-import MatchCard from '../components/MatchCard'
+import GroupStage from '../components/GroupStage';
+import SubNavbar from '../components/SubNavbar';
+import GlobalNavbar from '../components/GlobalNavbar';
 
 const sample = {
   name: 'Fictional World Cup',
@@ -38,22 +39,28 @@ const sample = {
   }
 }
 
-export default function WorldCupPage({ tournament }){
-  const t = tournament || sample
+export default function WorldCupPage({ tournament }) {
+  const t = tournament || sample;
+
+  const navItems = [
+    ...t.groups.map((g) => ({ name: `Group ${g.name}`, link: `#group-${g.name}` })),
+    { name: 'Knockout Stage', link: '#knockout' },
+    { name: 'Final', link: '#final' },
+  ];
+
   return (
     <div>
-      <h2>{t.name} — {t.year}</h2>
-      <p>Wiki-style tournament view: group stage, matches, and knockout bracket.</p>
-      <h3>Group Stage</h3>
-      <GroupStage groups={t.groups} />
-      <h3 style={{marginTop:24}}>Matchday 1 — {t.matchdays && t.matchdays[0] && t.matchdays[0].date}</h3>
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginTop:12}}>
-        {(t.matchdays && t.matchdays[0] && t.matchdays[0].matches || []).map((m,i)=> (
-          <MatchCard key={i} match={m} />
-        ))}
+      <GlobalNavbar />
+      <div style={{paddingTop: 140, maxWidth: 1200, margin: '0 auto', paddingLeft:24, paddingRight:24}}>
+        <h2>{t.name} — {t.year}</h2>
+        <p>Wiki-style tournament view: group stage, matches, and knockout bracket.</p>
+        <SubNavbar items={navItems} />
+        <h3 id="group-stage">Group Stage</h3>
+        <GroupStage groups={t.groups} />
+        <h3 id="knockout" style={{ marginTop: 24 }}>
+          Knockout Stage
+        </h3>
       </div>
-
-      <h3 style={{marginTop:24}}>Knockout Stage</h3>
     </div>
-  )
+  );
 }
