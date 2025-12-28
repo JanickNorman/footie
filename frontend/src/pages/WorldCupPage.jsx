@@ -1,4 +1,5 @@
 import GroupStage from '../components/GroupStage'
+import MatchCard from '../components/MatchCard'
 
 const sample = {
   name: 'Fictional World Cup',
@@ -13,6 +14,12 @@ const sample = {
     { name: 'G', teams: [ {id:'bra',name:'Brazil'},{id:'srb',name:'Serbia'},{id:'sui',name:'Switzerland'},{id:'cmr',name:'Cameroon'} ] },
     { name: 'H', teams: [ {id:'por',name:'Portugal'},{id:'gha',name:'Ghana'},{id:'uru',name:'Uruguay'},{id:'kor',name:'South Korea'} ] }
   ],
+    matchdays: [
+      {day:1,date:'15 Jun', matches: [
+        { group:'A', home:{id:'ned',name:'Netherlands'}, away:{id:'ecu',name:'Ecuador'}, homeScore:3, awayScore:0, venue:'Stadium A', time:'20:00', scorers:[ {team:'home',player:'G. Wijnaldum',minute:23}, {team:'home',player:'D. Bergwijn',minute:67}, {team:'home',player:'B. Devrij',minute:81} ] },
+        { group:'A', home:{id:'qatar',name:'Qatar'}, away:{id:'sen',name:'Senegal'}, homeScore:1, awayScore:2, venue:'Stadium B', time:'17:00', scorers:[ {team:'away',player:'S. Mane',minute:12}, {team:'home',player:'A. Almoez',minute:55}, {team:'away',player:'I. Gueye',minute:88} ] }
+      ] }
+    ],
   // seeded knockout (round of 16) using typical group pairing logic
   knockout: {
     roundOf16: [
@@ -36,9 +43,14 @@ export default function WorldCupPage({ tournament }){
       <p>Wiki-style tournament view: group stage, matches, and knockout bracket.</p>
       <h3>Group Stage</h3>
       <GroupStage groups={t.groups} />
+      <h3 style={{marginTop:24}}>Matchday 1 — {t.matchdays && t.matchdays[0] && t.matchdays[0].date}</h3>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginTop:12}}>
+        {(t.matchdays && t.matchdays[0] && t.matchdays[0].matches || []).map((m,i)=> (
+          <MatchCard key={i} match={m} />
+        ))}
+      </div>
 
       <h3 style={{marginTop:24}}>Knockout Stage</h3>
-
     </div>
   )
 }

@@ -19,8 +19,6 @@ button:disabled{opacity:0.6;cursor:not-allowed}
 
 /* Groups grid */
 .groups-grid{
-  display:grid;
-  grid-template-columns: repeat(4, 1fr);
   gap:16px;
   margin-top:16px;
 }
@@ -39,10 +37,10 @@ button:disabled{opacity:0.6;cursor:not-allowed}
 .team-name{font-weight:600}
 
 @media (max-width:900px){
-  .groups-grid{grid-template-columns:repeat(3,1fr)}
+  .groups-grid{}
 }
 @media (max-width:600px){
-  .groups-grid{grid-template-columns:repeat(2,1fr)}
+  .groups-grid{}
 }
 
 /* Bracket styles */
@@ -77,9 +75,9 @@ button:disabled{opacity:0.6;cursor:not-allowed}
 
 /* Group table styles */
 .group-table{display:flex;flex-direction:column;gap:8px;margin-top:8px}
-.group-table-header{display:grid;grid-template-columns: 1fr repeat(7, 40px);gap:8px;align-items:center;padding:6px 8px;border-bottom:1px solid rgba(2,6,23,0.06);font-size:13px}
+.group-table-header{display:grid;grid-template-columns: 1fr repeat(7, 40px) 60px 120px;gap:8px;align-items:center;padding:6px 8px;border-bottom:1px solid rgba(2,6,23,0.06);font-size:13px}
 .group-table-body{display:flex;flex-direction:column;gap:6px;margin-top:6px}
-.group-row{display:grid;grid-template-columns: 1fr repeat(7, 40px);gap:8px;align-items:center;padding:6px;border-radius:6px}
+.group-row{display:grid;grid-template-columns: 1fr repeat(7, 40px) 60px 120px;gap:8px;align-items:center;padding:6px;border-radius:6px}
 .team-cell{display:flex;align-items:center;gap:8px}
 
 /* Compact group table (flag, name, pts) */
@@ -93,6 +91,8 @@ button:disabled{opacity:0.6;cursor:not-allowed}
 .team-col{display:flex;align-items:center;gap:8px}
 .stat-col{display:flex;align-items:center;justify-content:center;font-weight:600}
 
+.form-dot{width:12px;height:12px;border-radius:50%;display:inline-block}
+
 @media (max-width:600px){
   .group-table-header, .group-row{grid-template-columns: 1fr repeat(7, 34px)}
   .team-flag{width:20px;height:14px}
@@ -102,4 +102,14 @@ button:disabled{opacity:0.6;cursor:not-allowed}
 .grid-12{display:grid;grid-template-columns:repeat(12,1fr);gap:16px;width:100%}
 .col-12{grid-column:1 / -1}
 .col-span-6{grid-column: span 6}
+.col-span-3{grid-column: span 3}
+.col-span-4{grid-column: span 4}
+
+@media (max-width:900px){
+  .col-span-3{grid-column: span 6}
+  .col-span-4{grid-column: span 6}
+}
+@media (max-width:600px){
+  .col-span-3, .col-span-4{grid-column: 1 / -1}
+}
 
