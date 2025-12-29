@@ -57,4 +57,9 @@ public class DrawController {
         return drawService.getSampleWorldCup();
     }
 
+    @GetMapping("/worldcup/sample-random")
+    public Mono<Map<String, Object>> getSampleRandomWorldCup() {
+        return drawService.getSampleRandomWorldCup();
+    }
+
 }

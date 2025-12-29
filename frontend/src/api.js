@@ -17,7 +17,7 @@ export async function getTeams(){
 }
 
 export async function getSampleWorldCup(){
-  const res = await fetch(`${BASE}/api/worldcup/sample`)
+  const res = await fetch(`${BASE}/api/worldcup/sample-random`)
   if(!res.ok) throw new Error(`API error ${res.status}`)
   return res.json()
 }

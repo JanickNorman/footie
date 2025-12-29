@@ -147,7 +147,10 @@ public class DrawService {
 
     public Mono<Map<String, Object>> getSampleRandomWorldCup() {
         return teamRepository.getRandomWorldCupTeams(48, Math.random() < 0.5)
-                .collectMap(Team::getCode)
+                .collectList()
+                .flatMap(list -> Mono.fromCallable(() -> doRun(list)).subscribeOn(Schedulers.boundedElastic()))
+                .flatMapMany(groupedMap -> Flux.fromIterable(groupedMap.values()).flatMap(Flux::fromIterable))
+                .collectMap(Team::getCode, Function.identity(), LinkedHashMap::new)
                 .map(this::createSampleWorldCup);
     }
 
