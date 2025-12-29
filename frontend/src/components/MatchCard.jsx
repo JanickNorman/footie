@@ -19,8 +19,8 @@ export default function MatchCard({match}){
   const home = match.home, away = match.away
   const hs = match.homeScore == null ? '-' : String(match.homeScore)
   const as_ = match.awayScore == null ? '-' : String(match.awayScore)
-  const containerStyle = {border:'1px solid #e6e6e6',borderRadius:8,padding:16,display:'flex',gap:16,alignItems:'center',background:'#fff'}
-  const teamCol = {flex:1,display:'flex',flexDirection:'column',gap:8}
+  const containerStyle = {border:'1px solid #e6e6e6',borderRadius:8,padding:16,display:'flex',gap:16,alignItems:'stretch',background:'#fff'}
+  const teamCol = {flex:1,display:'flex',flexDirection:'column',gap:8,justifyContent:'flex-start'}
   const scoreBox = {width:96,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center'}
 
   return (
