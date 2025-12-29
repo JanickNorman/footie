@@ -1,9 +1,5 @@
 import React from 'react'
 
-const FLAG_EMOJI = {
-  arg: '🇦🇷', bra: '🇧🇷', eng: '🏴', usa: '🇺🇸', fra: '🇫🇷', mex: '🇲🇽', pol: '🇵🇱', den: '🇩🇰', aus: '🇦🇺'
-}
-
 const FLAG_URLS = {
   eng: 'https://upload.wikimedia.org/wikipedia/en/b/be/Flag_of_England.svg',
   arg: 'https://upload.wikimedia.org/wikipedia/commons/1/1a/Flag_of_Argentina.svg',
@@ -16,15 +12,17 @@ const FLAG_URLS = {
   aus: 'https://upload.wikimedia.org/wikipedia/commons/b/b9/Flag_of_Australia.svg',
 }
 
-export default function Flag({team, size=20}){
-  const emoji = FLAG_EMOJI[team.id] || team.emoji || '🏳️'
-  const remote = FLAG_URLS[team.id]
+export default function Flag({team, size=28, url=null}){
   const local = `/archive/teams/${team.id}.png`
-  const src = remote || local
+  const src = url || FLAG_URLS[team.id] || local
   return (
     <span className="flag-wrapper" style={{display:'inline-flex',alignItems:'center',gap:8}}>
-      <img src={src} alt={`${team.name} flag`} style={{width:size,height:'auto',display: src? 'inline-block':'none'}} onError={(e)=>{e.target.style.display='none'}} />
-      <span style={{fontSize: size*0.9}} className="flag-emoji">{emoji}</span>
+      <img
+        src={src}
+        alt={`${team.name} flag`}
+        style={{width: size, height: 'auto', display: src ? 'inline-block' : 'none', border: '1px solid #ddd', borderRadius: 6}}
+        onError={(e) => { e.currentTarget.style.display = 'none' }}
+      />
     </span>
   )
 }

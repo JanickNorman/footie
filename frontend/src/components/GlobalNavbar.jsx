@@ -27,9 +27,11 @@ export default function GlobalNavbar(){
       </div>
 
       <nav style={navStyle}>
+        <a href="/" style={linkStyle}>Home</a>
         <a href="#" style={linkStyle}>Video</a>
         <a href="#" style={linkStyle}>News</a>
         <a href="#" style={linkStyle}>History</a>
+        <a href="/world_cup" style={linkStyle}>World Cup</a>
         <a href="#" style={linkStyle}>About</a>
         <a href="#" style={linkStyle}>Store</a>
       </nav>

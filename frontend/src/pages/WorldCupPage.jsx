@@ -1,6 +1,5 @@
 import GroupStage from '../components/GroupStage';
 import SubNavbar from '../components/SubNavbar';
-import GlobalNavbar from '../components/GlobalNavbar';
 import Bracket from '../components/Bracket';
 
 const sample = {
@@ -63,8 +62,7 @@ export default function WorldCupPage({ tournament }) {
 
   return (
     <div>
-      <GlobalNavbar />
-      <div style={{paddingTop: 50, maxWidth: 1200, margin: '0 auto', paddingLeft:24, paddingRight:24}}>
+      <div style={{paddingTop: 180, maxWidth: 1200, margin: '0 auto', paddingLeft:24, paddingRight:24}}>
         <h2>{t.name} — {t.year}</h2>
         <p>Wiki-style tournament view: group stage, matches, and knockout bracket.</p>
         <SubNavbar items={navItems} />
