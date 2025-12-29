@@ -120,4 +120,58 @@ public class TeamService {
         Query q = Query.query(where("code").is(code).and("team_type").is("national"));
         return template.delete(q, TeamEntity.class).then();
     }
+
+ 
+    public Flux<Team> getWorldCupTeams(List<String> teamCodes, int numberOfTeams) {
+        if (teamCodes == null || teamCodes.isEmpty()) {
+            return getRandomWorldCupTeams(numberOfTeams, false);
+        }
+
+        Query q = Query.query(where("code").in(teamCodes).and("team_type").is("national")).limit(32);
+
+        return template
+                .select(q, TeamEntity.class)
+                .collectList()
+                .flatMapMany(list -> {
+                    if (list.isEmpty()) {
+                        return getRandomWorldCupTeams(numberOfTeams, false);
+                    }
+
+                    // Order results according to the order in teamCodes
+                    Map<String, TeamEntity> byCode = list.stream()
+                            .collect(Collectors.toMap(TeamEntity::getCode, e -> e, (a, b) -> a));
+
+                    List<TeamEntity> ordered = new ArrayList<>();
+                    for (String code : teamCodes) {
+                        TeamEntity e = byCode.get(code);
+                        if (e != null) {
+                            ordered.add(e);
+                            if (ordered.size() >= 32) break; // respect original limit
+                        }
+                    }
+
+                    List<Team> teams = new ArrayList<>(ordered.size());
+                    for (int i = 0; i < ordered.size(); i++) {
+                        TeamEntity e = ordered.get(i);
+                        int pot = (i / 12) + 1;
+                        pot = Math.min(pot, 4);
+                        teams.add(new ConcreteTeam(e.getName(), e.getContinent(), pot, e.getCode(), e.getFlagUrl()));
+                    }
+
+                    if (teams.size() >= numberOfTeams) {
+                        return Flux.fromIterable(teams.subList(0, numberOfTeams));
+                    }
+
+                    int remaining = numberOfTeams - teams.size();
+                    List<String> present = ordered.stream().map(TeamEntity::getCode).collect(Collectors.toList());
+
+                    return Flux.concat(
+                            Flux.fromIterable(teams),
+                            getRandomWorldCupTeams(remaining, false)
+                                    .filter(t -> !present.contains(t.getCode()))
+                                    .take(remaining)
+                    );
+                });
+        
+    }
 }

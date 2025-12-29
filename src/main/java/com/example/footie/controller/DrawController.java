@@ -52,4 +52,9 @@ public class DrawController {
         return teamService.findAll();
     }
 
+    @GetMapping("/worldcup/sample")
+    public Mono<Map<String, Object>> getSampleWorldCup() {
+        return drawService.getSampleWorldCup();
+    }
+
 }

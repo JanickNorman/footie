@@ -14,7 +14,7 @@ const FLAG_URLS = {
 
 export default function Flag({team, size=28, url=null}){
   const local = `/archive/teams/${team.id}.png`
-  const src = url || FLAG_URLS[team.id] || local
+  const src = url || team.flagUrl || FLAG_URLS[team.id] || local
   return (
     <span className="flag-wrapper" style={{display:'inline-flex',alignItems:'center',gap:8}}>
       <img

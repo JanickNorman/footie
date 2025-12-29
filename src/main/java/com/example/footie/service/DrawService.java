@@ -2,6 +2,7 @@ package com.example.footie.service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
@@ -140,5 +141,270 @@ public class DrawService {
             }
         }
         return slots;
+    }
+
+    public Mono<Map<String, Object>> getSampleRandomWorldCup() {
+        return teamRepository.getRandomWorldCupTeams(48, Math.random() < 0.5)
+                .collectMap(Team::getCode)
+                .map(this::createSampleWorldCup);
+    }
+
+    public Mono<Map<String, Object>> getSampleWorldCup() {
+        return teamRepository.getWorldCupTeams(List.of("QAT", "ECU", "SEN", "NED", 
+                                        "ENG", "IRN", "USA", "WAL", 
+                                        "ARG", "KSA", "MEX", "POL", 
+                                        "FRA", "AUS", "DEN", "TUN", 
+                                        "ESP", "CRC", "GER", "JPN", 
+                                        "BEL", "CAN", "MAR", "IDN", 
+                                        "BRA", "SRB", "SUI", "CMR", 
+                                        "POR", "GHA", "URU", "KOR"), 32)
+                .collectMap(Team::getCode)
+                .map(this::createSampleWorldCup);
+    }
+
+    private Map<String, Object> createSampleWorldCup(Map<String, Team> teamsMap) {
+        Map<String, Object> tournament = new HashMap<>();
+        tournament.put("name", "Fictional World Cup");
+        tournament.put("year", 2026);
+        tournament.put("groups", createGroups(teamsMap));
+        tournament.put("matchdays", createMatchdays(teamsMap));
+        tournament.put("knockout", createKnockout(teamsMap));
+        return tournament;
+    }
+
+    private List<Map<String, Object>> createGroups(Map<String, Team> teamsMap) {
+        List<Map<String, Object>> groups = new ArrayList<>();
+        
+        // Group A
+        Map<String, Object> groupA = new HashMap<>();
+        groupA.put("name", "A");
+        groupA.put("teams", List.of(
+            createTeamMap("QAT", teamsMap),
+            createTeamMap("ECU", teamsMap),
+            createTeamMap("SEN", teamsMap),
+            createTeamMap("NED", teamsMap)
+        ));
+        groupA.put("matches", List.of(
+            createMatch(1, "15 Jun", "A", "NED", "ECU", 3, 0, "Stadium A", "20:00", teamsMap,
+                List.of(
+                    createScorer("home", "G. Wijnaldum", 23),
+                    createScorer("home", "D. Bergwijn", 67),
+                    createScorer("home", "B. Devrij", 81)
+                )),
+            createMatch(1, "15 Jun", "A", "QAT", "SEN", 1, 2, "Stadium B", "17:00", teamsMap,
+                List.of(
+                    createScorer("away", "S. Mane", 12),
+                    createScorer("home", "A. Almoez", 55),
+                    createScorer("away", "I. Gueye", 88)
+                ))
+        ));
+        groups.add(groupA);
+
+        // Group B
+        Map<String, Object> groupB = new HashMap<>();
+        groupB.put("name", "B");
+        groupB.put("teams", List.of(
+            createTeamMap("ENG", teamsMap),
+            createTeamMap("IRN", teamsMap),
+            createTeamMap("USA", teamsMap),
+            createTeamMap("WAL", teamsMap)
+        ));
+        groups.add(groupB);
+
+        // Group C
+        Map<String, Object> groupC = new HashMap<>();
+        groupC.put("name", "C");
+        groupC.put("teams", List.of(
+            createTeamMap("ARG", teamsMap),
+            createTeamMap("KSA", teamsMap),
+            createTeamMap("MEX", teamsMap),
+            createTeamMap("POL", teamsMap)
+        ));
+        groups.add(groupC);
+
+        // Group D
+        Map<String, Object> groupD = new HashMap<>();
+        groupD.put("name", "D");
+        groupD.put("teams", List.of(
+            createTeamMap("FRA", teamsMap),
+            createTeamMap("AUS", teamsMap),
+            createTeamMap("DEN", teamsMap),
+            createTeamMap("TUN", teamsMap)
+        ));
+        groups.add(groupD);
+
+        // Group E
+        Map<String, Object> groupE = new HashMap<>();
+        groupE.put("name", "E");
+        groupE.put("teams", List.of(
+            createTeamMap("ESP", teamsMap),
+            createTeamMap("CRC", teamsMap),
+            createTeamMap("GER", teamsMap),
+            createTeamMap("JPN", teamsMap)
+        ));
+        groups.add(groupE);
+
+        // Group F
+        Map<String, Object> groupF = new HashMap<>();
+        groupF.put("name", "F");
+        groupF.put("teams", List.of(
+            createTeamMap("BEL", teamsMap),
+            createTeamMap("CAN", teamsMap),
+            createTeamMap("MAR", teamsMap),
+            createTeamMap("CRO", teamsMap)
+        ));
+        groups.add(groupF);
+
+        // Group G
+        Map<String, Object> groupG = new HashMap<>();
+        groupG.put("name", "G");
+        groupG.put("teams", List.of(
+            createTeamMap("BRA", teamsMap),
+            createTeamMap("SRB", teamsMap),
+            createTeamMap("SUI", teamsMap),
+            createTeamMap("CMR", teamsMap)
+        ));
+        groups.add(groupG);
+
+        // Group H
+        Map<String, Object> groupH = new HashMap<>();
+        groupH.put("name", "H");
+        groupH.put("teams", List.of(
+            createTeamMap("POR", teamsMap),
+            createTeamMap("GHA", teamsMap),
+            createTeamMap("URU", teamsMap),
+            createTeamMap("KOR", teamsMap)
+        ));
+        groups.add(groupH);
+
+        return groups;
+    }
+
+    private List<Map<String, Object>> createMatchdays(Map<String, Team> teamsMap) {
+        List<Map<String, Object>> matchdays = new ArrayList<>();
+        
+        Map<String, Object> day1 = new HashMap<>();
+        day1.put("day", 1);
+        day1.put("date", "15 Jun");
+        day1.put("matches", List.of(
+            createMatch(1, "15 Jun", "A", "NED", "ECU", 3, 0, "Stadium A", "20:00", teamsMap,
+                List.of(
+                    createScorer("home", "G. Wijnaldum", 23),
+                    createScorer("home", "D. Bergwijn", 67),
+                    createScorer("home", "B. Devrij", 81)
+                )),
+            createMatch(1, "15 Jun", "A", "QAT", "SEN", 1, 2, "Stadium B", "17:00", teamsMap,
+                List.of(
+                    createScorer("away", "S. Mane", 12),
+                    createScorer("home", "A. Almoez", 55),
+                    createScorer("away", "I. Gueye", 88)
+                ))
+        ));
+        matchdays.add(day1);
+
+        return matchdays;
+    }
+
+    private Map<String, Object> createKnockout(Map<String, Team> teamsMap) {
+        Map<String, Object> knockout = new HashMap<>();
+        
+        // Round of 16
+        knockout.put("roundOf16", List.of(
+            createKnockoutMatch("NED", "IRN", 3, 1, "Khalifa Stadium", "16:00", null, teamsMap),
+            createKnockoutMatch("ARG", "DEN", 2, 1, "Ahmad Bin Ali", "20:00", null, teamsMap),
+            createKnockoutMatch("ESP", "CAN", 4, 0, "Al Thumama", "16:00", null, teamsMap),
+            createKnockoutMatch("BRA", "GHA", 3, 0, "Stadium 974", "20:00", null, teamsMap),
+            createKnockoutMatch("ENG", "ECU", 2, 0, "Al Bayt Stadium", "16:00", null, teamsMap),
+            createKnockoutMatch("FRA", "KSA", 3, 1, "Education City", "20:00", null, teamsMap),
+            createKnockoutMatch("BEL", "CRC", 1, 0, "Al Janoub", "16:00", null, teamsMap),
+            createKnockoutMatch("POR", "SRB", 2, 1, "Lusail Stadium", "20:00", null, teamsMap)
+        ));
+
+        // Quarterfinals
+        knockout.put("quarterfinals", List.of(
+            createKnockoutMatch("NED", "ARG", 2, 3, "Lusail Stadium", "20:00", "ARG", teamsMap),
+            createKnockoutMatch("ENG", "FRA", 1, 2, "Al Bayt Stadium", "20:00", null, teamsMap),
+            createKnockoutMatch("BRA", "ESP", 1, 0, "Education City", "16:00", null, teamsMap),
+            createKnockoutMatch("BEL", "POR", 0, 2, "Al Thumama", "16:00", null, teamsMap)
+        ));
+
+        // Semifinals
+        knockout.put("semifinals", List.of(
+            createKnockoutMatch("ARG", "BRA", 2, 0, "Lusail Stadium", "20:00", null, teamsMap),
+            createKnockoutMatch("FRA", "POR", 2, 1, "Al Bayt Stadium", "20:00", null, teamsMap)
+        ));
+
+        // Final
+        knockout.put("final", createKnockoutMatch("ARG", "FRA", 3, 3, "Lusail Stadium", "18:00", "ARG", teamsMap));
+
+        // Third place
+        knockout.put("thirdPlace", createKnockoutMatch("BRA", "POR", 2, 1, "Khalifa Stadium", "16:00", null, teamsMap));
+
+        return knockout;
+    }
+
+    private Map<String, Object> createTeamMap(String code, Map<String, Team> teamsMap) {
+        Map<String, Object> team = new HashMap<>();
+        team.put("id", code);
+        
+        // Get team from database if available
+        Team dbTeam = teamsMap.get(code);
+        if (dbTeam != null) {
+            team.put("name", dbTeam.getName());
+            if (dbTeam.getFlagUrl() != null) {
+                team.put("flagUrl", dbTeam.getFlagUrl());
+            }
+        } else {
+            // Fallback to code as name if not in database
+            team.put("name", code);
+        }
+        
+        return team;
+    }
+
+    private Map<String, Object> createMatch(int day, String date, String group, 
+                                            String homeId, String awayId,
+                                            int homeScore, int awayScore,
+                                            String venue, String time,
+                                            Map<String, Team> teamsMap,
+                                            List<Map<String, Object>> scorers) {
+        Map<String, Object> match = new HashMap<>();
+        match.put("day", day);
+        match.put("date", date);
+        match.put("group", group);
+        match.put("home", createTeamMap(homeId, teamsMap));
+        match.put("away", createTeamMap(awayId, teamsMap));
+        match.put("homeScore", homeScore);
+        match.put("awayScore", awayScore);
+        match.put("venue", venue);
+        match.put("time", time);
+        match.put("scorers", scorers);
+        return match;
+    }
+
+    private Map<String, Object> createKnockoutMatch(String homeId, String awayId,
+                                                     int homeScore, int awayScore,
+                                                     String venue, String time,
+                                                     String winner,
+                                                     Map<String, Team> teamsMap) {
+        Map<String, Object> match = new HashMap<>();
+        match.put("home", createTeamMap(homeId, teamsMap));
+        match.put("away", createTeamMap(awayId, teamsMap));
+        match.put("homeScore", homeScore);
+        match.put("awayScore", awayScore);
+        match.put("venue", venue);
+        match.put("time", time);
+        if (winner != null) {
+            match.put("winner", winner);
+        }
+        return match;
+    }
+
+    private Map<String, Object> createScorer(String team, String player, int minute) {
+        Map<String, Object> scorer = new HashMap<>();
+        scorer.put("team", team);
+        scorer.put("player", player);
+        scorer.put("minute", minute);
+        return scorer;
     }
 }

@@ -15,3 +15,9 @@ export async function getTeams(){
   if(!res.ok) throw new Error(`API error ${res.status}`)
   return res.json()
 }
+
+export async function getSampleWorldCup(){
+  const res = await fetch(`${BASE}/api/worldcup/sample`)
+  if(!res.ok) throw new Error(`API error ${res.status}`)
+  return res.json()
+}
