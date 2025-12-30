@@ -6,6 +6,7 @@ import TeamProfile from './pages/TeamProfile'
 import WorldCupPage from './pages/WorldCupPage'
 import NavbarWrapper from './components/NavbarWrapper'
 import DrawSimulator from './components/DrawSimulator'
+import MatchSimulator from './components/MatchSimulator'
 
 export default function App(){
   const tournaments = []
@@ -16,6 +17,7 @@ export default function App(){
         <Routes>
           <Route path="/tourney" element={<TournamentList tournaments={tournaments} />} />
           <Route path="/" element={<DrawSimulator />} />
+          <Route path="/match-simulator" element={<MatchSimulator />} />
           <Route path="/world_cup" element={<WorldCupPage />} />
           <Route path="/tourney/:id" element={<RouteWrapper Component={TournamentPage} items={tournaments} />} />
           <Route path="/tourney/team/:id" element={<RouteWrapper Component={TeamProfile} items={tournaments} />} />

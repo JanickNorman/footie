@@ -31,6 +31,7 @@ export default function GlobalNavbar({ topOffset = 40 }){
 
         <nav style={{display:'flex',gap:18,alignItems:'center'}}>
           <a href="/" style={linkStyle}>Home</a>
+          <a href="/match-simulator" style={linkStyle}>Live Match</a>
           <a href="#" style={linkStyle}>Video</a>
           <a href="#" style={linkStyle}>News</a>
           <a href="#" style={linkStyle}>History</a>
