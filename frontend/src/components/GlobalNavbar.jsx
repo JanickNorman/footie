@@ -1,43 +1,47 @@
 import React from 'react'
 
-export default function GlobalNavbar(){
+export default function GlobalNavbar({ topOffset = 40 }){
   const height = 64
   const style = {
     position: 'fixed',
-    top: 0,
+    top: topOffset,
     left: 0,
     right: 0,
     height,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: '0 20px',
+    padding: 0,
     background: 'linear-gradient(90deg,#063ea7,#0b63d6)',
     color: 'white',
     zIndex: 1100,
-    boxShadow: '0 2px 8px rgba(2,6,23,0.08)'
+    boxShadow: '0 2px 8px rgba(2,6,23,0.08)',
+    transition: 'top 360ms cubic-bezier(0.22,0.9,0.36,1)',
+    willChange: 'top'
   }
-  const navStyle = {display:'flex',gap:18,alignItems:'center'}
+  const innerStyle = {maxWidth:1200,margin:'0 auto',width:'100%',height:'100%',display:'flex',gap:18,alignItems:'center',justifyContent:'space-between',padding:'0 20px'}
   const linkStyle = {color:'rgba(255,255,255,0.9)',textDecoration:'none',fontWeight:600}
   return (
     <header style={style}>
-      <div style={{display:'flex',alignItems:'center',gap:12}}>
-        <div style={{width:36,height:36,borderRadius:8,background:'#fff',display:'flex',alignItems:'center',justifyContent:'center',color:'#063ea7',fontWeight:800}}>UE</div>
-        <div style={{fontWeight:800,letterSpacing:0.3}}>UEFA EURO 28</div>
-      </div>
+      <div style={innerStyle}>
+        <div style={{display:'flex',alignItems:'center',gap:12}}>
+          <div style={{width:36,height:36,borderRadius:8,background:'#fff',display:'flex',alignItems:'center',justifyContent:'center',color:'#063ea7',fontWeight:800}}>WC</div>
+          <div style={{fontWeight:800,letterSpacing:0.3}}>World Cup</div>
+        </div>
 
-      <nav style={navStyle}>
-        <a href="/" style={linkStyle}>Home</a>
-        <a href="#" style={linkStyle}>Video</a>
-        <a href="#" style={linkStyle}>News</a>
-        <a href="#" style={linkStyle}>History</a>
-        <a href="/world_cup" style={linkStyle}>World Cup</a>
-        <a href="#" style={linkStyle}>About</a>
-        <a href="#" style={linkStyle}>Store</a>
-      </nav>
+        <nav style={{display:'flex',gap:18,alignItems:'center'}}>
+          <a href="/" style={linkStyle}>Home</a>
+          <a href="#" style={linkStyle}>Video</a>
+          <a href="#" style={linkStyle}>News</a>
+          <a href="#" style={linkStyle}>History</a>
+          <a href="/world_cup" style={linkStyle}>World Cup</a>
+          <a href="/teams" style={linkStyle}>Teams</a>
+          <a href="#" style={linkStyle}>Store</a>
+        </nav>
 
-      <div style={{display:'flex',alignItems:'center',gap:12}}>
-        <button style={{background:'white',color:'#063ea7',border:'none',padding:'8px 12px',borderRadius:8,fontWeight:700}}>Sign in</button>
+        <div style={{display:'flex',alignItems:'center',gap:12}}>
+          <button style={{background:'white',color:'#063ea7',border:'none',padding:'8px 12px',borderRadius:8,fontWeight:700}}>Sign in</button>
+        </div>
       </div>
     </header>
   )

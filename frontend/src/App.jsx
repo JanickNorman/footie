@@ -4,7 +4,7 @@ import TournamentList from './pages/TournamentList'
 import TournamentPage from './pages/TournamentPage'
 import TeamProfile from './pages/TeamProfile'
 import WorldCupPage from './pages/WorldCupPage'
-import GlobalNavbar from './components/GlobalNavbar'
+import NavbarWrapper from './components/NavbarWrapper'
 import DrawSimulator from './components/DrawSimulator'
 
 export default function App(){
@@ -12,7 +12,7 @@ export default function App(){
   return (
     <BrowserRouter>
       <div className="app">
-        <GlobalNavbar />
+        <NavbarWrapper />
         <Routes>
           <Route path="/tourney" element={<TournamentList tournaments={tournaments} />} />
           <Route path="/" element={<DrawSimulator />} />

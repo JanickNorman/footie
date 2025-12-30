@@ -30,7 +30,7 @@ export default function WorldCupPage({ tournament }) {
 
   return (
     <div>
-      <div style={{paddingTop: 180, maxWidth: 1200, margin: '0 auto', paddingLeft:24, paddingRight:24}}>
+      <div style={{paddingTop: 40, maxWidth: 1200, margin: '0 auto', paddingLeft:24, paddingRight:24}}>
         <h2>{data.name} — {data.year}</h2>
         <p>Wiki-style tournament view: group stage, matches, and knockout bracket.</p>
         <SubNavbar items={navItems} />
